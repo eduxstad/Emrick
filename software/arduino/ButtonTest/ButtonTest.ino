@@ -23,7 +23,7 @@ CRGB leds[NUM_LEDS];
 #define FRAMES_PER_SECOND  120
 
 // constants won't change. They're used here to set pin numbers:
-const int buttonPin = 13;     // the number of the pushbutton pin
+const int buttonPin = 12;     // the number of the pushbutton pin
 
 // variables will change:
 int buttonState = 0;         // variable for reading the pushbutton status
@@ -59,22 +59,23 @@ void loop()
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
   if (buttonState == HIGH) {
     // turn LED on:
-    nextPattern();
+    nextPattern(); 
+    // insert a delay to keep the framerate modest 
   } else {
     // turn LED off:
-    rainbow();
-  }
-//  // Call the current pattern function once, updating the 'leds' array
-//  gPatterns[gCurrentPatternNumber]();
-//
-//  // send the 'leds' array out to the actual LED strip
-//  FastLED.show();  
-//  // insert a delay to keep the framerate modest
-//  FastLED.delay(1000/FRAMES_PER_SECOND); 
-//
-//  // do some periodic updates
-//  EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
-//  EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
+    //rainbow();
+    // Call the current pattern function once, updating the 'leds' array
+    gPatterns[gCurrentPatternNumber]();
+  
+    // send the 'leds' array out to the actual LED strip
+    FastLED.show();  
+    // insert a delay to keep the framerate modest
+    //FastLED.delay(1000/FRAMES_PER_SECOND); 
+  
+    // do some periodic updates
+    EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
+    //EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
+    }
 }
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
