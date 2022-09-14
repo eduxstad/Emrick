@@ -12,7 +12,7 @@ FASTLED_USING_NAMESPACE
 // -Mark Kriegsman, December 2014
 
 
-#define DATA_PIN    2
+#define DATA_PIN    18
 //#define CLK_PIN   4
 #define LED_TYPE    WS2813
 #define COLOR_ORDER GRB
