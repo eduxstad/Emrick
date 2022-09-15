@@ -42,6 +42,14 @@ const int rxLEDPin = 1;
 int buttonState = 0;
 
 
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+
+// List of patterns to cycle through.  Each is defined as a separate function below.
+typedef void (*SimplePatternList[])();
+SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm };
+
+uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
+uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 void setup() 
 {
@@ -62,25 +70,11 @@ void setup()
   digitalWrite(txLEDPin, LOW);
   digitalWrite(rxLEDPin, LOW);
 
-  Serial.println("Feather RFM69 TX Test!");
-  Serial.println();
-
   // manual reset
   digitalWrite(RFM69_RST, HIGH);
   delay(10);
   digitalWrite(RFM69_RST, LOW);
   delay(10);
-  
-  if (!rf69.init()) {
-    Serial.println("RFM69 radio init failed");
-    while (1);
-  }
-  Serial.println("RFM69 radio init OK!");
-  // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM (for low power module)
-  // No encryption
-  if (!rf69.setFrequency(RF69_FREQ)) {
-    Serial.println("setFrequency failed");
-  }
 
   // If you are using a high power RF69 eg RFM69HW, you *must* set a Tx power with the
   // ishighpowermodule flag set like this:
@@ -92,18 +86,7 @@ void setup()
   rf69.setEncryptionKey(key);
   
   pinMode(LED, OUTPUT);
-
-  Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz");
 }
-
-#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
-
-// List of patterns to cycle through.  Each is defined as a separate function below.
-typedef void (*SimplePatternList[])();
-SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm };
-
-uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
-uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 void loop() {
   gPatterns[gCurrentPatternNumber]();
