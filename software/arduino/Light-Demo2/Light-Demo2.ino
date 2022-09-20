@@ -101,7 +101,7 @@ void setup()
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])();
-SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm, red, white, green, Fire2012};
+SimplePatternList gPatterns = {white, red, green, rainbow, Glitter, confetti, juggle, Rain, Fire2012};
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
@@ -114,7 +114,7 @@ void loop() {
   uint8_t reply[1];
   uint8_t len = 1;
 
-  if (rf69.waitAvailableTimeout(50))  { 
+  if (rf69.waitAvailableTimeout(25))  { 
     // Should be a reply message for us now   
     if (rf69.recv(reply, &len)) {
       Serial.print("Received packet with data: ");
@@ -149,11 +149,12 @@ void rainbow()
   fill_rainbow( leds, NUM_LEDS, gHue, 7);
 }
 
-void rainbowWithGlitter() 
+void Glitter() 
 {
   // built-in FastLED rainbow, plus some random sparkly glitter
-  rainbow();
-  addGlitter(80);
+  //rainbow();
+  fadeToBlackBy( leds, NUM_LEDS, 20);
+  addGlitter(160);
 }
 
 void addGlitter( fract8 chanceOfGlitter) 
@@ -169,25 +170,6 @@ void confetti()
   fadeToBlackBy( leds, NUM_LEDS, 10);
   int pos = random16(NUM_LEDS);
   leds[pos] += CHSV( gHue + random8(64), 200, 255);
-}
-
-void sinelon()
-{
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  int pos = beatsin16( 13, 0, NUM_LEDS-1 );
-  leds[pos] += CHSV(152, 255, gHue);
-}
-
-void bpm()
-{
-  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-  uint8_t BeatsPerMinute = 62;
-  CRGBPalette16 palette = PartyColors_p;
-  uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
-  for( int i = 0; i < NUM_LEDS; i++) { //9948
-    leds[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
-  }
 }
 
 void juggle() {
@@ -224,6 +206,7 @@ void Fire2012()
 // Array of temperature readings at each simulation cell
   static uint8_t heat[NUM_LEDS];
 
+  // Step 1.  Cool down every cell a little
     for( int i = 0; i < NUM_LEDS; i++) {
       heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
     }
@@ -250,4 +233,61 @@ void Fire2012()
       }
       leds[pixelnumber] = color;
     }
+}
+
+void Rain() 
+{  
+
+  CRGB ColorBackground = CRGB(0x00,0x00,0x00);
+  CRGB ColorMeteor = CRGB(0x00,0x00,0xff);
+  byte meteorSize = 3;
+  byte meteorTrailDecay = 64;
+  boolean meteorRandomDecay = true;
+  
+  // set background color
+  fill_solid( leds, NUM_LEDS, CRGB(0x00,0x00,0x10));
+
+  for(int i = 0; i < NUM_LEDS+NUM_LEDS; i++) 
+  {
+    // fade color to background color for all LEDs
+    for(int j=0; j < NUM_LEDS; j++) {
+      if( (!meteorRandomDecay) || (random(10) > 5) ) {
+        leds[j] = fadeTowardColor(leds[j], ColorBackground, meteorTrailDecay ); 
+      }
+    }
+
+    // draw meteor
+    for(int j = 0; j < meteorSize; j++) {
+      if( ( i-j < NUM_LEDS) && (i-j >= 0) ) {
+        leds[i-j]= ColorMeteor;
+      }
+    }
+   
+    FastLED.show();
+    FastLED.delay(30);
+  }
+}
+
+// Functions from Kriegsman example
+CRGB fadeTowardColor( CRGB& cur, const CRGB& target, uint8_t amount)
+{
+  nblendU8TowardU8( cur.red,   target.red,   amount);
+  nblendU8TowardU8( cur.green, target.green, amount);
+  nblendU8TowardU8( cur.blue,  target.blue,  amount);
+  return cur;
+}
+
+void nblendU8TowardU8( uint8_t& cur, const uint8_t target, uint8_t amount)
+{
+  if( cur == target) return;
+  
+  if( cur < target ) {
+    uint8_t delta = target - cur;
+    delta = scale8_video( delta, amount);
+    cur += delta;
+  } else {
+    uint8_t delta = cur - target;
+    delta = scale8_video( delta, amount);
+    cur -= delta;
+  }
 }
