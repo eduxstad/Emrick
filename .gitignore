@@ -31,3 +31,6 @@ hardware/Emrick/\#auto_saved_files\#
 
 # Solidworks tmp files
 ~*
+
+# Mac 
+.DS_Store
