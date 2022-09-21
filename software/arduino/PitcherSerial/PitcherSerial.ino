@@ -77,15 +77,30 @@ void setup()
   Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz");
 }
 
-
+int incomingByte = 0;
 
 void loop() {
   //delay(1000);  // Wait 1 second between transmits, could also 'sleep' here!
 
   uint8_t data[1];
-  Serial.print("Sending "); Serial.println(radiopacket);
-  
-  // Send button state!
+  //Serial.print("Sending "); Serial.println(radiopacket);
+
+  if (Serial.available() > 0) {
+    // read the incoming bytes:
+    while (Serial.available() > 0) {
+      incomingByte = Serial.read();
+    }
+    // say what you got:
+    //Serial.print("I received: ");
+    //Serial.println(incomingByte, DEC);
+    Serial.print("Switching color patterns . . . ");
+    //always send a high to switch colors
+    data[0] = 1;
+    rf69.send((uint8_t *)data, 1);
+    rf69.waitPacketSent();
+    Serial.print("Switch command sent! \n");
+  }
+  /*// Send button state!
   buttonState = digitalRead(buttonPin);
   if (buttonState == HIGH) {
     data[0] = 1;
@@ -96,5 +111,5 @@ void loop() {
     data[0] = 0;
   }
   rf69.send((uint8_t *)data, 1);
-  rf69.waitPacketSent();
+  rf69.waitPacketSent();*/
 }
