@@ -101,7 +101,7 @@ void setup()
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])();
-SimplePatternList gPatterns = {white, red, green, rainbow, Glitter, confetti, juggle, Rain, Fire2012};
+SimplePatternList gPatterns = {Fire2012, white, red, green, rainbow, Glitter, confetti, juggle, Rain, off};
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
@@ -197,22 +197,22 @@ void white() {
   fill_solid( leds, NUM_LEDS, CRGB::White);
 }
 
-#define COOLING  55
-#define SPARKING 120
+#define COOLING  60
+#define SPARKING 40
 
 
 void Fire2012()
 {
 // Array of temperature readings at each simulation cell
-  static uint8_t heat[NUM_LEDS];
+  static uint8_t heat[NUM_LEDS/2];
 
   // Step 1.  Cool down every cell a little
-    for( int i = 0; i < NUM_LEDS; i++) {
+    for( int i = 0; i < NUM_LEDS/2; i++) {
       heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
     }
   
     // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-    for( int k= NUM_LEDS - 1; k >= 2; k--) {
+    for( int k= NUM_LEDS/2 - 1; k >= 2; k--) {
       heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
     }
     
@@ -223,16 +223,18 @@ void Fire2012()
     }
 
     // Step 4.  Map from heat cells to LED colors
-    for( int j = 0; j < NUM_LEDS; j++) {
+    for( int j = 0; j < NUM_LEDS/2; j++) {
       CRGB color = HeatColor( heat[j]);
       int pixelnumber;
-      if( gReverseDirection ) {
-        pixelnumber = (NUM_LEDS-1) - j;
+      if( 1 ) {
+        pixelnumber = (NUM_LEDS- 24) - j;
       } else {
         pixelnumber = j;
       }
       leds[pixelnumber] = color;
+      leds[((pixelnumber- 24) * -1) + 19] = color;
     }
+
 }
 
 void Rain() 
@@ -266,6 +268,11 @@ void Rain()
     FastLED.show();
     FastLED.delay(30);
   }
+}
+
+void off() {
+  FastLED.clear();
+  FastLED.show();
 }
 
 // Functions from Kriegsman example
