@@ -1,3 +1,4 @@
 (fp_lib_table
   (lib (name "cc1310")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_CC1310F128RGZR/KiCAD/2022-08-29_00-55-14/footprints.pretty")(options "")(descr ""))
+  (lib (name "footprints")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_BQ24072RGTR/KiCAD/2022-09-27_01-15-34/footprints.pretty")(options "")(descr ""))
 )
