@@ -131,34 +131,34 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.out \
+LightDemo.out \
 
 EXE_OUTPUTS__QUOTED += \
-"gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.out" \
+"LightDemo.out" \
 
 BIN_OUTPUTS += \
-gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.hex \
+LightDemo.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.hex" \
+"LightDemo.hex" \
 
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.out"
+	@$(MAKE) --no-print-directory -Onone "LightDemo.out"
 
 # Tool invocations
-gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+LightDemo.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
-	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.6.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=DeviceFamily_CC13X0 -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.map" -i"C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source" -i"C:/ti/simplelink_cc13x0_sdk_4_20_02_07/kernel/nortos" -i"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.6.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs_linkInfo.xml" --rom_model -o "gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.out" $(ORDERED_OBJS)
+	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.6.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=DeviceFamily_CC13X0 -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"LightDemo.map" -i"C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source" -i"C:/ti/simplelink_cc13x0_sdk_4_20_02_07/kernel/nortos" -i"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.6.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="LightDemo_linkInfo.xml" --rom_model -o "LightDemo.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.hex: $(EXE_OUTPUTS)
+LightDemo.hex: $(EXE_OUTPUTS)
 	@echo 'Building secondary target: "$@"'
 	@echo 'Invoking: Arm Hex Utility'
-	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.6.LTS/bin/armhex" --diag_wrap=off -o "gpiointerrupt_CC1310_LAUNCHXL_nortos_ccs.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.6.LTS/bin/armhex" --diag_wrap=off -o "LightDemo.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building secondary target: "$@"'
 	@echo ' '
 

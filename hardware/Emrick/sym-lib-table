@@ -1,4 +1,5 @@
 (sym_lib_table
   (lib (name "cc1310")(type "Legacy")(uri "C:/Users/ZareefH/Documents/KiCad/6.0/symbols/2022-09-21_04-56-32.lib")(options "")(descr "")(disabled))
   (lib (name "2022-09-27_01-15-34")(type "Legacy")(uri "C:/Users/eduxs/Downloads/ul_BQ24072RGTR/KiCAD/2022-09-27_01-15-34/2022-09-27_01-15-34.lib")(options "")(descr "")(disabled))
+  (lib (name "2022-09-29_03-42-52")(type "Legacy")(uri "//nas01.itap.purdue.edu/puhome/My Documents/Downloads/ul_CP2102N-A02-GQFN28/KiCAD/2022-09-29_03-42-52/2022-09-29_03-42-52.lib")(options "")(descr ""))
 )
