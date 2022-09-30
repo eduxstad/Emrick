@@ -2041,6 +2041,7 @@
     )
   )
 
+
   (junction (at 49.53 36.83) (diameter 0) (color 0 0 0 0)
     (uuid 0898fef8-38c0-4913-a547-95b076dd4f56)
   )
@@ -2458,6 +2459,11 @@
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid 33e2f2d4-8b16-4353-a1e3-1f1e383cf016)
   )
+  (polyline (pts (xy 133.35 128.27) (xy 133.35 201.93))
+    (stroke (width 0) (type default) (color 0 0 0 0))
+    (uuid 33ff723f-355c-4027-b100-0561c3e6d847)
+  )
+
   (wire (pts (xy 162.56 245.11) (xy 162.56 250.19))
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid 34d363a2-5171-4517-9179-6a8c176143e2)
@@ -3075,11 +3081,6 @@
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid b0aff072-4be0-4deb-b060-5b43e8203397)
   )
-  (polyline (pts (xy 154.94 128.27) (xy 154.94 201.93))
-    (stroke (width 0) (type default) (color 0 0 0 0))
-    (uuid b0e2446f-ee17-490c-b509-4de25b793de9)
-  )
-
   (wire (pts (xy 374.65 220.98) (xy 377.19 220.98))
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid b2b4d879-baeb-4f7f-a771-84089e384d2e)
@@ -3202,7 +3203,7 @@
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid cb5a22f2-dbca-4a6d-8238-59c73bd441e7)
   )
-  (polyline (pts (xy 15.24 128.27) (xy 154.94 128.27))
+  (polyline (pts (xy 15.24 128.27) (xy 133.35 128.27))
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid ccc7e2d4-c582-4463-8a5b-4a368f1ca8da)
   )
@@ -4197,7 +4198,7 @@
   (symbol (lib_id "Device:C") (at 95.25 116.84 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 26953e78-1915-4e0a-bec1-45be4e74c846)
-    (property "Reference" "C?" (id 0) (at 99.06 115.5699 0)
+    (property "Reference" "C32" (id 0) (at 99.06 115.5699 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1uF" (id 1) (at 99.06 118.1099 0)
@@ -4628,7 +4629,7 @@
   (symbol (lib_id "power:GND") (at 95.25 120.65 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 3fcff7bb-4cf4-4299-b0bb-bfe9f7c8f8bf)
-    (property "Reference" "#PWR?" (id 0) (at 95.25 127 0)
+    (property "Reference" "#PWR01" (id 0) (at 95.25 127 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (id 1) (at 95.25 125.73 0))
@@ -6193,6 +6194,9 @@
   )
 
   (symbol_instances
+    (path "/3fcff7bb-4cf4-4299-b0bb-bfe9f7c8f8bf"
+      (reference "#PWR01") (unit 1) (value "GND") (footprint "")
+    )
     (path "/db1997d6-d277-4757-91b2-aac765cc5595"
       (reference "#PWR0101") (unit 1) (value "GND") (footprint "")
     )
@@ -6334,9 +6338,6 @@
     (path "/82e04b35-6050-415a-b84d-608b4888a0c0"
       (reference "#PWR0147") (unit 1) (value "GND") (footprint "")
     )
-    (path "/3fcff7bb-4cf4-4299-b0bb-bfe9f7c8f8bf"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
-    )
     (path "/5829a0c0-c9ef-4e27-9276-7af505e15917"
       (reference "AE1") (unit 1) (value "Antenna") (footprint "")
     )
@@ -6434,7 +6435,7 @@
       (reference "C31") (unit 1) (value "0.1uF") (footprint "")
     )
     (path "/26953e78-1915-4e0a-bec1-45be4e74c846"
-      (reference "C?") (unit 1) (value "0.1uF") (footprint "")
+      (reference "C32") (unit 1) (value "0.1uF") (footprint "")
     )
     (path "/cd3a5ef3-e128-4902-a81d-6d604a40f2e6"
       (reference "D1") (unit 1) (value "LED") (footprint "")
