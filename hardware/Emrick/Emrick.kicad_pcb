@@ -2675,7 +2675,7 @@
 
   (footprint "cc1310:CC1310F128RGZR" (layer "F.Cu")
     (tedit 0) (tstamp 78b89ff0-1a1a-4f29-b7b2-4b2f2bcd98ff)
-    (at 86 118)
+    (at 86.5 118)
     (property "Sheetfile" "Emrick.kicad_sch")
     (property "Sheetname" "")
     (path "/3a44c8a5-e9b4-49d9-bf0d-940b38f2af71")
