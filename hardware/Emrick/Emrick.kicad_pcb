@@ -1147,7 +1147,7 @@
 
   (footprint "RF_Antenna:Texas_SWRA416_868MHz_915MHz" (layer "F.Cu")
     (tedit 61D4B0FF) (tstamp 49b2faf8-f9fb-402b-94ea-babd1bbf3071)
-    (at 111.76 76.2)
+    (at 106.68 50.8)
     (descr "http://www.ti.com/lit/an/swra416/swra416.pdf")
     (tags "PCB antenna")
     (property "Sheetfile" "Emrick.kicad_sch")
@@ -1255,10 +1255,10 @@
       (fill (thermal_gap 0.508) (thermal_bridge_width 0.508))
       (polygon
         (pts
-          (xy 102.06 81.9)
-          (xy 121.46 81.9)
-          (xy 121.46 69.7)
-          (xy 102.06 69.7)
+          (xy 96.98 56.5)
+          (xy 116.38 56.5)
+          (xy 116.38 44.3)
+          (xy 96.98 44.3)
         )
       )
     )
