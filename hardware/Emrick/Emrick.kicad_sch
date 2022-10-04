@@ -2049,6 +2049,7 @@
     )
   )
 
+
   (junction (at 49.53 36.83) (diameter 0) (color 0 0 0 0)
     (uuid 0898fef8-38c0-4913-a547-95b076dd4f56)
   )
@@ -3513,6 +3514,11 @@
   (text "External Flash Chip" (at 46.99 19.05 0)
     (effects (font (size 2 2)) (justify left bottom))
     (uuid d1d85cf8-d421-4cbc-854c-f418be548d9f)
+  )
+  (text "DIO16-17 are for programming \nand may not be able to be moved "
+    (at 250.19 83.82 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid e6f43d64-a4d5-405f-9d52-2987b4f645b1)
   )
 
   (label "48" (at 356.87 36.83 0)
