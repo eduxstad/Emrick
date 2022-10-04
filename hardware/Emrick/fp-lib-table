@@ -9,4 +9,5 @@
   (lib (name "bq24072")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_BQ24072TRGTR/KiCAD/2022-10-04_02-11-22/footprints.pretty")(options "")(descr ""))
   (lib (name "mx25r8")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_MX25R8035FZUIL0/KiCAD/2022-10-04_02-12-01/footprints.pretty")(options "")(descr ""))
   (lib (name "cp2102n")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_CP2102N-A02-GQFN28/KiCAD/2022-10-04_02-12-33/footprints.pretty")(options "")(descr ""))
+  (lib (name "power_inductor")(type "KiCad")(uri "//nas01.itap.purdue.edu/puhome/My Documents/KiCad/6.0/footprints/power_inductor.pretty")(options "")(descr ""))
 )

@@ -6482,7 +6482,7 @@
       (reference "J4") (unit 1) (value "BATT_CONN") (footprint "hirosedf65:DF65-3P-1.7V21")
     )
     (path "/31746688-5aac-4a84-b28c-7b597062dcdb"
-      (reference "L1") (unit 1) (value "MHCI06030-1R5M-R8") (footprint "")
+      (reference "L1") (unit 1) (value "MHCI06030-1R5M-R8") (footprint "power_inductor:IND-SMD_L7.3-W6.6")
     )
     (path "/de1aeabd-b343-4138-8d74-7c7a871e8d81"
       (reference "L2") (unit 1) (value "27nH") (footprint "Inductor_SMD:L_0402_1005Metric")
