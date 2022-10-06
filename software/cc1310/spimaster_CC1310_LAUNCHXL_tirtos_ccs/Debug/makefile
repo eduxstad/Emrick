@@ -2,10 +2,12 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-CG_TOOL_ROOT := /Applications/ti/ccs1210/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS
+SHELL = cmd.exe
 
-GEN_OPTS__FLAG := --cmd_file="/Users/hamzakamel/Desktop/ECE 477/Emrick/software/cc1310/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt" 
-GEN_CMDS__FLAG := -l"/Users/hamzakamel/Desktop/ECE 477/Emrick/software/cc1310/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd" 
+CG_TOOL_ROOT := C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS
+
+GEN_OPTS__FLAG := 
+GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
 "./CC1310_LAUNCHXL.obj" \
@@ -26,8 +28,8 @@ $(GEN_CMDS__FLAG) \
 
 -include ../makefile.init
 
-RM := rm -rf
-RMDIR := rm -rf
+RM := DEL /F
+RMDIR := RMDIR /S/Q
 
 # All of the sources participating in the build are defined here
 -include sources.mk
@@ -145,21 +147,18 @@ BIN_OUTPUTS__QUOTED += \
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@$(MAKE) --no-print-directory -Onone "spimaster_CC1310_LAUNCHXL_tirtos_ccs.out"
 
-dependents:
-	-cd /Users/hamzakamel/Desktop/ECE\ 477/Emrick/software/cc1310/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug && $(MAKE) clean all
-
 # Tool invocations
-spimaster_CC1310_LAUNCHXL_tirtos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) /Users/hamzakamel/Desktop/ECE\ 477/Emrick/software/cc1310/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib
+spimaster_CC1310_LAUNCHXL_tirtos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
-	"/Applications/ti/ccs1210/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=DeviceFamily_CC13X0 -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"spimaster_CC1310_LAUNCHXL_tirtos_ccs.map" -i"/Users/hamzakamel/ti/simplelink_cc13x0_sdk_4_20_02_07/source" -i"/Users/hamzakamel/ti/simplelink_cc13x0_sdk_4_20_02_07/kernel/tirtos/packages" -i"/Applications/ti/ccs1210/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="spimaster_CC1310_LAUNCHXL_tirtos_ccs_linkInfo.xml" --rom_model -o "spimaster_CC1310_LAUNCHXL_tirtos_ccs.out" $(ORDERED_OBJS)
+	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=DeviceFamily_CC13X0 -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"spimaster_CC1310_LAUNCHXL_tirtos_ccs.map" -i"/source" -i"/kernel/tirtos/packages" -i"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="spimaster_CC1310_LAUNCHXL_tirtos_ccs_linkInfo.xml" --rom_model -o "spimaster_CC1310_LAUNCHXL_tirtos_ccs.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
 spimaster_CC1310_LAUNCHXL_tirtos_ccs.hex: $(EXE_OUTPUTS)
 	@echo 'Building secondary target: "$@"'
 	@echo 'Invoking: Arm Hex Utility'
-	"/Applications/ti/ccs1210/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armhex" --diag_wrap=off -o "spimaster_CC1310_LAUNCHXL_tirtos_ccs.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armhex" --diag_wrap=off -o "spimaster_CC1310_LAUNCHXL_tirtos_ccs.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building secondary target: "$@"'
 	@echo ' '
 
@@ -173,7 +172,6 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
-/Users/hamzakamel/Desktop/ECE\ 477/Emrick/software/cc1310/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib:
 
 -include ../makefile.targets
 
