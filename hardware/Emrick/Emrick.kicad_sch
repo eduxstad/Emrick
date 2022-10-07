@@ -3591,11 +3591,6 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 126f686a-ab7a-463d-b6b1-ef04cead0782)
   )
-  (text "Consider switching this out with VDDS \nthat will be powered by the power regulator \n(for operation independent of the battery)"
-    (at 35.56 213.36 0)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid 24d7ab01-7eb6-4e08-8697-3cb010ca8fc0)
-  )
   (text "LED Strip Connection/Level Shifter" (at 16.51 132.08 0)
     (effects (font (size 2 2)) (justify left bottom))
     (uuid 29cffe72-6b10-4f20-adce-a41104f1fd16)
@@ -4792,8 +4787,8 @@
     (in_bom yes) (on_board yes)
     (uuid 31746688-5aac-4a84-b28c-7b597062dcdb)
     (property "Reference" "L1" (id 0) (at 71.12 214.63 90))
-    (property "Value" "MHCI06030-1R5M-R8" (id 1) (at 71.12 217.17 90))
-    (property "Footprint" "power_inductor:IND-SMD_L7.3-W6.6" (id 2) (at 71.12 219.71 0)
+    (property "Value" "1.5uH" (id 1) (at 71.12 217.17 90))
+    (property "Footprint" "Inductor_SMD:L_Sunlord_MWSA0518_5.4x5.2mm" (id 2) (at 71.12 219.71 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 71.12 219.71 0)
@@ -7034,7 +7029,7 @@
       (reference "J4") (unit 1) (value "BATT_CONN") (footprint "hirosedf65:DF65-3P-1.7V21")
     )
     (path "/31746688-5aac-4a84-b28c-7b597062dcdb"
-      (reference "L1") (unit 1) (value "MHCI06030-1R5M-R8") (footprint "power_inductor:IND-SMD_L7.3-W6.6")
+      (reference "L1") (unit 1) (value "1.5uH") (footprint "Inductor_SMD:L_Sunlord_MWSA0518_5.4x5.2mm")
     )
     (path "/de1aeabd-b343-4138-8d74-7c7a871e8d81"
       (reference "L2") (unit 1) (value "27nH") (footprint "Inductor_SMD:L_0402_1005Metric")
