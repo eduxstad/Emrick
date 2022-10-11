@@ -2501,7 +2501,7 @@
 
   (footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Horizontal" (layer "F.Cu")
     (tedit 59FED5CB) (tstamp 84a5cd4c-cc83-4068-9b0a-d6d3665729f3)
-    (at 88.54 87.5 -90)
+    (at 89.8 88 -90)
     (descr "Through hole angled pin header, 1x04, 2.54mm pitch, 6mm pin length, single row")
     (tags "Through hole angled pin header THT 1x04 2.54mm single row")
     (property "Sheetfile" "Emrick.kicad_sch")
