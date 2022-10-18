@@ -37,6 +37,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 /* POSIX Header files */
 #include <pthread.h>
@@ -82,6 +83,11 @@ unsigned char masterRxBuffer[NB_SPI_BYTES_PER_PIXEL*NB_PIXELS];
 unsigned char masterTxBuffer[NB_SPI_BYTES_PER_PIXEL*NB_PIXELS];
 
 static uint8_t _au8_spiLedBuffer[NB_SPI_BYTES_PER_PIXEL*NB_PIXELS] = {0};
+const uint8_t HSVlights[61] =
+{0, 4, 8, 13, 17, 21, 25, 30, 34, 38, 42, 47, 51, 55, 59, 64, 68, 72, 76,
+81, 85, 89, 93, 98, 102, 106, 110, 115, 119, 123, 127, 132, 136, 140, 144,
+149, 153, 157, 161, 166, 170, 174, 178, 183, 187, 191, 195, 200, 204, 208,
+212, 217, 221, 225, 229, 234, 238, 242, 246, 251, 255};
 
 
 #include <ti/drivers/SPI.h>
@@ -103,13 +109,30 @@ static uint8_t _au8_spiLedBuffer[NB_SPI_BYTES_PER_PIXEL*NB_PIXELS] = {0};
 /* Semaphore to block master until slave is ready for transfer */
 sem_t masterSem;
 
-/*
- *  ======== slaveReadyFxn ========
- *  Callback function for the GPIO interrupt on Board_SPI_SLAVE_READY.
- */
-void slaveReadyFxn(uint_least8_t index)
+void delay(int number_of_seconds)
 {
-    sem_post(&masterSem);
+    // Converting time into milli_seconds
+    int milli_seconds = 1000 * number_of_seconds;
+
+    // Storing start time
+    clock_t start_time = clock();
+
+    // looping till required time is not achieved
+    while (clock() < start_time + milli_seconds)
+        ;
+}
+
+void trueHSV(int ind, int LED, int angle)
+{
+  uint8_t red, green, blue;
+
+  if (angle<60) {red = 255; green = HSVlights[angle]; blue = 0;} else
+  if (angle<120) {red = HSVlights[120-angle]; green = 255; blue = 0;} else
+  if (angle<180) {red = 0, green = 255; blue = HSVlights[angle-120];} else
+  if (angle<240) {red = 0, green = HSVlights[240-angle]; blue = 255;} else
+  if (angle<300) {red = HSVlights[angle-240], green = 0; blue = 255;} else
+                 {red = 255, green = 0; blue = HSVlights[360-angle];}
+  WS2812_setPixelColor(ind, red, green, blue);
 }
 
 /*
@@ -122,8 +145,9 @@ void *masterThread(void *arg0)
     SPI_Handle      masterSpi;
     SPI_Params      spiParams;
     SPI_Transaction transaction;
-    bool            transferOK;
+    //bool            transferOK;
     uint16_t loc_u16_pixelIndex;
+    uint32_t i;
 
     GPIO_setConfig(Board_SPI_MASTER_READY, GPIO_CFG_OUTPUT | GPIO_CFG_OUT_LOW);
     GPIO_write(Board_SPI_MASTER_READY, 1);
@@ -140,31 +164,28 @@ void *masterThread(void *arg0)
         Display_printf(display, 0, 0, "Master SPI initialized\n");
     }
 
-    //masterTxBuffer[sizeof(NB_SPI_BYTES_PER_PIXEL*NB_PIXELS) - 1] = '0';
-
-    //memset((void *) _au8_spiLedBuffer, 0, NB_SPI_BYTES_PER_PIXEL*NB_PIXELS);
     /** Put all led to 0 */
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
     }
 
-    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-    {
-        WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0xFF, 0x00);
+    while(1){
+        for(i = 0; i < 0xFF; i++)
+        {
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+            {
+                //WS2812_setPixelColor(loc_u16_pixelIndex, i, i, i);
+                trueHSV(loc_u16_pixelIndex, loc_u16_pixelIndex, i);
+            }
+            transaction.count = sizeof(_au8_spiLedBuffer);
+            transaction.txBuf = _au8_spiLedBuffer;
+            transaction.rxBuf = NULL;
+
+            SPI_transfer(masterSpi, &transaction);
+        }
     }
 
-    transaction.count = sizeof(_au8_spiLedBuffer);
-    transaction.txBuf = _au8_spiLedBuffer;
-    transaction.rxBuf = NULL;
-
-    transferOK = SPI_transfer(masterSpi, &transaction);
-    if(transferOK)
-    {
-        Display_printf(display, 0, 0, "SPI worked!");
-    }
-
-    GPIO_write(Board_SPI_MASTER_READY, 0);
 
 
     return (NULL);
