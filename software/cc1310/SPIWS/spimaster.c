@@ -65,7 +65,7 @@
 
 //TODO : ADD limitation on NB_PIXELS
 #ifndef NB_PIXELS
-#define NB_PIXELS 45
+#define NB_PIXELS 46U
 #endif
 
 #define NB_SPI_BYTES_PER_PIXEL 9U
@@ -130,7 +130,7 @@ void *masterThread(void *arg0)
 
     SPI_Params_init(&spiParams);
     spiParams.frameFormat = SPI_POL0_PHA1;
-    spiParams.bitRate = 4000000;
+    spiParams.bitRate = 2400000;
     masterSpi = SPI_open(Board_SPI_MASTER, &spiParams);
     if (masterSpi == NULL) {
         Display_printf(display, 0, 0, "Error initializing master SPI\n");
@@ -142,20 +142,21 @@ void *masterThread(void *arg0)
 
     //masterTxBuffer[sizeof(NB_SPI_BYTES_PER_PIXEL*NB_PIXELS) - 1] = '0';
 
-    memset((void *) _au8_spiLedBuffer, 0, NB_SPI_BYTES_PER_PIXEL*NB_PIXELS);
+    //memset((void *) _au8_spiLedBuffer, 0, NB_SPI_BYTES_PER_PIXEL*NB_PIXELS);
     /** Put all led to 0 */
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
     }
 
-    WS2812_setPixelColor(0, 0xFF, 0, 0);
-    WS2812_setPixelColor(1, 0, 0xFF, 0);
-    WS2812_setPixelColor(2, 0, 0, 0xFF);
-    //masterTxBuffer = (void *) _au8_spiLedBuffer;
+    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+    {
+        WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0xFF, 0x00);
+    }
+
     transaction.count = sizeof(_au8_spiLedBuffer);
-    transaction.txBuf = (void *) _au8_spiLedBuffer;
-    transaction.rxBuf = (void *) NULL;
+    transaction.txBuf = _au8_spiLedBuffer;
+    transaction.rxBuf = NULL;
 
     transferOK = SPI_transfer(masterSpi, &transaction);
     if(transferOK)
