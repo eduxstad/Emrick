@@ -101,7 +101,7 @@ void setup()
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])();
-SimplePatternList gPatterns = {Fire2012, white, red, green, rainbow, Glitter, confetti, juggle, Rain, off};
+SimplePatternList gPatterns = {white, red, green, rainbow, Glitter, confetti, juggle, Rain, off};
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
