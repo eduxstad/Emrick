@@ -151,7 +151,7 @@ all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@$(MAKE) --no-print-directory -Onone "rfPacketTx_CC1310_LAUNCHXL_tirtos_ccs.out"
 
 dependents:
-	-cd C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug && $(MAKE) all
+	-cd C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug && $(MAKE) clean all
 
 # Tool invocations
 rfPacketTx_CC1310_LAUNCHXL_tirtos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib

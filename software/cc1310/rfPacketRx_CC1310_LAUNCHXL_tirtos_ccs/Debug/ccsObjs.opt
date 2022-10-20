@@ -1,6 +1,7 @@
 "./CC1310_LAUNCHXL.obj"
 "./CC1310_LAUNCHXL_fxns.obj"
 "./RFQueue.obj"
+"./WS2812.obj"
 "./ccfg.obj"
 "./main_tirtos.obj"
 "./rfPacketRx.obj"
