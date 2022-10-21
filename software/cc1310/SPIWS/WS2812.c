@@ -106,6 +106,7 @@ void WS2812_beginSPI(void)
     masterSpi = SPI_open(Board_SPI_MASTER, &spiParams);
 
 
+    //This is needed
     /** Put all led to 0 */
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {

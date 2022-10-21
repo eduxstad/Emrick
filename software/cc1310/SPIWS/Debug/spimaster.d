@@ -52,6 +52,7 @@ spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/d
 spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/driverlib/gpio.h
 spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/inc/hw_gpio.h
 spimaster.obj: ../WS2812.h
+spimaster.obj: ../patterns.h
 
 ../spimaster.c:
 
@@ -156,4 +157,6 @@ C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/driverlib/gpio.h
 C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/inc/hw_gpio.h:
 
 ../WS2812.h:
+
+../patterns.h:
 

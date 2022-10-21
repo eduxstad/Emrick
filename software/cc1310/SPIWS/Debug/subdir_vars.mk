@@ -14,6 +14,7 @@ C_SRCS += \
 ../WS2812.c \
 ../ccfg.c \
 ../main_tirtos.c \
+../patterns.c \
 ../spimaster.c 
 
 C_DEPS += \
@@ -22,6 +23,7 @@ C_DEPS += \
 ./WS2812.d \
 ./ccfg.d \
 ./main_tirtos.d \
+./patterns.d \
 ./spimaster.d 
 
 OBJS += \
@@ -30,6 +32,7 @@ OBJS += \
 ./WS2812.obj \
 ./ccfg.obj \
 ./main_tirtos.obj \
+./patterns.obj \
 ./spimaster.obj 
 
 OBJS__QUOTED += \
@@ -38,6 +41,7 @@ OBJS__QUOTED += \
 "WS2812.obj" \
 "ccfg.obj" \
 "main_tirtos.obj" \
+"patterns.obj" \
 "spimaster.obj" 
 
 C_DEPS__QUOTED += \
@@ -46,6 +50,7 @@ C_DEPS__QUOTED += \
 "WS2812.d" \
 "ccfg.d" \
 "main_tirtos.d" \
+"patterns.d" \
 "spimaster.d" 
 
 C_SRCS__QUOTED += \
@@ -54,6 +59,7 @@ C_SRCS__QUOTED += \
 "../WS2812.c" \
 "../ccfg.c" \
 "../main_tirtos.c" \
+"../patterns.c" \
 "../spimaster.c" 
 
 

@@ -6,8 +6,8 @@ SHELL = cmd.exe
 
 CG_TOOL_ROOT := C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS
 
-GEN_OPTS__FLAG := --cmd_file="C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt" 
-GEN_CMDS__FLAG := -l"C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd" 
+GEN_OPTS__FLAG := --cmd_file="C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt" 
+GEN_CMDS__FLAG := -l"C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd" 
 
 ORDERED_OBJS += \
 "./CC1310_LAUNCHXL.obj" \
@@ -15,6 +15,7 @@ ORDERED_OBJS += \
 "./WS2812.obj" \
 "./ccfg.obj" \
 "./main_tirtos.obj" \
+"./patterns.obj" \
 "./spimaster.obj" \
 "../CC1310_LAUNCHXL_TIRTOS.cmd" \
 -l"ti/display/lib/display.aem3" \
@@ -149,10 +150,10 @@ all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@$(MAKE) --no-print-directory -Onone "SPIWS.out"
 
 dependents:
-	-cd C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug && $(MAKE) all
+	-cd C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug && $(MAKE) all
 
 # Tool invocations
-SPIWS.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib
+SPIWS.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
 	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=DeviceFamily_CC13X0 -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"SPIWS.map" -i"C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source" -i"C:/ti/simplelink_cc13x0_sdk_4_20_02_07/kernel/tirtos/packages" -i"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="SPIWS_linkInfo.xml" --rom_model -o "SPIWS.out" $(ORDERED_OBJS)
@@ -169,14 +170,14 @@ SPIWS.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "CC1310_LAUNCHXL.obj" "CC1310_LAUNCHXL_fxns.obj" "WS2812.obj" "ccfg.obj" "main_tirtos.obj" "spimaster.obj" 
-	-$(RM) "CC1310_LAUNCHXL.d" "CC1310_LAUNCHXL_fxns.d" "WS2812.d" "ccfg.d" "main_tirtos.d" "spimaster.d" 
+	-$(RM) "CC1310_LAUNCHXL.obj" "CC1310_LAUNCHXL_fxns.obj" "WS2812.obj" "ccfg.obj" "main_tirtos.obj" "patterns.obj" "spimaster.obj" 
+	-$(RM) "CC1310_LAUNCHXL.d" "CC1310_LAUNCHXL_fxns.d" "WS2812.d" "ccfg.d" "main_tirtos.d" "patterns.d" "spimaster.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
 .PHONY: all clean dependents
 .SECONDARY:
-C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib:
+C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib:
 
 -include ../makefile.targets
 
