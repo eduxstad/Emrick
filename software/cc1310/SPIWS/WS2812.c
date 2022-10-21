@@ -57,7 +57,7 @@
 
 //TODO : ADD limitation on NB_PIXELS
 #ifndef NB_PIXELS
-#define NB_PIXELS 1U
+#define NB_PIXELS 46U
 #endif
 
 #define NB_SPI_BYTES_PER_PIXEL 9U
@@ -68,6 +68,7 @@
  */
 #define GRB_BIT_TO_SPI_BITS(val, bitPos) ((1 << bitPos & val) ? 0x06 : 0x04)
 
+
 /**************************************************************************
  * Type Definitions
  **************************************************************************/
@@ -76,8 +77,9 @@
  * Variables
  **************************************************************************/
 /** buffer written to SPI */
-//static uint8_t _au8_spiLedBuffer[NB_SPI_BYTES_PER_PIXEL*NB_PIXELS] = {0};
-static SPI_Handle      _spiHandle;
+static uint8_t _au8_spiLedBuffer[NB_SPI_BYTES_PER_PIXEL*NB_PIXELS] = {0};
+SPI_Handle      masterSpi;
+SPI_Params      spiParams;
 
 
 /**************************************************************************
@@ -91,24 +93,17 @@ static SPI_Handle      _spiHandle;
 /**************************************************************************
  * Global Functions Defintions
  **************************************************************************/
-void WS2812_begin(void)
-{
-    WS2812_beginSPI(Board_SPI_MASTER);
-}
 
-void WS2812_beginSPI(uint8_t arg_u8_spiId)
+void WS2812_beginSPI(void)
 {
-    SPI_Params loc_spiParams;
+    SPI_Params      spiParams;
     uint16_t loc_u16_pixelIndex;
 
 
-    GPIO_setConfig(Board_SPI_MASTER_READY, GPIO_CFG_OUTPUT | GPIO_CFG_OUT_LOW);
-
-    SPI_Params_init(&loc_spiParams);
-    loc_spiParams.bitRate = 2400000;
-    loc_spiParams.dataSize = 6;
-    loc_spiParams.frameFormat = SPI_POL0_PHA1;
-    _spiHandle = SPI_open(arg_u8_spiId, &loc_spiParams);
+    SPI_Params_init(&spiParams);
+    spiParams.frameFormat = SPI_POL0_PHA1;
+    spiParams.bitRate = 2400000;
+    masterSpi = SPI_open(Board_SPI_MASTER, &spiParams);
 
 
     /** Put all led to 0 */
@@ -121,22 +116,52 @@ void WS2812_beginSPI(uint8_t arg_u8_spiId)
 
 void WS2812_close(void)
 {
-    SPI_close(_spiHandle);
+    SPI_close(masterSpi);
 }
 
-// bool WS2812_show(void)
-// {
-//     /** Make SPI transfer */
-//     SPI_Transaction spiTransaction;
+bool WS2812_show(void)
+{
+    /** Make SPI transfer */
+    SPI_Transaction transaction;
 
-//     spiTransaction.count = sizeof(_au8_spiLedBuffer);
-//     spiTransaction.txBuf = _au8_spiLedBuffer;
-//     spiTransaction.rxBuf = NULL;
+    transaction.count = sizeof(_au8_spiLedBuffer);
+    transaction.txBuf = _au8_spiLedBuffer;
+    transaction.rxBuf = NULL;
 
-//     return SPI_transfer(_spiHandle, &spiTransaction);
-// }
+    return SPI_transfer(masterSpi, &transaction);
+}
 
 void WS2812_setPin(uint8_t p)
 {
 
+}
+
+void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t arg_u8_green, uint8_t arg_u8_blue)
+{
+    uint8_t loc_u8_currIndex = 3;
+
+    /** Position of current led data in SPI buffer */
+    uint16_t loc_u16_ledOffset = arg_u16_ledIndex*9;
+
+    /** Concatenate color on a 32bit word */
+    uint32_t loc_u32_grb = arg_u8_green << 16 | arg_u8_red << 8 | arg_u8_blue;
+
+    /** Concatenate two bytes of SPI buffer in order to always transfer blocks of 3 bits
+     * to SPI buffer corresponding to a single grb bit*/
+    uint16_t loc_u16_currVal = 0;
+
+    int8_t loc_u8_bitIndex;
+
+    for(loc_u8_bitIndex = 23; loc_u8_bitIndex >= 0; loc_u8_bitIndex--)
+    {
+        loc_u16_currVal |= GRB_BIT_TO_SPI_BITS(loc_u32_grb, loc_u8_bitIndex) << (16 + 8*((loc_u8_currIndex - 3)/8) - loc_u8_currIndex);
+
+        if((loc_u8_currIndex)/8 > (loc_u8_currIndex-3)/8) /** some bits have been written to byte at index 1 in  loc_u16_currVal*/
+        {
+            /** it's time to shift buffers */
+            _au8_spiLedBuffer[loc_u16_ledOffset + loc_u8_currIndex /8 - 1] = loc_u16_currVal >> 8;
+            loc_u16_currVal = loc_u16_currVal << 8;
+        }
+        loc_u8_currIndex += 3;
+    }
 }

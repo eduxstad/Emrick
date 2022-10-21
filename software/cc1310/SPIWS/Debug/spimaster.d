@@ -14,17 +14,17 @@ spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/ma
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/sys/_stdint.h
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/string.h
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/xlocale/_string.h
-spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/time.h
+spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/pthread.h
+spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sys/types.h
+spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sys/_internal.h
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/time.h
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/abi_prefix.h
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/xlocale/_time.h
+spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/time.h
 spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/signal.h
-spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sys/types.h
-spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sys/_internal.h
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/signal.h
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/sys/timespec.h
 spimaster.obj: C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/sys/_timespec.h
-spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/pthread.h
 spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sched.h
 spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/semaphore.h
 spimaster.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/unistd.h
@@ -81,7 +81,11 @@ C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/string.h:
 
 C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/xlocale/_string.h:
 
-C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/time.h:
+C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/pthread.h:
+
+C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sys/types.h:
+
+C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sys/_internal.h:
 
 C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/time.h:
 
@@ -89,19 +93,15 @@ C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/abi_prefix.h:
 
 C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/xlocale/_time.h:
 
+C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/time.h:
+
 C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/signal.h:
-
-C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sys/types.h:
-
-C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sys/_internal.h:
 
 C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/signal.h:
 
 C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/sys/timespec.h:
 
 C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/sys/_timespec.h:
-
-C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/pthread.h:
 
 C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/posix/ccs/sched.h:
 
