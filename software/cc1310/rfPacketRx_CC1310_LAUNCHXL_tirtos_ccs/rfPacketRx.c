@@ -129,7 +129,7 @@ static uint8_t packet[MAX_LENGTH + NUM_APPENDED_BYTES - 1]; /* The length byte i
 /***** Pattern List *****/
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 typedef void (*SimplePatternList[])();
-SimplePatternList gPatterns = {allWhite, allBlue, allRed, allGreen, chirstLights, ResetLights};
+SimplePatternList gPatterns = {allWhite, allBlue, allRed, allGreen, chirstLights, rainbow, ResetLights};
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 
 /*
@@ -346,4 +346,3 @@ void nextPattern()
   // add one to the current pattern number, and wrap around at the end
   gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
 }
-

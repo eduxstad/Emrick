@@ -106,13 +106,10 @@ void rainbow(void)
     {
         for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
         {
-            //WS2812_setPixelColor(loc_u16_pixelIndex, i, i, i);
             trueHSV(i, &red, &green, &blue);
             WS2812_setPixelColor(loc_u16_pixelIndex, red, green, blue);
         }
 
         WS2812_show();
     }
-
-    usleep(20000);
 }
