@@ -322,30 +322,8 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
                            !PIN_getOutputValue(Board_PIN_LED2));
 
 
+        //Switch Patterns
         nextPattern();
-//        switch(colorIndex)
-//        {
-//            case(0):
-//                allRed();
-//                colorIndex++;
-//                break;
-//            case(1):
-//                allWhite();
-//                colorIndex++;
-//                break;
-//            case(2):
-//                allBlue();
-//                colorIndex++;
-//                break;
-//            case(3):
-//                allGreen();
-//                colorIndex++;
-//                break;
-//            case(4):
-//                chirstLights();
-//                colorIndex = 0;
-//                break;
-//        }
 
         /* Get current unhandled data entry */
         currentDataEntry = RFQueue_getDataEntry();

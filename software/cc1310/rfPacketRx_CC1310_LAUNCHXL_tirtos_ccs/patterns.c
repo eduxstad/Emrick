@@ -23,6 +23,7 @@ const uint8_t HSVlights[61] =
 149, 153, 157, 161, 166, 170, 174, 178, 183, 187, 191, 195, 200, 204, 208,
 212, 217, 221, 225, 229, 234, 238, 242, 246, 251, 255};
 
+uint16_t loc_u16_pixelIndex;
 
 void trueHSV(int angle, int * red, int * green, int * blue)
 {
@@ -39,7 +40,6 @@ void trueHSV(int angle, int * red, int * green, int * blue)
 
 void ResetLights(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0x00, 0x00);
@@ -49,7 +49,6 @@ void ResetLights(void)
 }
 void allWhite(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0xFF, 0xFF);
@@ -60,7 +59,6 @@ void allWhite(void)
 
 void allRed(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0x00, 0x00);
@@ -71,7 +69,6 @@ void allRed(void)
 
 void allBlue(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0x00, 0xFF);
@@ -82,7 +79,6 @@ void allBlue(void)
 
 void allGreen(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0xFF, 0x00);
@@ -93,7 +89,6 @@ void allGreen(void)
 
 void chirstLights(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex = loc_u16_pixelIndex + 2)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0x00, 0x00);
@@ -105,7 +100,6 @@ void chirstLights(void)
 
 void rainbow(void)
 {
-    uint16_t loc_u16_pixelIndex;
     uint32_t i;
     int red, green, blue;
     for(i = 0; i < 0xFF; i++)

@@ -39,7 +39,7 @@ extern "C" {
 
 //TODO : ADD limitation on NB_PIXELS
 #ifndef NB_PIXELS
-#define NB_PIXELS 46U
+#define NB_PIXELS 50U
 #endif
 
 #define NB_SPI_BYTES_PER_PIXEL 9U
