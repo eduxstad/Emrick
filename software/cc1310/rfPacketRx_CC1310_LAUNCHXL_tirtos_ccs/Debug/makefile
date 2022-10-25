@@ -16,6 +16,7 @@ ORDERED_OBJS += \
 "./WS2812.obj" \
 "./ccfg.obj" \
 "./main_tirtos.obj" \
+"./patterns.obj" \
 "./rfPacketRx.obj" \
 "./smartrf_settings/smartrf_settings.obj" \
 "../CC1310_LAUNCHXL_TIRTOS.cmd" \
@@ -173,8 +174,8 @@ rfPacketRx_CC1310_LAUNCHXL_tirtos_ccs.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "CC1310_LAUNCHXL.obj" "CC1310_LAUNCHXL_fxns.obj" "RFQueue.obj" "WS2812.obj" "ccfg.obj" "main_tirtos.obj" "rfPacketRx.obj" "smartrf_settings\smartrf_settings.obj" 
-	-$(RM) "CC1310_LAUNCHXL.d" "CC1310_LAUNCHXL_fxns.d" "RFQueue.d" "WS2812.d" "ccfg.d" "main_tirtos.d" "rfPacketRx.d" "smartrf_settings\smartrf_settings.d" 
+	-$(RM) "CC1310_LAUNCHXL.obj" "CC1310_LAUNCHXL_fxns.obj" "RFQueue.obj" "WS2812.obj" "ccfg.obj" "main_tirtos.obj" "patterns.obj" "rfPacketRx.obj" "smartrf_settings\smartrf_settings.obj" 
+	-$(RM) "CC1310_LAUNCHXL.d" "CC1310_LAUNCHXL_fxns.d" "RFQueue.d" "WS2812.d" "ccfg.d" "main_tirtos.d" "patterns.d" "rfPacketRx.d" "smartrf_settings\smartrf_settings.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

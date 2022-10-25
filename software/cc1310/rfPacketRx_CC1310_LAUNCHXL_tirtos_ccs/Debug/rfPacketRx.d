@@ -62,6 +62,7 @@ rfPacketRx.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/
 rfPacketRx.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/driverlib/gpio.h
 rfPacketRx.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/inc/hw_gpio.h
 rfPacketRx.obj: ../WS2812.h
+rfPacketRx.obj: ../patterns.h
 rfPacketRx.obj: ../RFQueue.h
 rfPacketRx.obj: C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/driverlib/rf_data_entry.h
 rfPacketRx.obj: ../smartrf_settings/smartrf_settings.h
@@ -190,6 +191,8 @@ C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/driverlib/gpio.h
 C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source/ti/devices/cc13x0/inc/hw_gpio.h:
 
 ../WS2812.h:
+
+../patterns.h:
 
 ../RFQueue.h:
 

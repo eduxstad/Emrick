@@ -4,6 +4,7 @@
 "./WS2812.obj"
 "./ccfg.obj"
 "./main_tirtos.obj"
+"./patterns.obj"
 "./rfPacketRx.obj"
 "./smartrf_settings/smartrf_settings.obj"
 "../CC1310_LAUNCHXL_TIRTOS.cmd"
