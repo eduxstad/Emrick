@@ -6,8 +6,8 @@ SHELL = cmd.exe
 
 CG_TOOL_ROOT := C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS
 
-GEN_OPTS__FLAG := --cmd_file="C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt" 
-GEN_CMDS__FLAG := -l"C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd" 
+GEN_OPTS__FLAG := --cmd_file="C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt" 
+GEN_CMDS__FLAG := -l"C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd" 
 
 ORDERED_OBJS += \
 "./CC1310_LAUNCHXL.obj" \
@@ -150,10 +150,10 @@ all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@$(MAKE) --no-print-directory -Onone "SPIWS.out"
 
 dependents:
-	-cd C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug && $(MAKE) all
+	-cd C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug && $(MAKE) all
 
 # Tool invocations
-SPIWS.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib
+SPIWS.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
 	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=DeviceFamily_CC13X0 -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"SPIWS.map" -i"C:/ti/simplelink_cc13x0_sdk_4_20_02_07/source" -i"C:/ti/simplelink_cc13x0_sdk_4_20_02_07/kernel/tirtos/packages" -i"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="SPIWS_linkInfo.xml" --rom_model -o "SPIWS.out" $(ORDERED_OBJS)
@@ -177,7 +177,7 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
-C:/Users/kamelh/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib:
+C:/Users/sdlott/workspace_v12/tirtos_builds_CC1310_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1310_LAUNCHXL_release_ccs.lib:
 
 -include ../makefile.targets
 

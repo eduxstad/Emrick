@@ -55,6 +55,7 @@
 /* Board Header files */
 #include "Board.h"
 #include "WS2812.h"
+#include "patterns.h"
 
 /* Application Header files */
 #include "RFQueue.h"
@@ -71,31 +72,11 @@
                                    * Max 30 payload bytes
                                    * 1 status byte (RF_cmdPropRx.rxConf.bAppendStatus = 0x1) */
 
-//TODO : ADD limitation on NB_PIXELS
-#ifndef NB_PIXELS
-#define NB_PIXELS 46U
-#endif
-
-#define NB_SPI_BYTES_PER_PIXEL 9U
-
-/** Get SPI value corresponding to a bit at index n in a grb color on 24 bits
- *  1 bit is 0b110
- *  0 bit is 0b100
- */
-#define GRB_BIT_TO_SPI_BITS(val, bitPos) ((1 << bitPos & val) ? 0x06 : 0x04)
-
 static Display_Handle display;
 
 SPI_Handle      masterSpi;
 SPI_Params      spiParams;
 uint16_t        colorIndex = 0;
-
-static uint8_t _au8_spiLedBuffer[NB_SPI_BYTES_PER_PIXEL*NB_PIXELS] = {0};
-const uint8_t HSVlights[61] =
-{0, 4, 8, 13, 17, 21, 25, 30, 34, 38, 42, 47, 51, 55, 59, 64, 68, 72, 76,
-81, 85, 89, 93, 98, 102, 106, 110, 115, 119, 123, 127, 132, 136, 140, 144,
-149, 153, 157, 161, 166, 170, 174, 178, 183, 187, 191, 195, 200, 204, 208,
-212, 217, 221, 225, 229, 234, 238, 242, 246, 251, 255};
 
 
 #include <ti/drivers/SPI.h>
@@ -145,6 +126,12 @@ static uint8_t* packetDataPointer;
 
 static uint8_t packet[MAX_LENGTH + NUM_APPENDED_BYTES - 1]; /* The length byte is stored in a separate variable */
 
+/***** Pattern List *****/
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+typedef void (*SimplePatternList[])();
+SimplePatternList gPatterns = {allWhite, allBlue, allRed, allGreen, chirstLights, rainbow, ResetLights};
+uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
+
 /*
  * Application LED pin configuration table:
  *   - All LEDs board LEDs are off.
@@ -170,20 +157,6 @@ void delay(int number_of_seconds)
     while (clock() < start_time + milli_seconds)
         ;
 }
-
-void trueHSV(int ind, int LED, int angle)
-{
-  uint8_t red, green, blue;
-
-  if (angle<60) {red = 255; green = HSVlights[angle]; blue = 0;} else
-  if (angle<120) {red = HSVlights[120-angle]; green = 255; blue = 0;} else
-  if (angle<180) {red = 0, green = 255; blue = HSVlights[angle-120];} else
-  if (angle<240) {red = 0, green = HSVlights[240-angle]; blue = 255;} else
-  if (angle<300) {red = HSVlights[angle-240], green = 0; blue = 255;} else
-                 {red = 255, green = 0; blue = HSVlights[360-angle];}
-  WS2812_setPixelColor(ind, red, green, blue);
-}
-
 
 
 void *mainThread(void *arg0)
@@ -338,43 +311,10 @@ void *mainThread(void *arg0)
     return (NULL);
 }
 
-
-void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t arg_u8_green, uint8_t arg_u8_blue)
-{
-    uint8_t loc_u8_currIndex = 3;
-
-    /** Position of current led data in SPI buffer */
-    uint16_t loc_u16_ledOffset = arg_u16_ledIndex*9;
-
-    /** Concatenate color on a 32bit word */
-    uint32_t loc_u32_grb = arg_u8_green << 16 | arg_u8_red << 8 | arg_u8_blue;
-
-    /** Concatenate two bytes of SPI buffer in order to always transfer blocks of 3 bits
-     * to SPI buffer corresponding to a single grb bit*/
-    uint16_t loc_u16_currVal = 0;
-
-    int8_t loc_u8_bitIndex;
-
-    for(loc_u8_bitIndex = 23; loc_u8_bitIndex >= 0; loc_u8_bitIndex--)
-    {
-        loc_u16_currVal |= GRB_BIT_TO_SPI_BITS(loc_u32_grb, loc_u8_bitIndex) << (16 + 8*((loc_u8_currIndex - 3)/8) - loc_u8_currIndex);
-
-        if((loc_u8_currIndex)/8 > (loc_u8_currIndex-3)/8) /** some bits have been written to byte at index 1 in  loc_u16_currVal*/
-        {
-            /** it's time to shift buffers */
-            _au8_spiLedBuffer[loc_u16_ledOffset + loc_u8_currIndex /8 - 1] = loc_u16_currVal >> 8;
-            loc_u16_currVal = loc_u16_currVal << 8;
-        }
-        loc_u8_currIndex += 3;
-    }
-}
-
-
 void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 {
-    SPI_Transaction transaction;
-    uint16_t loc_u16_pixelIndex;
 
+    gPatterns[gCurrentPatternNumber]();
     if (e & RF_EventRxEntryDone)
     {
         /* Toggle pin to indicate RX */
@@ -382,49 +322,8 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
                            !PIN_getOutputValue(Board_PIN_LED2));
 
 
-
-        switch(colorIndex)
-        {
-        case(0):
-            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-            {
-                WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0XFF);
-                //trueHSV(loc_u16_pixelIndex, loc_u16_pixelIndex, i);
-            }
-            transaction.count = sizeof(_au8_spiLedBuffer);
-            transaction.txBuf = _au8_spiLedBuffer;
-            transaction.rxBuf = NULL;
-
-            SPI_transfer(masterSpi, &transaction);
-            colorIndex++;
-            break;
-        case(1):
-            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-            {
-                WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0xFF, 0x00);
-                //trueHSV(loc_u16_pixelIndex, loc_u16_pixelIndex, i);
-            }
-            transaction.count = sizeof(_au8_spiLedBuffer);
-            transaction.txBuf = _au8_spiLedBuffer;
-            transaction.rxBuf = NULL;
-
-            SPI_transfer(masterSpi, &transaction);
-            colorIndex++;
-            break;
-        case(2):
-            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-            {
-                WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0x00, 0x00);
-                //trueHSV(loc_u16_pixelIndex, loc_u16_pixelIndex, i);
-            }
-            transaction.count = sizeof(_au8_spiLedBuffer);
-            transaction.txBuf = _au8_spiLedBuffer;
-            transaction.rxBuf = NULL;
-
-            SPI_transfer(masterSpi, &transaction);
-            colorIndex = 0;
-            break;
-        }
+        //Switch Patterns
+        nextPattern();
 
         /* Get current unhandled data entry */
         currentDataEntry = RFQueue_getDataEntry();
@@ -440,4 +339,10 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
         RFQueue_nextEntry();
     }
+}
+
+void nextPattern()
+{
+  // add one to the current pattern number, and wrap around at the end
+  gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
 }

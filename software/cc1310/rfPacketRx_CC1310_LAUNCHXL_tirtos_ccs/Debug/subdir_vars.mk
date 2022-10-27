@@ -15,6 +15,7 @@ C_SRCS += \
 ../WS2812.c \
 ../ccfg.c \
 ../main_tirtos.c \
+../patterns.c \
 ../rfPacketRx.c 
 
 C_DEPS += \
@@ -24,6 +25,7 @@ C_DEPS += \
 ./WS2812.d \
 ./ccfg.d \
 ./main_tirtos.d \
+./patterns.d \
 ./rfPacketRx.d 
 
 OBJS += \
@@ -33,6 +35,7 @@ OBJS += \
 ./WS2812.obj \
 ./ccfg.obj \
 ./main_tirtos.obj \
+./patterns.obj \
 ./rfPacketRx.obj 
 
 OBJS__QUOTED += \
@@ -42,6 +45,7 @@ OBJS__QUOTED += \
 "WS2812.obj" \
 "ccfg.obj" \
 "main_tirtos.obj" \
+"patterns.obj" \
 "rfPacketRx.obj" 
 
 C_DEPS__QUOTED += \
@@ -51,6 +55,7 @@ C_DEPS__QUOTED += \
 "WS2812.d" \
 "ccfg.d" \
 "main_tirtos.d" \
+"patterns.d" \
 "rfPacketRx.d" 
 
 C_SRCS__QUOTED += \
@@ -60,6 +65,7 @@ C_SRCS__QUOTED += \
 "../WS2812.c" \
 "../ccfg.c" \
 "../main_tirtos.c" \
+"../patterns.c" \
 "../rfPacketRx.c" 
 
 

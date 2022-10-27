@@ -37,6 +37,19 @@ extern "C" {
  * Manifest Constants
  **************************************************************************/
 
+//TODO : ADD limitation on NB_PIXELS
+#ifndef NB_PIXELS
+#define NB_PIXELS 45U
+#endif
+
+#define NB_SPI_BYTES_PER_PIXEL 9U
+
+/** Get SPI value corresponding to a bit at index n in a grb color on 24 bits
+ *  1 bit is 0b110
+ *  0 bit is 0b100
+ */
+#define GRB_BIT_TO_SPI_BITS(val, bitPos) ((1 << bitPos & val) ? 0x06 : 0x04)
+
 /**************************************************************************
  * Type Definitions
  **************************************************************************/
@@ -54,14 +67,9 @@ extern "C" {
  **************************************************************************/
 /**
  * Initialize WS2812 driver with data line on arg_u8_pin
- * SPI used will be SPI at index 0 in your Board.c
- */
-extern void WS2812_begin(void);
-/**
- * Initialize WS2812 driver with data line on arg_u8_pin
  * SPI used will be SPI at index arg_u8_spiId in your Board.c
  */
-extern void WS2812_beginSPI(uint8_t arg_u8_spiId);
+extern void WS2812_beginSPI(void);
 extern void WS2812_close(void);
 extern bool WS2812_show(void);
 extern void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t arg_u8_green, uint8_t arg_u8_blue);
