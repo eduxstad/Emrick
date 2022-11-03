@@ -37,6 +37,19 @@ extern "C" {
  * Manifest Constants
  **************************************************************************/
 
+//TODO : ADD limitation on NB_PIXELS
+#ifndef NB_PIXELS
+#define NB_PIXELS 45U
+#endif
+
+#define NB_SPI_BYTES_PER_PIXEL 9U
+
+/** Get SPI value corresponding to a bit at index n in a grb color on 24 bits
+ *  1 bit is 0b110
+ *  0 bit is 0b100
+ */
+#define GRB_BIT_TO_SPI_BITS(val, bitPos) ((1 << bitPos & val) ? 0x06 : 0x04)
+
 /**************************************************************************
  * Type Definitions
  **************************************************************************/

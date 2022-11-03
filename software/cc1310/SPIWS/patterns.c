@@ -16,23 +16,14 @@
 #include <unistd.h>
 
 //TODO : ADD limitation on NB_PIXELS
-#ifndef NB_PIXELS
-#define NB_PIXELS 46U
-#endif
-
-#define NB_SPI_BYTES_PER_PIXEL 9U
-
-/** Get SPI value corresponding to a bit at index n in a grb color on 24 bits
- *  1 bit is 0b110
- *  0 bit is 0b100
- */
-#define GRB_BIT_TO_SPI_BITS(val, bitPos) ((1 << bitPos & val) ? 0x06 : 0x04)
 
 const uint8_t HSVlights[61] =
 {0, 4, 8, 13, 17, 21, 25, 30, 34, 38, 42, 47, 51, 55, 59, 64, 68, 72, 76,
 81, 85, 89, 93, 98, 102, 106, 110, 115, 119, 123, 127, 132, 136, 140, 144,
 149, 153, 157, 161, 166, 170, 174, 178, 183, 187, 191, 195, 200, 204, 208,
 212, 217, 221, 225, 229, 234, 238, 242, 246, 251, 255};
+
+uint16_t loc_u16_pixelIndex;
 
 void trueHSV(int angle, int * red, int * green, int * blue)
 {
@@ -47,9 +38,17 @@ void trueHSV(int angle, int * red, int * green, int * blue)
   //WS2812_setPixelColor(LED, red, green, blue);
 }
 
+void ResetLights(void)
+{
+    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+    {
+        WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0x00, 0x00);
+    }
+
+    WS2812_show();
+}
 void allWhite(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0xFF, 0xFF);
@@ -60,7 +59,6 @@ void allWhite(void)
 
 void allRed(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0x00, 0x00);
@@ -71,7 +69,6 @@ void allRed(void)
 
 void allBlue(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0x00, 0xFF);
@@ -82,7 +79,6 @@ void allBlue(void)
 
 void allGreen(void)
 {
-    uint16_t loc_u16_pixelIndex;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0xFF, 0x00);
@@ -91,25 +87,29 @@ void allGreen(void)
     WS2812_show();
 }
 
+void chirstLights(void)
+{
+    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex = loc_u16_pixelIndex + 2)
+    {
+        WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0x00, 0x00);
+        WS2812_setPixelColor(loc_u16_pixelIndex + 1, 0x00, 0xFF, 0x00);
+    }
+
+    WS2812_show();
+}
+
 void rainbow(void)
 {
-    uint16_t loc_u16_pixelIndex;
     uint32_t i;
     int red, green, blue;
-    //Prelim Code
-    while(1)
+    for(i = 0; i < 0xFF; i++)
     {
-        for(i = 0; i < 0xFF; i++)
+        for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
         {
-            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-            {
-                //WS2812_setPixelColor(loc_u16_pixelIndex, i, i, i);
-                trueHSV(i, &red, &green, &blue);
-                WS2812_setPixelColor(loc_u16_pixelIndex, red, green, blue);
-            }
-
-            WS2812_show();
-            usleep(20000);
+            trueHSV(i, &red, &green, &blue);
+            WS2812_setPixelColor(loc_u16_pixelIndex, red, green, blue);
         }
+
+        WS2812_show();
     }
 }
