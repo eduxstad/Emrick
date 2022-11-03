@@ -23,7 +23,10 @@ const uint8_t HSVlights[61] =
 149, 153, 157, 161, 166, 170, 174, 178, 183, 187, 191, 195, 200, 204, 208,
 212, 217, 221, 225, 229, 234, 238, 242, 246, 251, 255};
 
+uint8_t setArr[NB_PIXELS * 3] = {0};
+
 uint16_t loc_u16_pixelIndex;
+uint16_t arrIdx = 0;
 
 void trueHSV(int angle, int * red, int * green, int * blue)
 {
@@ -49,9 +52,16 @@ void ResetLights(void)
 }
 void allWhite(void)
 {
+    for(arrIdx = 0; arrIdx < NB_PIXELS * 3; arrIdx++)
+    {
+        setArr[arrIdx] = 0xFF;
+    }
+
+    arrIdx = 0;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
-        WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0xFF, 0xFF);
+        WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
+        arrIdx = arrIdx + 3;
     }
 
     WS2812_show();
@@ -59,9 +69,19 @@ void allWhite(void)
 
 void allRed(void)
 {
+    for(arrIdx = 0; arrIdx < NB_PIXELS * 3;)
+    {
+        setArr[arrIdx + 1] = 0x0;
+        setArr[arrIdx + 2] = 0x0;
+        setArr[arrIdx] = 0xFF;
+        arrIdx = arrIdx + 3;
+    }
+
+    arrIdx = 0;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
-        WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0x00, 0x00);
+        WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
+        arrIdx = arrIdx + 3;
     }
 
     WS2812_show();
@@ -69,9 +89,19 @@ void allRed(void)
 
 void allBlue(void)
 {
+    for(arrIdx = 2; arrIdx < NB_PIXELS * 3;)
+    {
+        setArr[arrIdx - 1] = 0x0;
+        setArr[arrIdx - 2] = 0x0;
+        setArr[arrIdx] = 0xFF;
+        arrIdx = arrIdx + 3;
+    }
+
+    arrIdx = 0;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
-        WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0x00, 0xFF);
+        WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
+        arrIdx = arrIdx + 3;
     }
 
     WS2812_show();
@@ -79,9 +109,19 @@ void allBlue(void)
 
 void allGreen(void)
 {
+    for(arrIdx = 1; arrIdx < NB_PIXELS * 3;)
+    {
+        setArr[arrIdx - 1] = 0x0;
+        setArr[arrIdx + 1] = 0x0;
+        setArr[arrIdx] = 0xFF;
+        arrIdx = arrIdx + 3;
+    }
+
+    arrIdx = 0;
     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
     {
-        WS2812_setPixelColor(loc_u16_pixelIndex, 0x00, 0xFF, 0x00);
+        WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
+        arrIdx = arrIdx + 3;
     }
 
     WS2812_show();
@@ -89,10 +129,31 @@ void allGreen(void)
 
 void chirstLights(void)
 {
-    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex = loc_u16_pixelIndex + 2)
+    int pick = 0;
+    for(arrIdx = 0; arrIdx < NB_PIXELS * 3;)
     {
-        WS2812_setPixelColor(loc_u16_pixelIndex, 0xFF, 0x00, 0x00);
-        WS2812_setPixelColor(loc_u16_pixelIndex + 1, 0x00, 0xFF, 0x00);
+        if(pick == 0)
+        {
+            setArr[arrIdx] = 0xFF;
+            setArr[arrIdx + 1] = 0x0;
+            setArr[arrIdx + 2] = 0x0;
+            pick = 1;
+        }
+        else
+        {
+            setArr[arrIdx] = 0x00;
+            setArr[arrIdx + 1] = 0xFF;
+            setArr[arrIdx + 2] = 0x0;
+            pick = 0;
+        }
+        arrIdx = arrIdx + 3;
+    }
+
+    arrIdx = 0;
+    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+    {
+        WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
+        arrIdx = arrIdx + 3;
     }
 
     WS2812_show();
