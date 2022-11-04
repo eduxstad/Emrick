@@ -84,7 +84,7 @@ void *masterThread(void *arg0)
 
     WS2812_beginSPI();
 
-    chirstLights();
+    rainbow();
 
     return NULL;
 }
