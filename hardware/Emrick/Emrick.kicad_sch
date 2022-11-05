@@ -5166,7 +5166,7 @@
     (property "Footprint" "bq24072:BQ24072TRGTR" (id 2) (at 257.81 236.474 0)
       (effects (font (size 1.524 1.524)) hide)
     )
-    (property "Datasheet" "" (id 3) (at 224.79 242.57 0)
+    (property "Datasheet" "https://www.ti.com/lit/ds/symlink/bq24072.pdf" (id 3) (at 233.68 222.25 0)
       (effects (font (size 1.524 1.524)))
     )
     (pin "1" (uuid 44ee4186-6bcc-488d-a189-e0df1ea204b3))
