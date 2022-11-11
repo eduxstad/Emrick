@@ -125,7 +125,7 @@ extern const PIN_Config BoardGpioInitTable[];
 
 /* SPI Board */
 #define CC1310_LAUNCHXL_SPI0_MISO             IOID_8          /* RF1.20 */
-#define CC1310_LAUNCHXL_SPI0_MOSI             IOID_9          /* RF1.18 */
+#define CC1310_LAUNCHXL_SPI0_MOSI             IOID_4          /* RF1.18 */
 #define CC1310_LAUNCHXL_SPI0_CLK              IOID_10         /* RF1.16 */
 #define CC1310_LAUNCHXL_SPI0_CSN              IOID_11
 #define CC1310_LAUNCHXL_SPI1_MISO             PIN_UNASSIGNED
