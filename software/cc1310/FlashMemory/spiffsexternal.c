@@ -109,12 +109,6 @@ void *mainThread(void *arg0)
     Display_printf(displayHandle, 0, 0, "\n // New Run \\ \n");
     Display_printf(displayHandle, 0, 0, "Mounting file system to run SPI\n");
 
-    Display_printf(displayHandle, 0, 0, "Making Array to Send and saving it to file.\n");
-    for(Idx = 0; Idx < NB_PIXELS * 3; Idx++)
-    {
-        ArrtoSend[Idx] = 0xFF;
-    }
-
     status = SPIFFS_mount(&fs, &fsConfig, spiffsWorkBuffer,
         spiffsFileDescriptorCache, sizeof(spiffsFileDescriptorCache),
         spiffsReadWriteCache, sizeof(spiffsReadWriteCache), NULL);
@@ -170,9 +164,12 @@ void *mainThread(void *arg0)
             while (1);
         }
 
-        Display_printf(displayHandle, 0, 0, "Starting SPI\n");
-        WS2812_beginSPI();
-        Display_printf(displayHandle, 0, 0, "\nSPI Started\n");
+        Display_printf(displayHandle, 0, 0, "Making Array to Send and saving it to file.\n");
+        for(Idx = 0; Idx < NB_PIXELS * 3; Idx++)
+        {
+            ArrtoSend[Idx] = 0xFF;
+        }
+
 
         Display_printf(displayHandle, 0, 0, "Writing to spiffsFile...");
 
@@ -194,7 +191,9 @@ void *mainThread(void *arg0)
             while (1) ;
         }
 
-        Display_printf(displayHandle, 0, 0, "Displaying File contents\n");
+        Display_printf(displayHandle, 0, 0, "Starting SPI\n");
+        WS2812_beginSPI();
+        Display_printf(displayHandle, 0, 0, "\nSPI Started\n");
 
         for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
         {
@@ -202,7 +201,10 @@ void *mainThread(void *arg0)
             arrIdx = arrIdx + 3;
         }
 
+        Display_printf(displayHandle, 0, 0, "Displaying File contents before erasure.\n");
         WS2812_show();
+
+        WS2812_close();
 
         Display_printf(displayHandle, 0, 0, "Erasing spiffsFile...");
 
