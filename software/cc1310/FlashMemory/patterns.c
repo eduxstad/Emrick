@@ -129,36 +129,56 @@ void allGreen(void)
     WS2812_show();
 }
 
-void chirstLights(void)
+void chirstLights(uint8_t arr[])
 {
     int pick = 0;
     for(arrIdx = 0; arrIdx < NB_PIXELS * 3;)
     {
         if(pick == 0)
         {
-            setArr[arrIdx] = 0xFF;
-            setArr[arrIdx + 1] = 0x0;
-            setArr[arrIdx + 2] = 0x0;
+            arr[arrIdx] = 0xFF;
+            arr[arrIdx + 1] = 0x0;
+            arr[arrIdx + 2] = 0x0;
             pick = 1;
         }
         else
         {
-            setArr[arrIdx] = 0x00;
-            setArr[arrIdx + 1] = 0xFF;
-            setArr[arrIdx + 2] = 0x0;
+            arr[arrIdx] = 0x00;
+            arr[arrIdx + 1] = 0xFF;
+            arr[arrIdx + 2] = 0x0;
             pick = 0;
         }
         arrIdx = arrIdx + 3;
     }
 
-    arrIdx = 0;
-    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-    {
-        WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
-        arrIdx = arrIdx + 3;
-    }
+//    int pick = 0;
+//    for(arrIdx = 0; arrIdx < NB_PIXELS * 3;)
+//    {
+//        if(pick == 0)
+//        {
+//            setArr[arrIdx] = 0xFF;
+//            setArr[arrIdx + 1] = 0x0;
+//            setArr[arrIdx + 2] = 0x0;
+//            pick = 1;
+//        }
+//        else
+//        {
+//            setArr[arrIdx] = 0x00;
+//            setArr[arrIdx + 1] = 0xFF;
+//            setArr[arrIdx + 2] = 0x0;
+//            pick = 0;
+//        }
+//        arrIdx = arrIdx + 3;
+//    }
 
-    WS2812_show();
+//    arrIdx = 0;
+//    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+//    {
+//        WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
+//        arrIdx = arrIdx + 3;
+//    }
+//
+//    WS2812_show();
 }
 
 void rainbow(void)

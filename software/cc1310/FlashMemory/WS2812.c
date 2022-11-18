@@ -124,6 +124,9 @@ void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t
 {
     uint8_t loc_u8_currIndex = 3;
 
+    arg_u8_red /= 4;
+    arg_u8_green /= 4;
+    arg_u8_blue /= 4;
     /** Position of current led data in SPI buffer */
     uint16_t loc_u16_ledOffset = arg_u16_ledIndex*9;
 

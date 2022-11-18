@@ -30,8 +30,8 @@
 
 
 void trueHSV(int angle, int * red, int * green, int * blue);
+void chirstLights(uint8_t arr[]);
 void ResetLights(void);
-void chirstLights(void);
 void rainbow(void);
 void allWhite(void);
 void allBlue(void);

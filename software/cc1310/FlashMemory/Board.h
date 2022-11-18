@@ -136,7 +136,7 @@ extern "C" {
 #define Board_FLASH_CS_ON       0
 #define Board_FLASH_CS_OFF      1
 
-#define Board_SPI_MASTER        CC1310_LAUNCHXL_SPI0
+#define Board_SPI_MASTER        CC1310_LAUNCHXL_SPI1
 #define Board_SPI_SLAVE         CC1310_LAUNCHXL_SPI0
 #define Board_SPI_MASTER_READY  CC1310_LAUNCHXL_SPI_MASTER_READY
 #define Board_SPI_SLAVE_READY   CC1310_LAUNCHXL_SPI_SLAVE_READY

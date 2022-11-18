@@ -42,6 +42,7 @@
 
 #include "Board.h"
 #include "WS2812.h"
+#include "patterns.h"
 
 /* SPIFFS configuration parameters */
 #define SPIFFS_LOGICAL_BLOCK_SIZE    (4096)
@@ -60,9 +61,9 @@ static uint8_t spiffsFileDescriptorCache[SPIFFS_FILE_DESCRIPTOR_SIZE * 4];
 /* The array below will be used by SPIFFS as a read/write cache. */
 static uint8_t spiffsReadWriteCache[SPIFFS_LOGICAL_PAGE_SIZE * 2];
 
-#define MESSAGE_LENGTH    (22)
+#define MESSAGE_LENGTH    (135)
 uint8_t ArrtoSend[NB_PIXELS * 3] = {0};
-uint8_t ArrtoRead[NB_PIXELS * 3];
+uint8_t ArrtoRead[NB_PIXELS * 3] = {0};
 
 spiffs fs;
 SPIFFSNVS_Data spiffsnvsData;
@@ -78,7 +79,6 @@ void *mainThread(void *arg0)
     int32_t        status;
     uint8_t arrIdx = 0;
     uint8_t loc_u16_pixelIndex = 0;
-    uint8_t Idx = 0;
 
     /*
      * Wake up external flash on LaunchPads. It is powered off by default
@@ -165,10 +165,7 @@ void *mainThread(void *arg0)
         }
 
         Display_printf(displayHandle, 0, 0, "Making Array to Send and saving it to file.\n");
-        for(Idx = 0; Idx < NB_PIXELS * 3; Idx++)
-        {
-            ArrtoSend[Idx] = 0xFF;
-        }
+        chirstLights(ArrtoSend);
 
 
         Display_printf(displayHandle, 0, 0, "Writing to spiffsFile...");
@@ -191,23 +188,6 @@ void *mainThread(void *arg0)
             while (1) ;
         }
 
-        Display_printf(displayHandle, 0, 0, "Starting SPI\n");
-        WS2812_beginSPI();
-        Display_printf(displayHandle, 0, 0, "\nSPI Started\n");
-
-        for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-        {
-            WS2812_setPixelColor(loc_u16_pixelIndex, ArrtoRead[arrIdx], ArrtoRead[arrIdx + 1], ArrtoRead[arrIdx + 2]);
-            arrIdx = arrIdx + 3;
-        }
-
-        Display_printf(displayHandle, 0, 0, "Displaying File contents before erasure.\n");
-        WS2812_show();
-
-        WS2812_close();
-
-        Display_printf(displayHandle, 0, 0, "Erasing spiffsFile...");
-
         status = SPIFFS_fremove(&fs, fd);
         if (status != SPIFFS_OK) {
             Display_printf(displayHandle, 0, 0, "Error removing spiffsFile.\n");
@@ -217,6 +197,19 @@ void *mainThread(void *arg0)
 
         SPIFFS_close(&fs, fd);
     }
+
+    Display_printf(displayHandle, 0, 0, "Starting SPI\n");
+    WS2812_beginSPI();
+    Display_printf(displayHandle, 0, 0, "\nSPI Started\n");
+
+    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+    {
+        WS2812_setPixelColor(loc_u16_pixelIndex, ArrtoRead[arrIdx], ArrtoRead[arrIdx + 1], ArrtoRead[arrIdx + 2]);
+        arrIdx = arrIdx + 3;
+    }
+
+    Display_printf(displayHandle, 0, 0, "Displaying File contents before erasure.\n");
+    WS2812_show();
 
     SPIFFS_unmount(&fs);
 
