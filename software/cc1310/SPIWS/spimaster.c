@@ -85,10 +85,10 @@ void *masterThread(void *arg0)
     WS2812_beginSPI();
 
     //rainbow();
-    allWhite();
+    //chirstLights();
+    allRed();
 
-    //spin so that the peripheral doesn't freak out
-    while (1);
+    return NULL;
 }
 
 /*

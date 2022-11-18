@@ -173,30 +173,26 @@ void rainbow(void)
         for(i = 0; i < NB_PIXELS; i = i + 1)
         {
             trueHSV(j*30, &red, &green, &blue);
-//            rainbowArr[j][3*i] = (uint8_t) red;
-//            rainbowArr[j][3*i + 1] = (uint8_t) green;
-//            rainbowArr[j][3*i + 2] = (uint8_t) blue;
             *(rainbowArr+3*i+(3*NB_PIXELS)*j) = (uint8_t) red;
             *(rainbowArr+(3*i + 1)+(3*NB_PIXELS)*j) = (uint8_t) green;
             *(rainbowArr+(3*i + 2)+(3*NB_PIXELS)*j) = (uint8_t) blue;
         }
     }
 
-  while(1)
-      {
-        for(i = 0; i < 12; i=i+1)
+    for(i = 0; i < 12; i=i+1)
+    {
+        arrIdx = 0;
+        for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
         {
-            arrIdx = 0;
-            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-            {
-                //WS2812_setPixelColor(loc_u16_pixelIndex, rainbowArr[i][arrIdx], rainbowArr[i][arrIdx + 1], rainbowArr[i][arrIdx + 2]);
-                WS2812_setPixelColor(loc_u16_pixelIndex, *(rainbowArr+arrIdx+(3*NB_PIXELS)*i), *(rainbowArr+(arrIdx + 1)+(3*NB_PIXELS)*i), *(rainbowArr+(arrIdx + 2)+(3*NB_PIXELS)*i));
-                arrIdx = arrIdx + 3;
-            }
-
-            WS2812_show();
-            //usleep(137000);
-            sleep(1);
+            //WS2812_setPixelColor(loc_u16_pixelIndex, rainbowArr[i][arrIdx], rainbowArr[i][arrIdx + 1], rainbowArr[i][arrIdx + 2]);
+            WS2812_setPixelColor(loc_u16_pixelIndex, *(rainbowArr+arrIdx+(3*NB_PIXELS)*i), *(rainbowArr+(arrIdx + 1)+(3*NB_PIXELS)*i), *(rainbowArr+(arrIdx + 2)+(3*NB_PIXELS)*i));
+            arrIdx = arrIdx + 3;
         }
+
+        WS2812_show();
+        //usleep(137000);
+        sleep(1);
     }
+
+    free(rainbowArr);
 }
