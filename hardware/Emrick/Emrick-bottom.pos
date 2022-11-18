@@ -1,0 +1,14 @@
+### Module positions - created on Thu Nov 17 21:51:45 2022 ###
+### Printed by Pcbnew version (6.0.8)
+## Unit = mm, Angle = deg.
+## Side : bottom
+# Ref     Val         Package                            PosX       PosY       Rot  Side
+J4        BATT_CONN   DF65-3P-1.7V21                 -87.2500   -22.7000  180.0000  bottom
+L8        1uH         L_Sunlord_MWSA0518_5.4x5.2mm  -105.5000   -29.8500  180.0000  bottom
+Q1        Q_NMOS_GSD  SOT-23_Handsoldering           -96.3000   -31.3500   90.0000  bottom
+Q2        Q_NMOS_GSD  SOT-23_Handsoldering           -93.2000   -31.3500   90.0000  bottom
+Q3        Q_NMOS_GSD  SOT-23_Handsoldering           -99.4000   -31.6500   90.0000  bottom
+R7        3.01k       R_0603_1608Metric              -96.9175   -26.9425  -90.0000  bottom
+R8        2.21k       R_0603_1608Metric              -95.3175   -26.9425  -90.0000  bottom
+R9        8.87k       R_0603_1608Metric              -98.5175   -26.9425  -90.0000  bottom
+## End
