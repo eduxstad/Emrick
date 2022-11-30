@@ -138,7 +138,7 @@ uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
  */
 PIN_Config pinTable[] =
 {
-    Board_PIN_LED2 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
+    Board_PIN_LED1 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
 	PIN_TERMINATE
 };
 

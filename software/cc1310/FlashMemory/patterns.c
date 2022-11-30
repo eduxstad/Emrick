@@ -202,8 +202,7 @@ void rainbow(void)
         }
     }
 
-  while(1)
-      {
+
         for(i = 0; i < 12; i=i+1)
         {
             arrIdx = 0;

@@ -85,7 +85,7 @@ void WS2812_beginSPI(void)
 
     SPI_Params_init(&spiParams);
     spiParams.frameFormat = SPI_POL0_PHA1;
-    spiParams.bitRate = 2400000;
+    spiParams.bitRate = 2420000;
     masterSpi = SPI_open(Board_SPI_MASTER, &spiParams);
 
 
