@@ -88,7 +88,8 @@ void *masterThread(void *arg0)
     //chirstLights();
     //allRed();
     //animationBasic();
-    rainbowAnimation();
+    //rainbowAnimation();
+    bounce();
 
     return NULL;
 }

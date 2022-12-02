@@ -271,3 +271,26 @@ void rainbowAnimation(void)
 
     free(rainbowArr);
 }
+
+void bounce(void)
+{
+    for(arrIdx = 0; arrIdx < NB_PIXELS * 3;)
+        {
+            setArr[arrIdx + 1] = 0x00;
+            setArr[arrIdx + 2] = 0xFF;
+            setArr[arrIdx] = 0x00;
+            arrIdx = arrIdx + 3;
+        }
+
+        arrIdx = 0;
+        for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+        {
+            WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
+            arrIdx = arrIdx + 3;
+            WS2812_show();
+            usleep(100000);
+
+        }
+
+
+}
