@@ -84,9 +84,11 @@ void *masterThread(void *arg0)
 
     WS2812_beginSPI();
 
-    rainbow();
+    //rainbow();
     //chirstLights();
     //allRed();
+    //animationBasic();
+    rainbowAnimation();
 
     return NULL;
 }
