@@ -72,8 +72,6 @@
                                    * Max 30 payload bytes
                                    * 1 status byte (RF_cmdPropRx.rxConf.bAppendStatus = 0x1) */
 
-static Display_Handle display;
-
 SPI_Handle      masterSpi;
 SPI_Params      spiParams;
 uint16_t        colorIndex = 0;
@@ -129,7 +127,7 @@ static uint8_t packet[MAX_LENGTH + NUM_APPENDED_BYTES - 1]; /* The length byte i
 /***** Pattern List *****/
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 typedef void (*SimplePatternList[])();
-SimplePatternList gPatterns = {allWhite, allBlue, allRed, allGreen, chirstLights, rainbow, ResetLights};
+SimplePatternList gPatterns = {allWhite, allBlue, allRed, allGreen, chirstLights, rainbow};
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 
 /*
@@ -145,19 +143,6 @@ PIN_Config pinTable[] =
 /***** Function definitions *****/
 sem_t masterSem;
 
-void delay(int number_of_seconds)
-{
-    // Converting time into milli_seconds
-    int milli_seconds = 1000 * number_of_seconds;
-
-    // Storing start time
-    clock_t start_time = clock();
-
-    // looping till required time is not achieved
-    while (clock() < start_time + milli_seconds)
-        ;
-}
-
 
 void *mainThread(void *arg0)
 {
@@ -170,21 +155,10 @@ void *mainThread(void *arg0)
     SPI_init();
 
 
-
     GPIO_setConfig(Board_SPI_MASTER_READY, GPIO_CFG_OUTPUT | GPIO_CFG_OUT_LOW);
     GPIO_write(Board_SPI_MASTER_READY, 1);
 
-    SPI_Params_init(&spiParams);
-    spiParams.frameFormat = SPI_POL0_PHA1;
-    spiParams.bitRate = 2400000;
-    masterSpi = SPI_open(Board_SPI_MASTER, &spiParams);
-    if (masterSpi == NULL) {
-        Display_printf(display, 0, 0, "Error initializing master SPI\n");
-        while (1);
-    }
-    else {
-        Display_printf(display, 0, 0, "Master SPI initialized\n");
-    }
+    WS2812_beginSPI();
 
     /* Open LED pins */
     ledPinHandle = PIN_open(&ledPinState, pinTable);
@@ -230,84 +204,6 @@ void *mainThread(void *arg0)
                                                RF_PriorityNormal, &callback,
                                                RF_EventRxEntryDone);
 
-//    switch(terminationReason)
-//    {
-//        case RF_EventLastCmdDone:
-//            // A stand-alone radio operation command or the last radio
-//            // operation command in a chain finished.
-//            break;
-//        case RF_EventCmdCancelled:
-//            // Command cancelled before it was started; it can be caused
-//            // by RF_cancelCmd() or RF_flushCmd().
-//            break;
-//        case RF_EventCmdAborted:
-//            // Abrupt command termination caused by RF_cancelCmd() or
-//            // RF_flushCmd().
-//            break;
-//        case RF_EventCmdStopped:
-//            // Graceful command termination caused by RF_cancelCmd() or
-//            // RF_flushCmd().
-//            break;
-//        default:
-//            // Uncaught error event
-//            while(1);
-//    }
-//
-//    uint32_t cmdStatus = ((volatile RF_Op*)&RF_cmdPropRx)->status;
-//    switch(cmdStatus)
-//    {
-//        case PROP_DONE_OK:
-//            // Packet received with CRC OK
-//            break;
-//        case PROP_DONE_RXERR:
-//            // Packet received with CRC error
-//            break;
-//        case PROP_DONE_RXTIMEOUT:
-//            // Observed end trigger while in sync search
-//            break;
-//        case PROP_DONE_BREAK:
-//            // Observed end trigger while receiving packet when the command is
-//            // configured with endType set to 1
-//            break;
-//        case PROP_DONE_ENDED:
-//            // Received packet after having observed the end trigger; if the
-//            // command is configured with endType set to 0, the end trigger
-//            // will not terminate an ongoing reception
-//            break;
-//        case PROP_DONE_STOPPED:
-//            // received CMD_STOP after command started and, if sync found,
-//            // packet is received
-//            break;
-//        case PROP_DONE_ABORT:
-//            // Received CMD_ABORT after command started
-//            break;
-//        case PROP_ERROR_RXBUF:
-//            // No RX buffer large enough for the received data available at
-//            // the start of a packet
-//            break;
-//        case PROP_ERROR_RXFULL:
-//            // Out of RX buffer space during reception in a partial read
-//            break;
-//        case PROP_ERROR_PAR:
-//            // Observed illegal parameter
-//            break;
-//        case PROP_ERROR_NO_SETUP:
-//            // Command sent without setting up the radio in a supported
-//            // mode using CMD_PROP_RADIO_SETUP or CMD_RADIO_SETUP
-//            break;
-//        case PROP_ERROR_NO_FS:
-//            // Command sent without the synthesizer being programmed
-//            break;
-//        case PROP_ERROR_RXOVF:
-//            // RX overflow observed during operation
-//            break;
-//        default:
-//            // Uncaught error event - these could come from the
-//            // pool of states defined in rf_mailbox.h
-//            while(1);
-//    }
-//
-//    while(1);
     return (NULL);
 }
 
@@ -318,8 +214,8 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
     if (e & RF_EventRxEntryDone)
     {
         /* Toggle pin to indicate RX */
-        PIN_setOutputValue(ledPinHandle, Board_PIN_LED2,
-                           !PIN_getOutputValue(Board_PIN_LED2));
+        PIN_setOutputValue(ledPinHandle, Board_PIN_LED1,
+                           !PIN_getOutputValue(Board_PIN_LED1));
 
 
         //Switch Patterns

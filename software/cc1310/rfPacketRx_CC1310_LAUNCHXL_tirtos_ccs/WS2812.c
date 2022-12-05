@@ -85,7 +85,7 @@ void WS2812_beginSPI(void)
 
     SPI_Params_init(&spiParams);
     spiParams.frameFormat = SPI_POL0_PHA1;
-    spiParams.bitRate = 2400000;
+    spiParams.bitRate = 2420000;
     masterSpi = SPI_open(Board_SPI_MASTER, &spiParams);
 
 
@@ -123,6 +123,10 @@ void WS2812_setPin(uint8_t p)
 void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t arg_u8_green, uint8_t arg_u8_blue)
 {
     uint8_t loc_u8_currIndex = 3;
+    /* Divide by 3 to prevent over current */
+    arg_u8_red = arg_u8_red/3;
+    arg_u8_green = arg_u8_green/3;
+    arg_u8_blue = arg_u8_blue/3;
 
     /** Position of current led data in SPI buffer */
     uint16_t loc_u16_ledOffset = arg_u16_ledIndex*9;
