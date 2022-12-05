@@ -38,3 +38,7 @@ void allBlue(void);
 void allRed(void);
 void allGreen(void);
 void nextPattern(void);
+void animationBasic(void);
+void rainbowAnimation(void);
+void bounce(void);
+

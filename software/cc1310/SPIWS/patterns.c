@@ -256,6 +256,7 @@ void rainbowAnimation(void)
         }
     }
 
+
     for(i = 0; i < 12; i=i+1)
     {
         arrIdx = 0;
