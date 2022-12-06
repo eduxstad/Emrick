@@ -51,19 +51,28 @@
 #include "smartrf_settings/smartrf_settings.h"
 
 /***** Defines *****/
+#include "WS2812.h"
+#include "patterns.h"
 
 /* Do power measurement */
 //#define POWER_MEASUREMENT
 
 /* Packet TX Configuration */
-#define PAYLOAD_LENGTH      12
+#define PAYLOAD_LENGTH      135
 #ifdef POWER_MEASUREMENT
 #define PACKET_INTERVAL     5  /* For power measurement set packet interval to 5s */
 #else
 #define PACKET_INTERVAL     500000  /* Set packet interval to 500000us or 500ms */
 #endif
 
-/***** Prototypes *****/
+/* Pattern List */
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+typedef void (*SimplePatternList[])();
+SimplePatternList gPatterns = {allBlue, allRed, allGreen, chirstLights};
+uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
+
+/* Pattern Array */
+uint8_t SendArr[NB_PIXELS * 3] = {0};
 
 /***** Variable declarations *****/
 static RF_Object rfObject;
@@ -125,11 +134,11 @@ void *mainThread(void *arg0)
 
     while(1)
     {
-        uint8_t myString[] = "Cumming!";
+        gPatterns[gCurrentPatternNumber](SendArr);
         uint8_t i;
         for (i = 0; i < PAYLOAD_LENGTH; i++)
         {
-            packet[i] = myString[i];
+            packet[i] = SendArr[i];
         }
 
         RF_cmdPropTx.pktLen = PAYLOAD_LENGTH;
@@ -208,9 +217,17 @@ void *mainThread(void *arg0)
         /* Sleep for PACKET_INTERVAL us */
         usleep(PACKET_INTERVAL);
         usleep(PACKET_INTERVAL);
-        usleep(PACKET_INTERVAL);
-        usleep(PACKET_INTERVAL);
 #endif
+
+        //Switch Patterns
+        nextPattern();
 
     }
 }
+
+void nextPattern()
+{
+  // add one to the current pattern number, and wrap around at the end
+  gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
+}
+

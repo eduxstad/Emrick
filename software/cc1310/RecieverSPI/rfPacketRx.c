@@ -123,8 +123,9 @@ static rfc_dataEntryGeneral_t* currentDataEntry;
 static uint8_t packetLength;
 static uint8_t* packetDataPointer;
 
-int index = 0;
-
+/* Array Index variables */
+uint16_t loc_u16_pixelIndex;
+uint16_t arrIdx;
 
 static uint8_t packet[MAX_LENGTH + NUM_APPENDED_BYTES - 1]; /* The length byte is stored in a separate variable */
 
@@ -216,9 +217,9 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
     if (e & RF_EventRxEntryDone)
     {
-        /* Toggle pin to indicate RX */
-        PIN_setOutputValue(ledPinHandle, Board_PIN_LED1,
-                           !PIN_getOutputValue(Board_PIN_LED1));
+//        /* Toggle pin to indicate RX */
+//        PIN_setOutputValue(ledPinHandle, Board_PIN_LED1,
+//                           !PIN_getOutputValue(Board_PIN_LED1));
 
         /* Get current unhandled data entry */
         currentDataEntry = RFQueue_getDataEntry();
@@ -232,16 +233,17 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Copy the payload + the status byte to the packet variable */
         memcpy(packet, packetDataPointer, (packetLength + 1));
 
-            Display_printf(displayHandle, 0, 0,
-                "%c", packet[index]);
+        arrIdx = 0;
+        for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+        {
+            WS2812_setPixelColor(loc_u16_pixelIndex, packet[arrIdx], packet[arrIdx + 1], packet[arrIdx + 2]);
+            arrIdx = arrIdx + 3;
+        }
 
-            index++;
-
-            if(index == packetLength){
-                index = 0;
-            }
+        WS2812_show();
 
         RFQueue_nextEntry();
     }
 
 }
+
