@@ -127,6 +127,9 @@ static uint8_t* packetDataPointer;
 uint16_t loc_u16_pixelIndex;
 uint16_t arrIdx;
 
+/* Board ID Number */
+uint16_t BoardID = 1;
+
 static uint8_t packet[MAX_LENGTH + NUM_APPENDED_BYTES - 1]; /* The length byte is stored in a separate variable */
 
 /*
@@ -246,4 +249,3 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
     }
 
 }
-

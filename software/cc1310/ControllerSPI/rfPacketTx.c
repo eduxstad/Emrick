@@ -87,12 +87,12 @@ static uint8_t packet[PAYLOAD_LENGTH];
 
 /* UART driver handles */
 char        input = 0;
-const char  echoPrompt[] = "Press any key to update pattern. \r\n\n";
-const char  echoUpdate[] = "Update Received! Changing pattern.\r\n";
+const char  echoPrompt[] = "\nPress any key to program new pattern.\r\n\n";
+const char  echoUpdate[] = "Program Received! Entering performance mode.\r\n";
+const char  echoChange[] = "Programming mode. Press any key to exit.\r\n";
 
 UART_Handle uart;
 UART_Params uartParams;
-
 
 /*
  * Application LED pin configuration table:
@@ -256,6 +256,7 @@ void PerformanceMode()
 
         if(input){
             ProgrammingMode();
+            input = 0;
         }
     }
 }
@@ -263,7 +264,11 @@ void PerformanceMode()
 void ProgrammingMode()
 {
 
+    while(1) {
+        UART_write(uart, echoChange, sizeof(echoChange));
+        UART_read(uart, &input, 1);
 
+        if(input){
 #ifndef POWER_MEASUREMENT
             PIN_setOutputValue(ledPinHandle, Board_PIN_LED1,!PIN_getOutputValue(Board_PIN_LED1));
 #endif
@@ -282,5 +287,8 @@ void ProgrammingMode()
             //Switch Patterns
             nextPattern();
             input = 0;
+            return;
+        }
+    }
 }
 
