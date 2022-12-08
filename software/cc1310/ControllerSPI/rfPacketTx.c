@@ -88,7 +88,7 @@ static uint8_t packet[PAYLOAD_LENGTH];
 /* UART driver handles */
 char        input = 0;
 const char  echoPrompt[] = "\nPress any key to program new pattern.\r\n\n";
-const char  echoUpdate[] = "Program Received! Entering performance mode.\r\n";
+const char  echoUpdate[] = "Entering performance mode. Press s to program.\r\n";
 const char  echoChange[] = "Programming mode. Press any key to exit.\r\n";
 
 UART_Handle uart;
@@ -254,7 +254,7 @@ void PerformanceMode()
         UART_write(uart, echoUpdate, sizeof(echoUpdate));
         UART_read(uart, &input, 1);
 
-        if(input){
+        if(input == 's'){
             ProgrammingMode();
             input = 0;
         }
