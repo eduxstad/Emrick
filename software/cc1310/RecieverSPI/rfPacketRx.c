@@ -236,14 +236,28 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Copy the payload + the status byte to the packet variable */
         memcpy(packet, packetDataPointer, (packetLength + 1));
 
-        arrIdx = 0;
-        for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+        if(BoardID == 1 && packet[0] == 0xFF)
         {
-            WS2812_setPixelColor(loc_u16_pixelIndex, packet[arrIdx], packet[arrIdx + 1], packet[arrIdx + 2]);
-            arrIdx = arrIdx + 3;
-        }
+            arrIdx = 0;
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+            {
+                WS2812_setPixelColor(loc_u16_pixelIndex, packet[arrIdx], packet[arrIdx + 1], packet[arrIdx + 2]);
+                arrIdx = arrIdx + 3;
+            }
 
-        WS2812_show();
+            WS2812_show();
+        }
+        else if(BoardID == 2 && packet[0] != 0xFF)
+        {
+            arrIdx = 0;
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
+            {
+                WS2812_setPixelColor(loc_u16_pixelIndex, packet[arrIdx], packet[arrIdx + 1], packet[arrIdx + 2]);
+                arrIdx = arrIdx + 3;
+            }
+
+            WS2812_show();
+        }
 
         RFQueue_nextEntry();
     }
