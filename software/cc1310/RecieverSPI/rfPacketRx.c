@@ -128,9 +128,10 @@ uint16_t loc_u16_pixelIndex;
 uint16_t arrIdx;
 
 /* Board ID Number */
-uint16_t BoardID = 1;
+uint16_t BoardID = 2;
 
 static uint8_t packet[MAX_LENGTH + NUM_APPENDED_BYTES - 1]; /* The length byte is stored in a separate variable */
+uint8_t packet2[MAX_LENGTH + NUM_APPENDED_BYTES - 1]; /* The length byte is stored in a separate variable */
 
 /*
  * Application LED pin configuration table:
@@ -236,6 +237,12 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Copy the payload + the status byte to the packet variable */
         memcpy(packet, packetDataPointer, (packetLength + 1));
 
+        uint16_t i;
+        for(i = 0; i < sizeof(packet)/sizeof(packet[0]); i++) {
+            packet2[i] = packet[i];
+        }
+
+
         if(BoardID == 1 && packet[0] == 0xFF)
         {
             arrIdx = 0;
@@ -247,12 +254,12 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
             WS2812_show();
         }
-        else if(BoardID == 2 && packet[0] != 0xFF)
+        else if(BoardID == 2)
         {
             arrIdx = 0;
             for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
             {
-                WS2812_setPixelColor(loc_u16_pixelIndex, packet[arrIdx], packet[arrIdx + 1], packet[arrIdx + 2]);
+                WS2812_setPixelColor(loc_u16_pixelIndex, packet2[arrIdx], packet2[arrIdx + 1], packet2[arrIdx + 2]);
                 arrIdx = arrIdx + 3;
             }
 

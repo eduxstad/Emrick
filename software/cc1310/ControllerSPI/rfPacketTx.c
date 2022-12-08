@@ -70,7 +70,7 @@
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 typedef void (*SimplePatternList[])();
 SimplePatternList gPatterns = {allBlue, allRed, allGreen, chirstLights};
-uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
+uint16_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 
 /* Pattern Array */
 uint8_t SendArr[NB_PIXELS * 3] = {0};
@@ -167,7 +167,7 @@ void *mainThread(void *arg0)
 void sendControlPacket()
 {
     gPatterns[gCurrentPatternNumber](SendArr);
-    uint8_t i;
+    uint16_t i;
     for (i = 0; i < PAYLOAD_LENGTH; i++)
     {
         packet[i] = SendArr[i];
