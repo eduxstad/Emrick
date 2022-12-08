@@ -75,7 +75,9 @@ extern bool WS2812_show(void);
 extern void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t arg_u8_green, uint8_t arg_u8_blue);
 
 
-void sendControlPacket(); //Control Packet declaration
+void sendControlPacket(void); //Control Packet declaration
+void PerformanceMode(void); //Performance mode declaration
+void ProgrammingMode(void); //Programming mode declaration
 
 #ifdef __cplusplus
 }

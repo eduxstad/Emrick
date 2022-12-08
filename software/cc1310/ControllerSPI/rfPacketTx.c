@@ -85,6 +85,14 @@ static PIN_State ledPinState;
 
 static uint8_t packet[PAYLOAD_LENGTH];
 
+/* UART driver handles */
+char        input = 0;
+const char  echoPrompt[] = "Press any key to update pattern. \r\n\n";
+const char  echoUpdate[] = "Update Received! Changing pattern.\r\n";
+
+UART_Handle uart;
+UART_Params uartParams;
+
 
 /*
  * Application LED pin configuration table:
@@ -107,13 +115,6 @@ void *mainThread(void *arg0)
 {
     RF_Params rfParams;
     RF_Params_init(&rfParams);
-
-    char        input = 0;
-    const char  echoPrompt[] = "Press any key to update pattern. \r\n\n";
-    const char  echoUpdate[] = "Update Received! Changing pattern.\r\n";
-
-    UART_Handle uart;
-    UART_Params uartParams;
 
     /* Open LED pins */
     ledPinHandle = PIN_open(&ledPinState, pinTable);
@@ -158,37 +159,9 @@ void *mainThread(void *arg0)
 
     UART_write(uart, echoPrompt, sizeof(echoPrompt));
 
-    while(1)
-    {
+    PerformanceMode();
 
-        sendControlPacket();
-
-        UART_write(uart, echoUpdate, sizeof(echoUpdate));
-        UART_read(uart, &input, 1);
-        if(input){
-
-
-#ifndef POWER_MEASUREMENT
-            PIN_setOutputValue(ledPinHandle, Board_PIN_LED1,!PIN_getOutputValue(Board_PIN_LED1));
-#endif
-            /* Power down the radio */
-            RF_yield(rfHandle);
-
-#ifdef POWER_MEASUREMENT
-            /* Sleep for PACKET_INTERVAL s */
-            sleep(PACKET_INTERVAL);
-#else
-            /* Sleep for PACKET_INTERVAL us */
-//           usleep(PACKET_INTERVAL);
-//          usleep(PACKET_INTERVAL);
-#endif
-
-            //Switch Patterns
-            nextPattern();
-            input = 0;
-        }
-
-    }
+    return NULL;
 }
 
 void sendControlPacket()
@@ -269,5 +242,45 @@ void nextPattern()
 {
   // add one to the current pattern number, and wrap around at the end
   gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
+}
+
+void PerformanceMode()
+{
+    while(1)
+    {
+
+        sendControlPacket();
+
+        UART_write(uart, echoUpdate, sizeof(echoUpdate));
+        UART_read(uart, &input, 1);
+
+        if(input){
+            ProgrammingMode();
+        }
+    }
+}
+
+void ProgrammingMode()
+{
+
+
+#ifndef POWER_MEASUREMENT
+            PIN_setOutputValue(ledPinHandle, Board_PIN_LED1,!PIN_getOutputValue(Board_PIN_LED1));
+#endif
+            /* Power down the radio */
+            RF_yield(rfHandle);
+
+#ifdef POWER_MEASUREMENT
+            /* Sleep for PACKET_INTERVAL s */
+            sleep(PACKET_INTERVAL);
+#else
+            /* Sleep for PACKET_INTERVAL us */
+//          usleep(PACKET_INTERVAL);
+//          usleep(PACKET_INTERVAL);
+#endif
+
+            //Switch Patterns
+            nextPattern();
+            input = 0;
 }
 
