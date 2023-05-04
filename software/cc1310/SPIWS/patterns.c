@@ -231,7 +231,7 @@ void animationBasic(void)
             WS2812_setPixelColor(loc_u16_pixelIndex, setArr[arrIdx], setArr[arrIdx + 1], setArr[arrIdx + 2]);
             arrIdx = arrIdx + 3;
             WS2812_show();
-            usleep(100000);
+            usleep(30000);
         }
 
 
@@ -266,7 +266,7 @@ void rainbowAnimation(void)
             WS2812_setPixelColor(loc_u16_pixelIndex, *(rainbowArr+arrIdx+(3*NB_PIXELS)*i), *(rainbowArr+(arrIdx + 1)+(3*NB_PIXELS)*i), *(rainbowArr+(arrIdx + 2)+(3*NB_PIXELS)*i));
             arrIdx = arrIdx + 3;
             WS2812_show();
-            usleep(10000);
+            usleep(100000);
         }
     }
 

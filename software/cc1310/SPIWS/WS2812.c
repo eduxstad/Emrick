@@ -1,6 +1,6 @@
 /******************************************************************************
  * @file    WS2812.c
- * @author  Rémi Pincent - INRIA
+ * @author  Rï¿½mi Pincent - INRIA
  * @date    10/04/2016
  *
  * @brief WS2812 driver implementation on Texas Instruments CC26xx.
@@ -28,13 +28,13 @@
  * In Board.c you can assign only 1 pin to SPI MOSI (Neopixel data) and let other unsassigned.
  *
  * Project : WS2812_driver
- * Contact:  Rémi Pincent - remi.pincent@inria.fr
+ * Contact:  Rï¿½mi Pincent - remi.pincent@inria.fr
  *
  * Revision History:
  * refer https://github.com/Lahorde/cc26xx_neopixel.git
  *
  * LICENSE :
- * cc26xx_neopixel (c) by Rémi Pincent
+ * cc26xx_neopixel (c) by Rï¿½mi Pincent
  * cc26xx_neopixel is licensed under a
  * Creative Commons Attribution-NonCommercial 3.0 Unported License.
  *
@@ -124,9 +124,9 @@ void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t
 {
     uint8_t loc_u8_currIndex = 3;
     /* Divide by 3 to prevent over current */
-    arg_u8_red = arg_u8_red/3;
-    arg_u8_green = arg_u8_green/3;
-    arg_u8_blue = arg_u8_blue/3;
+    arg_u8_red = arg_u8_red/5;
+    arg_u8_green = arg_u8_green/5;
+    arg_u8_blue = arg_u8_blue/5;
 
     /** Position of current led data in SPI buffer */
     uint16_t loc_u16_ledOffset = arg_u16_ledIndex*9;

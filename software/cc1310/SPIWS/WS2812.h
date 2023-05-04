@@ -1,18 +1,18 @@
 /******************************************************************************
  * @file    WS2812.h
- * @author  Rémi Pincent - INRIA
+ * @author  Rï¿½mi Pincent - INRIA
  * @date    10/04/2018
  *
  * @brief Neopixel WS2812 driver - http://cdn.sparkfun.com/datasheets/Components/LED/WS2812.pdf
  *
  * Project : cc26xx_neopixel
- * Contact:  Rémi Pincent - remi.pincent@inria.fr
+ * Contact:  Rï¿½mi Pincent - remi.pincent@inria.fr
  *
  * Revision History:
  * refer https://github.com/Lahorde/cc26xx_neopixel.git
  *
  * LICENSE :
- * cc26xx_neopixel (c) by Rémi Pincent
+ * cc26xx_neopixel (c) by Rï¿½mi Pincent
  * cc26xx_neopixel is licensed under a
  * Creative Commons Attribution-NonCommercial 3.0 Unported License.
  *

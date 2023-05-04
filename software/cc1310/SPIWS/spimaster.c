@@ -90,6 +90,15 @@ void *masterThread(void *arg0)
     //animationBasic();
     while (1) {
         rainbowAnimation();
+        //rainbow();
+        /*allRed();
+        sleep(3);
+        allBlue();
+        sleep(3);
+        allGreen();
+        sleep(3);
+        chirstLights();
+        sleep(3);*/
     }
     //bounce();
 
