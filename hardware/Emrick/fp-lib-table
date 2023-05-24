@@ -1,5 +1,9 @@
 (fp_lib_table
+  (version 7)
   (lib (name "cc1310")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_CC1310F128RGZR/KiCAD/2022-08-29_00-55-14/footprints.pretty")(options "")(descr ""))
   (lib (name "footprints")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_BQ24072RGTR/KiCAD/2022-09-27_01-15-34/footprints.pretty")(options "")(descr ""))
   (lib (name "Emrick Footprints")(type "KiCad")(uri "${KIPRJMOD}/Emrick_Footprints")(options "")(descr ""))
+  (lib (name "tps61230")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_TPS61230ARNSR/KiCADv6/2023-05-23_19-38-35/footprints.pretty")(options "")(descr ""))
+  (lib (name "xkbswitch")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_SS-12D10G5/KiCADv6/2023-05-24_03-18-55/footprints.pretty")(options "")(descr ""))
+  (lib (name "s4bjstconn")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_S4B-PH-SM4-TB-LF-SN-/KiCADv6/2023-05-24_03-45-30/footprints.pretty")(options "")(descr ""))
 )
