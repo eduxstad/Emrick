@@ -7,7 +7,7 @@
   (title_block
     (title "Project Emrick Light Strip")
     (date "2022-10-10")
-    (rev "2")
+    (rev "3")
   )
 
   (lib_symbols
