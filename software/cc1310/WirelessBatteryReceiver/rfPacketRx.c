@@ -160,7 +160,6 @@ void *mainThread(void *arg0)
     GPIO_init();
     SPI_init();
 
-
     GPIO_setConfig(Board_SPI_MASTER_READY, GPIO_CFG_OUTPUT | GPIO_CFG_OUT_LOW);
     GPIO_write(Board_SPI_MASTER_READY, 1);
 
@@ -250,6 +249,7 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Battery Monitor */
         uint32_t bat_measure;
         float bat_voltage;
+        float adc_bat_voltage;
 
         /* time (in seconds) delay */
         uint32_t time;
@@ -258,8 +258,10 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         bat_voltage = ((bat_measure >> 8) & 0x7)
                 + ((float) (bat_measure & 0xFF)) / 256.0;
         time = packet[1];
+        adc_bat_voltage = (float) packet[3];
+        adc_bat_voltage = adc_bat_voltage * 2 / 1000000;
 
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[%d] Voltage: %f (%x, %x)", time, bat_voltage, packet[2], bat_measure);
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[%d] Supply Voltage: %f Battery Voltage: %f", time, bat_voltage, adc_bat_voltage);
 
         RFQueue_nextEntry();
     }

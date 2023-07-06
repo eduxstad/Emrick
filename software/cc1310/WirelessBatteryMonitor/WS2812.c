@@ -123,10 +123,14 @@ void WS2812_setPin(uint8_t p)
 void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t arg_u8_green, uint8_t arg_u8_blue)
 {
     uint8_t loc_u8_currIndex = 3;
-    /* Divide by 3 to prevent over current */
-    arg_u8_red = arg_u8_red/3;
-    arg_u8_green = arg_u8_green/3;
-    arg_u8_blue = arg_u8_blue/3;
+    /* Divide by a constant to decrease brightness and increase battery life
+     * This isn't strictly necessary but at full brightness/all white the strip will draw 2A
+     * which will drain the battery very quickly (and it will run quite hot).
+     */
+    uint8_t current_divider = 2;
+    arg_u8_red = arg_u8_red/current_divider;
+    arg_u8_green = arg_u8_green/current_divider;
+    arg_u8_blue = arg_u8_blue/current_divider;
 
     /** Position of current led data in SPI buffer */
     uint16_t loc_u16_ledOffset = arg_u16_ledIndex*9;

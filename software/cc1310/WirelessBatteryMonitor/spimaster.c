@@ -53,6 +53,9 @@
 /* Battery Monitor */
 #include <ti/devices/cc13x0/driverlib/aon_batmon.h>
 
+/* ADC */
+#include <ti/drivers/ADC.h>
+
 /* Display Header files */
 #include <ti/display/Display.h>
 #include <ti/display/DisplayUart.h>
@@ -78,6 +81,10 @@
 static RF_Object rfObject;
 static RF_Handle rfHandle;
 static uint32_t packet[PAYLOAD_LENGTH];
+
+/* ADC conversion result variables */
+uint16_t adcValue0;
+uint32_t adcValue0MicroVolt;
 
 
 /**************************************************************************
@@ -120,6 +127,7 @@ void *trackBattery(void *arg0)
     Display_printf(hSerial, DisplayUart_SCROLLING, 0, reset_msg);
 
     AONBatMonEnable();
+    ADC_init();
 
     RF_Params rfParams;
     RF_Params_init(&rfParams);
@@ -134,6 +142,12 @@ void *trackBattery(void *arg0)
     /* Set the frequency */
     RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
 
+    ADC_Handle   adc;
+    ADC_Params   adcparams;
+    int_fast16_t res;
+
+    ADC_Params_init(&adcparams);
+
 
     while (1)
     {
@@ -147,11 +161,37 @@ void *trackBattery(void *arg0)
                            bat_voltage);
 
         }
+
+        adc = ADC_open(Board_ADC0, &adcparams);
+
+        if (adc != NULL) {
+            res = ADC_convert(adc, &adcValue0);
+
+            if (res == ADC_STATUS_SUCCESS) {
+
+                adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
+
+                Display_printf(hSerial, DisplayUart_SCROLLING, 0, "ADC0 raw result: %d\n", adcValue0);
+                Display_printf(hSerial, DisplayUart_SCROLLING, 0, "ADC0 convert result: %d uV\n",
+                    adcValue0MicroVolt);
+            }
+            else {
+                Display_printf(hSerial, DisplayUart_SCROLLING, 0, "ADC0 convert failed\n");
+            }
+
+            ADC_close(adc);
+        } else {
+            Display_printf(hSerial, DisplayUart_SCROLLING, 0, "Error initializing ADC0\n");
+        }
+
         Display_printf(hSerial, DisplayUart_SCROLLING, 0, "Time: %d", time);
+
+
 
         packet[0] = bat_measure;
         packet[2] = ((bat_measure >> 8) & 0x7);
         packet[1] = time;
+        packet[3] = adcValue0MicroVolt;
 
         if (bat_voltage < 3.15) {
             delay_seconds = 2;
