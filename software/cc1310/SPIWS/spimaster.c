@@ -90,6 +90,7 @@ void *masterThread(void *arg0)
     //animationBasic();
     while (1) {
         rainbowAnimation();
+        //allWhite();
         //rainbow();
         /*allRed();
         sleep(3);
