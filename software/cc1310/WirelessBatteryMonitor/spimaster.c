@@ -110,8 +110,10 @@ void *trackBattery(void *arg0)
     float bat_voltage;
 
     /* time (in seconds) delay */
+    const uint32_t LONG_DELAY = 2;
+    const uint32_t SHORT_DELAY = 2;
     uint32_t time = 0;
-    uint32_t delay_seconds = 30;
+    uint32_t delay_seconds;
 
     /* Initialize UART display. */
     /* So we can use Display_printf, a nice function */
@@ -194,9 +196,9 @@ void *trackBattery(void *arg0)
         packet[3] = adcValue0MicroVolt;
 
         if (bat_voltage < 3.15) {
-            delay_seconds = 2;
+            delay_seconds = SHORT_DELAY;
         } else {
-            delay_seconds = 30;
+            delay_seconds = LONG_DELAY;
         }
 
         RF_cmdPropTx.pktLen = PAYLOAD_LENGTH;
