@@ -157,25 +157,24 @@ static uint8_t spiffsReadWriteCache[SPIFFS_LOGICAL_PAGE_SIZE * 2];
 spiffs fs;
 SPIFFSNVS_Data spiffsnvsData;
 
+float sup_voltage;
 
 float supplyVoltage(Display_Handle displayHandle)
 {
     uint32_t sup_measure;
-    float sup_voltage;
 
     if (AONBatMonNewBatteryMeasureReady())
     {
         sup_measure = AONBatMonBatteryVoltageGet();
         sup_voltage = ((sup_measure >> 8) & 0x7)
                 + ((float) (sup_measure & 0xFF)) / 256.0;
-        return sup_voltage;
+
 
     }
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "Error measuring Supply Voltage\n");
+    /* Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                   "No new Supply Voltage\n"); */
 
-
-    return 0;
+    return sup_voltage;
 }
 
 uint32_t batteryMicroVoltage(Display_Handle displayHandle)
@@ -198,6 +197,7 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
         {
 
             adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
+            ADC_close(adc);
             return adcValue0MicroVolt;
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "ADC0 raw result: %d", adcValue0);
@@ -209,13 +209,14 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
                            "ADC0 convert failed\n");
         }
 
-        ADC_close(adc);
     }
     else
     {
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                        "Error initializing ADC0\n");
     }
+
+    ADC_close(adc);
 
 }
 
@@ -635,8 +636,9 @@ void* mainThread(void *arg0)
     {
         sleep(1);
         supply_volt = supplyVoltage(displayHandle);
+        bat_microVolt = batteryMicroVoltage(displayHandle);
         Display_printf(displayHandle, 0, 0,
-                       "\r(%02d:%02d) Smoketest running", clock_seconds/60, clock_seconds % 60);
+                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
         GPIO_toggle(Board_GPIO_LED1);
         clock_seconds += delay;
     }
