@@ -587,7 +587,7 @@ void* mainThread(void *arg0)
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
     smoketestFlash(displayHandle);
-    //smoketestLED(displayHandle);
+    smoketestLED(displayHandle);
     smoketestRF(displayHandle);
 
     /* Create application thread(s) */

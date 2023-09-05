@@ -1,33 +1,33 @@
-### SysConfig Notice
 
-All examples will soon be supported by SysConfig, a tool that will help you graphically configure your software components. A preview is available today in the examples/syscfg_preview directory. Starting in 3Q 2019, with SDK version 3.30, only SysConfig-enabled versions of examples will be provided. For more information, click [here](http://www.ti.com/sysconfignotice).
-
----
-# empty
+# Smoketest
 
 ---
 
-## Example Summary
+## Summary
 
-This example is intended to be a starting point for new development where
-a fuller set of kernel features and debug capabilities are enabled.
+This smoketest is intented to test and demonstrate that all features of the
+Emrick board are working, ideally without creating any smoke. The program
+attempts to print any errors to the UART/serial console. 
 
 ## Peripherals Exercised
 
-* `Board_GPIO_LED0`  - LED0
+* Serial over UART - Console output is printed to serial at baud 115200
+	(You may have to install the Silicon Labs [drivers](
+	https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=downloads) 
+	to open the COM port).
+* Supply Voltage - Internal supply voltage monitor of the CC1310.
+* Battery Voltage - ADC measurement of the battery voltage (floats if no
+	battery is present).
+* External Flash - Writes and reads a file from the external flash chip. 
+* 5V Supply - Turns on the boosted 5V supply
+* LED Strip - Displays maximum brightness (white), RGB, and an animation
+	on the LED strip. Turns off after. 
+* RF TX - Transmits a packet at boot. 
+* RF RX - Creates a thread to listen for packets and prints whenever
+	it receives a packet. You can start another board running the 
+	smoketest to trigger this message. 
+* Power LED - The LED should flash after initialization is complete.
 
-## Resources & Jumper Settings
-
-> If you're using an IDE (such as CCS or IAR), please refer to Board.html in
-your project directory for resources used and board-specific jumper settings.
-Otherwise, you can find Board.html in the directory
-&lt;SDK_INSTALL_DIR&gt;/source/ti/boards/&lt;BOARD&gt;.
-
-
-## Example Usage
-
-* The example lights `Board_GPIO_LED0` as part of the initialization in the
-`mainThread()`. This thread then toggles the LED at a 1 second rate.
 
 ## Application Design Details
 
