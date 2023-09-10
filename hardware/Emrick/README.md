@@ -21,11 +21,11 @@ Well, you're worried you toasted a board. Here are the steps to make sure that t
 ![Render of C33 pin 1](images/5vc33.png)
 
 2. Verify the supply voltages of the CC1310 microcontroller. This is taken from section 12 of the Hardware and PCB Design considerations [here](https://www.ti.com/lit/an/swra640g/swra640g.pdf). 
-  1. Verify the output of the regulator is 3.3 volts (aka VDDS == 3.3) on pin 2 of FB1. This should be within a tenth of a volt. 
+    1. Verify the output of the regulator is 3.3 volts (aka VDDS == 3.3) on pin 2 of FB1. This should be within a tenth of a volt. 
   ![Render of FB1 pin2](images/3v3fb1.png)
-  2. Verify that VDDR == 1.68 on pin 2 of L1. This should be within a 100th of a volt.
+    2. Verify that VDDR == 1.68 on pin 2 of L1. This should be within a 100th of a volt.
   ![Render of L1 pin 2](images/1v68l1.png)
-  3. Verify that DCOUPL == 1.27 on pin 1 of C22. This should be within a 10th of a volt. 
+    3. Verify that DCOUPL == 1.27 on pin 1 of C22. This should be within a 10th of a volt. 
   ![Render of C22 pin 1](images/1v27c22.png)
 If these voltages check out, it's pretty likely that the CC1310 should be working correctly. 
 
