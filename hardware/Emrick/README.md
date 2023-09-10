@@ -32,7 +32,7 @@ If these voltages check out, it's pretty likely that the CC1310 should be workin
 3. Now we can move on to the boosted 5V LED output. 
     1. Load a program that turns on the LED lights, like SPIWS. Don't actually connect a light strip. 
     2. Check that the voltage on pin 1 of J1 is stable at 4.95V or greater. Ideally very close to 5V,like 4.99V, since there is only the extremely small load of the multimeter across it. 
-    [!Render of J1 pin 1](images/5vj1.png)
+    ![Render of J1 pin 1](images/5vj1.png)
 
 
 
