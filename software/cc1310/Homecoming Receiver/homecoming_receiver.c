@@ -527,7 +527,10 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Copy the payload + the status byte to the packet variable */
         //memcpy(packet, packetDataPointer, (packetLength + 1));
 
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d", packetDataPointer[0]);
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
+        if (packetDataPointer[0] == 0xFF) {
+            testFlag++;
+        }
 
         RFQueue_nextEntry();
     }
