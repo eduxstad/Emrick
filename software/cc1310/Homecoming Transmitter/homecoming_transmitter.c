@@ -364,8 +364,11 @@ void sendRF(Display_Handle displayHandle)
     /* Set the frequency */
     RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
 
-    RF_cmdPropTx.pktLen = PAYLOAD_LENGTH;
-    RF_cmdPropTx.pPkt = packet;
+    uint8_t pk[1];
+    pk[0] = 0xFF;
+
+    RF_cmdPropTx.pktLen = 1;
+    RF_cmdPropTx.pPkt = pk;
     RF_cmdPropTx.startTrigger.triggerType = TRIG_NOW;
 
     /* Send packet */
@@ -588,61 +591,26 @@ void* mainThread(void *arg0)
                         0,
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
-    smoketestFlash(displayHandle);
+    //smoketestFlash(displayHandle);
     //smoketestLED(displayHandle);
-    sendRF(displayHandle);
-
-    /* Create application thread(s) */
-    pthread_attr_init(&attrs);
-
-    detachState = PTHREAD_CREATE_DETACHED;
-    /* Set priority and stack size attributes */
-    retc = pthread_attr_setdetachstate(&attrs, detachState);
-    if (retc != 0) {
-        /* pthread_attr_setdetachstate() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread stack size.");
-        while (1);
-    }
-
-    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
-    if (retc != 0) {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread stack size.");
-        /* pthread_attr_setstacksize() failed */
-        while (1);
-    }
-
-    /* Create RX Listener thread */
-    priParam.sched_priority = 1;
-    pthread_attr_setschedparam(&attrs, &priParam);
-
-    retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread.");
-        while (1);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "Created listening thread.");
-
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "Smoketest start up complete!");
-
-    int clock_seconds = 0;
-    int delay = 1;
-    while (delay)
-    {
+    while (1) {
+        sendRF(displayHandle);
         sleep(1);
-        supply_volt = supplyVoltage(displayHandle);
-        bat_microVolt = batteryMicroVoltage(displayHandle);
-        Display_printf(displayHandle, 0, 0,
-                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
-        GPIO_toggle(Board_GPIO_LED1);
-        clock_seconds += delay;
     }
+
+
+
+//    int clock_seconds = 0;
+//    int delay = 1;
+//    while (delay)
+//    {
+//        sleep(1);
+//        supply_volt = supplyVoltage(displayHandle);
+//        bat_microVolt = batteryMicroVoltage(displayHandle);
+//        Display_printf(displayHandle, 0, 0,
+//                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        clock_seconds += delay;
+//    }
 }
 

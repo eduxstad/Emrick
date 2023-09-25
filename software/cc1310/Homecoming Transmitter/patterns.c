@@ -357,61 +357,61 @@ void rainbowGradient(void)
 }
 
 
-void rainbowGradientFast() {
-    int i = 0;
-    int increment = 1;
-    int steps = 256 / increment; //number of steps is the number of color code values divided by the increment size
-    uint8_t rainbowArr = malloc(NB_PIXELS * 3 * steps * 4);
-
-    for (i = 0; i < 255; i += increment) { //red to green
-        int j = 0;
-        for (j = 0; j < NB_PIXELS; j++) {
-            *(rainbowArr + j*3 + i*NB_PIXELS*3) = 255 - i;
-            *(rainbowArr + j*3+1 + i*NB_PIXELS*3) = i;
-            *(rainbowArr + j*3+2 + i*NB_PIXELS*3) = 0;
-        }
-    }
-
-    for (i = 0; i < 255; i += increment) { //green to blue
-        int j = 0;
-        for (j = 0; j < NB_PIXELS; j++) {
-            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 0;
-            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 255-i;
-            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = i;
-        }
-    }
-
-    for (i = 0; i < 255; i += increment) { //blue to white
-        int j = 0;
-        for (j = 0; j < NB_PIXELS; j++) {
-            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*2) = i;
-            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*2) = i;
-            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 255;
-        }
-    }
-
-    for (i = 0; i < 255; i += increment) { //white to red
-        int j = 0;
-        for (j = 0; j < NB_PIXELS; j++) {
-            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = i;
-            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = i;
-            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = 255;
-        }
-    }
-
-    while (1) {
-        for (i = 0; i < 4; i++) { //loop over the 4 different sections of the gradient
-            int j = 0;
-            for (j = 0; j < 255; j += increment) { //loop over the span of each gradient
-                uint16_t k = 0;
-                for (k = 0; k < NB_PIXELS; k++) { //loop over each pixel
-                    WS2812_setPixelColor(k,*(rainbowArr+j*3+i*NB_PIXELS*3+NB_PIXELS*3*steps*i),
-                                         *(rainbowArr+j*3+1+i*NB_PIXELS*3+NB_PIXELS*3*steps*i),
-                                         *(rainbowArr+j*3+2+i*NB_PIXELS*3+NB_PIXELS*3*steps*i));
-                }
-                WS2812_show();
-                //usleep(1);
-            }
-        }
-    }
-}
+//void rainbowGradientFast() {
+//    int i = 0;
+//    int increment = 1;
+//    int steps = 256 / increment; //number of steps is the number of color code values divided by the increment size
+//    uint8_t rainbowArr = malloc(NB_PIXELS * 3 * steps * 4);
+//
+//    for (i = 0; i < 255; i += increment) { //red to green
+//        int j = 0;
+//        for (j = 0; j < NB_PIXELS; j++) {
+//            *(rainbowArr + j*3 + i*NB_PIXELS*3) = 255 - i;
+//            *(rainbowArr + j*3+1 + i*NB_PIXELS*3) = i;
+//            *(rainbowArr + j*3+2 + i*NB_PIXELS*3) = 0;
+//        }
+//    }
+//
+//    for (i = 0; i < 255; i += increment) { //green to blue
+//        int j = 0;
+//        for (j = 0; j < NB_PIXELS; j++) {
+//            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 0;
+//            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 255-i;
+//            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = i;
+//        }
+//    }
+//
+//    for (i = 0; i < 255; i += increment) { //blue to white
+//        int j = 0;
+//        for (j = 0; j < NB_PIXELS; j++) {
+//            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*2) = i;
+//            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*2) = i;
+//            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 255;
+//        }
+//    }
+//
+//    for (i = 0; i < 255; i += increment) { //white to red
+//        int j = 0;
+//        for (j = 0; j < NB_PIXELS; j++) {
+//            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = i;
+//            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = i;
+//            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = 255;
+//        }
+//    }
+//
+//    while (1) {
+//        for (i = 0; i < 4; i++) { //loop over the 4 different sections of the gradient
+//            int j = 0;
+//            for (j = 0; j < 255; j += increment) { //loop over the span of each gradient
+//                uint16_t k = 0;
+//                for (k = 0; k < NB_PIXELS; k++) { //loop over each pixel
+//                    WS2812_setPixelColor(k,*(rainbowArr+j*3+i*NB_PIXELS*3+NB_PIXELS*3*steps*i),
+//                                         *(rainbowArr+j*3+1+i*NB_PIXELS*3+NB_PIXELS*3*steps*i),
+//                                         *(rainbowArr+j*3+2+i*NB_PIXELS*3+NB_PIXELS*3*steps*i));
+//                }
+//                WS2812_show();
+//                //usleep(1);
+//            }
+//        }
+//    }
+//}

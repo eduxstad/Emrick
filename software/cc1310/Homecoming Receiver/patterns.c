@@ -10,11 +10,15 @@
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/SPI.h>
 #include <ti/display/Display.h>
+#include <ti/display/DisplayUart.h>
 
 /* POSIX Header files */
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
+#include "patterns.h"
+#include <sched.h>
+#include <math.h>
 
 //TODO : ADD limitation on NB_PIXELS
 
@@ -29,6 +33,58 @@ uint8_t setArr[NB_PIXELS * 3] = {0};
 
 uint16_t loc_u16_pixelIndex;
 uint16_t arrIdx = 0;
+
+bool TEST_FLAG = false;
+
+
+RGB hsvToRgb(float h, float s, float v) {
+    RGB rgb;
+
+    if (s == 0.0)
+    {
+        rgb.r = v;
+        rgb.g = v;
+        rgb.b = v;
+        return rgb;
+    }
+    float M = 255 * v;
+    float m = M * (1 - s);
+    float z =((M - m) * (1-fabs(fmod(h/60.0,2.0)-1)));
+
+    if (h < 60) {
+        rgb.r = (uint8_t) M;
+        rgb.g = (uint8_t) (z + m);
+        rgb.b = (uint8_t) m;
+    } else if (h < 120) {
+        rgb.r = (uint8_t) (z + m);
+        rgb.g = (uint8_t) M;
+        rgb.b = (uint8_t) m;
+    } else if (h < 180) {
+        rgb.r = (uint8_t) m;
+        rgb.g = (uint8_t) M;
+        rgb.b = (uint8_t) (z + m);
+    } else if (h < 240) {
+        rgb.r = (uint8_t) m;
+        rgb.g = (uint8_t) (z + m);
+        rgb.b = (uint8_t) M;
+    } else if (h < 300) {
+        rgb.r = (uint8_t) (z + m);
+        rgb.g = (uint8_t) m;
+        rgb.b = (uint8_t) M;
+    } else {
+        rgb.r = (uint8_t) M;
+        rgb.g = (uint8_t) m;
+        rgb.b = (uint8_t) (z + m);
+    }
+
+
+    return rgb;
+}
+
+
+
+
+
 
 void trueHSV(int angle, int * red, int * green, int * blue)
 {
@@ -299,18 +355,23 @@ void bounce(void)
 void rainbowGradient(void)
 {
     int j = 0;
-    for (j = 0; j < 8; j++) {
+        WS2812_beginSPI();
+    for (j = 0; j < 1000; j++) {
         //Start at red, go to green
+        //pthread_mutex_lock(&LEDMutex);
         int i = 0;
+        useconds_t time = 15000;
         for (i = 0; i < 255; i+=5) {
-
-            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-                    {
-                        WS2812_setPixelColor(loc_u16_pixelIndex, 255 - i, i, 0);
-                        WS2812_show();
-                    }
-            usleep(1); //Complete guesstimation on timing it with the old lights
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++){
+                WS2812_setPixelColor(loc_u16_pixelIndex, 255 - i, i, 0);
+            }
+            if (testFlag == 1) {
+                WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+            }
+                WS2812_show();
+            usleep(time); //Complete guesstimation on timing it with the old lights
         }
+
 
         //Start at green, go to blue
         for (i = 0; i < 255; i+=5) {
@@ -318,9 +379,12 @@ void rainbowGradient(void)
                 for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
                         {
                             WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255 - i, i);
-                            WS2812_show();
                         }
-                //usleep(1);
+                if (testFlag == 1) {
+                    WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+                }
+                            WS2812_show();
+                usleep(time);
             }
 
         //Start at blue, go to white
@@ -329,9 +393,12 @@ void rainbowGradient(void)
                 for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
                         {
                             WS2812_setPixelColor(loc_u16_pixelIndex, i, i, 255);
-                            WS2812_show();
                         }
-                usleep(1);
+                if (testFlag == 1) {
+                    WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+                }
+                         WS2812_show();
+                usleep(time);
         }
 
         //Start at white, go to red
@@ -340,78 +407,65 @@ void rainbowGradient(void)
                 for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
                         {
                             WS2812_setPixelColor(loc_u16_pixelIndex, 255, 255-i, 255 - i);
-                            WS2812_show();
                         }
-                //usleep(1);
+                if (testFlag == 1) {
+                    WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+                }
+                            WS2812_show();
+                usleep(time);
             }
-
-//        for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-//        {
-//            WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
-//            WS2812_show();
-//        }
-//        sleep(1);
+        //pthread_mutex_unlock(&LEDMutex);
     }
-
-
 }
 
 
-void rainbowGradientFast() {
+void rainbowGradientHSV() {
     int i = 0;
-    int increment = 1;
-    int steps = 256 / increment; //number of steps is the number of color code values divided by the increment size
-    uint8_t rainbowArr = malloc(NB_PIXELS * 3 * steps * 4);
-
-    for (i = 0; i < 255; i += increment) { //red to green
-        int j = 0;
-        for (j = 0; j < NB_PIXELS; j++) {
-            *(rainbowArr + j*3 + i*NB_PIXELS*3) = 255 - i;
-            *(rainbowArr + j*3+1 + i*NB_PIXELS*3) = i;
-            *(rainbowArr + j*3+2 + i*NB_PIXELS*3) = 0;
-        }
-    }
-
-    for (i = 0; i < 255; i += increment) { //green to blue
-        int j = 0;
-        for (j = 0; j < NB_PIXELS; j++) {
-            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 0;
-            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 255-i;
-            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = i;
-        }
-    }
-
-    for (i = 0; i < 255; i += increment) { //blue to white
-        int j = 0;
-        for (j = 0; j < NB_PIXELS; j++) {
-            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*2) = i;
-            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*2) = i;
-            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps) = 255;
-        }
-    }
-
-    for (i = 0; i < 255; i += increment) { //white to red
-        int j = 0;
-        for (j = 0; j < NB_PIXELS; j++) {
-            *(rainbowArr + j*3 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = i;
-            *(rainbowArr + j*3+1 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = i;
-            *(rainbowArr + j*3+2 + i*NB_PIXELS*3 + NB_PIXELS*3*steps*3) = 255;
-        }
-    }
-
+    useconds_t time = 19800;
     while (1) {
-        for (i = 0; i < 4; i++) { //loop over the 4 different sections of the gradient
-            int j = 0;
-            for (j = 0; j < 255; j += increment) { //loop over the span of each gradient
-                uint16_t k = 0;
-                for (k = 0; k < NB_PIXELS; k++) { //loop over each pixel
-                    WS2812_setPixelColor(k,*(rainbowArr+j*3+i*NB_PIXELS*3+NB_PIXELS*3*steps*i),
-                                         *(rainbowArr+j*3+1+i*NB_PIXELS*3+NB_PIXELS*3*steps*i),
-                                         *(rainbowArr+j*3+2+i*NB_PIXELS*3+NB_PIXELS*3*steps*i));
-                }
-                WS2812_show();
-                //usleep(1);
+        int j = 0;
+        for (j = 0; j < 300; j++) {
+            RGB rgb;
+            for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                rgb = hsvToRgb((float)j,1.0,1.0);
+                WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
             }
+            if (testFlag == 1) {
+                WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+            }
+
+            //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
+            WS2812_show();
+            usleep(time);
+        }
+        float k = 0;
+        for (k = 0; k < 1.0; k += 0.010) {
+            RGB rgb;
+            for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                rgb = hsvToRgb((float)300,1.0 - k,1.0);
+                WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
+            }
+            if (testFlag == 1) {
+                WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+            }
+
+            //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
+            WS2812_show();
+            usleep(time);
+        }
+        for (j = 1; j < 60; j++) {
+            RGB rgb;
+            for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                rgb = hsvToRgb((float)j+300,(float)j / 60.0,1.0);
+                WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
+            }
+            if (testFlag == 1) {
+                WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+            }
+
+            //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
+            WS2812_show();
+            usleep(time);
         }
     }
 }
