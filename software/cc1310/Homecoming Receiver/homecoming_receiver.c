@@ -530,6 +530,7 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
         if (packetDataPointer[0] == 0xFF) {
             testFlag++;
+            GPIO_toggle(Board_GPIO_LED1);
         }
 
         RFQueue_nextEntry();
@@ -592,7 +593,7 @@ void* mainThread(void *arg0)
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
     //smoketestFlash(displayHandle);
-    sendRF(displayHandle);
+    //sendRF(displayHandle);
 
     /* Create application thread(s) */
     pthread_attr_init(&attrs);
