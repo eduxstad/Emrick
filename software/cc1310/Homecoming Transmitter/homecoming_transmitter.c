@@ -436,11 +436,6 @@ void sendRF(Display_Handle displayHandle)
  */
 void* mainThread(void *arg0)
 {
-    pthread_t           thread0;
-    pthread_attr_t      attrs;
-    struct sched_param  priParam;
-    int                 retc;
-    int                 detachState;
 
     /* Call driver init functions */
     GPIO_init();
@@ -487,10 +482,23 @@ void* mainThread(void *arg0)
                         (float) bat_microVolt / 1000000);
     //smoketestFlash(displayHandle);
 
+//    while (1) {
+//        sendRF(displayHandle);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(1);
+//    }
+
+    sendRF(displayHandle);
+    sleep(10);
+    sendRF(displayHandle);
+    GPIO_toggle(Board_GPIO_LED1);
+
+
     while (1) {
-        sendRF(displayHandle);
+        sleep(3);
         GPIO_toggle(Board_GPIO_LED1);
         sleep(1);
+        GPIO_toggle(Board_GPIO_LED1);
     }
 
 

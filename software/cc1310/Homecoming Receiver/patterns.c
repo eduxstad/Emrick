@@ -422,6 +422,7 @@ void rainbowGradient(void)
 void rainbowGradientHSV() {
     int i = 0;
     useconds_t time = 19800;
+    uint16_t test_led = 3;
     while (1) {
         int j = 0;
         for (j = 0; j < 300; j++) {
@@ -431,7 +432,7 @@ void rainbowGradientHSV() {
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
             }
             if (testFlag % 2 == 1) {
-                WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+                WS2812_setPixelColor(test_led, 255, 255, 255);
             }
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
@@ -446,7 +447,7 @@ void rainbowGradientHSV() {
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
             }
             if (testFlag % 2 == 1) {
-                WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+                WS2812_setPixelColor(test_led, 255, 255, 255);
             }
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
@@ -460,7 +461,7 @@ void rainbowGradientHSV() {
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
             }
             if (testFlag % 2 == 1) {
-                WS2812_setPixelColor(NB_PIXELS / 2, 255, 255, 255);
+                WS2812_setPixelColor(test_led, 255, 255, 255);
             }
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
