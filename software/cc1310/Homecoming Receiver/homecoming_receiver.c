@@ -221,7 +221,7 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 }
 
 
-void smoketestFlash(Display_Handle displayHandle) {
+void spiffs_init() {
 
     spiffs_file    fd;
     spiffs_config  fsConfig;
@@ -284,64 +284,6 @@ void smoketestFlash(Display_Handle displayHandle) {
             while (1);
         }
     }
-
-    /* Open a file */
-    fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR, 0);
-    if (fd < 0) {
-        /* File not found; create a new file & write message to it */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Creating spiffsFile...");
-
-        fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_CREAT | SPIFFS_RDWR, 0);
-        if (fd < 0) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "Error creating spiffsFile.");
-
-            while (1);
-        }
-
-
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Writing to spiffsFile...");
-
-        if (SPIFFS_write(&fs, fd, (void *) fileArrayHeap, MESSAGE_LENGTH) < 0) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error writing spiffsFile.");
-
-            while (1) ;
-        }
-
-        SPIFFS_close(&fs, fd);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Reading spiffsFile...");
-
-    fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR, 0);
-
-    if (SPIFFS_read(&fs, fd, fileArrayRead, MESSAGE_LENGTH) < 0)
-    {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error reading spiffsFile.");
-
-        while (1);
-    }
-
-    int8_t i = 0;
-    while (i < MESSAGE_LENGTH) {
-        if (fileArrayRead[i] != fileArrayHeap[i]) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error: spiffsFile does not match at index %d, expected %d and read %d", i, fileArrayHeap[i], fileArrayRead[i]);
-        }
-        i++;
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Removing spiffsFile...");
-    status = SPIFFS_fremove(&fs, fd);
-    if (status != SPIFFS_OK)
-    {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error removing spiffsFile.");
-
-        while (1);
-    }
-
-    SPIFFS_close(&fs, fd);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Closed file handle.");
-
 
     SPIFFS_unmount(&fs);
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Unmounted filesystem.");
@@ -592,8 +534,9 @@ void* mainThread(void *arg0)
                         0,
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
-    //smoketestFlash(displayHandle);
-    //sendRF(displayHandle);
+
+    spiffs_init();
+
 
     /* Create application thread(s) */
     pthread_attr_init(&attrs);

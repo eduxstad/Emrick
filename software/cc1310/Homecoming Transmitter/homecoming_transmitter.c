@@ -489,7 +489,7 @@ void* mainThread(void *arg0)
 //    }
 
     sendRF(displayHandle);
-    sleep(10);
+    sleep(5);
     sendRF(displayHandle);
     GPIO_toggle(Board_GPIO_LED1);
 
