@@ -419,7 +419,7 @@ void rainbowGradient(void)
 
 void rainbowGradientHSV() {
     int i = 0;
-    useconds_t time = 19800;
+    useconds_t time = 20700;
     uint16_t test_led = 3;
     while (1) {
         int j = 0;
@@ -438,7 +438,7 @@ void rainbowGradientHSV() {
             usleep(time);
         }
         float k = 0;
-        for (k = 0; k < 1.0; k += 0.010) {
+        for (k = 0; k < 1.0; k += 0.011) {
             RGB rgb;
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 rgb = hsvToRgb((float)300,1.0 - k,1.0);
@@ -455,7 +455,7 @@ void rainbowGradientHSV() {
         for (j = 1; j < 60; j++) {
             RGB rgb;
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-                rgb = hsvToRgb((float)j+300,(float)j / 60.0,1.0);
+                rgb = hsvToRgb(0.0,(float)j / 60.0,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
             }
             if (testFlag % 2 == 1) {

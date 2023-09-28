@@ -470,16 +470,20 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Copy the payload + the status byte to the packet variable */
         //memcpy(packet, packetDataPointer, (packetLength + 1));
 
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
         if (packetDataPointer[0] == 0xFF) { // ON signal
-            timer++;
-            testFlag = 1;
-            GPIO_toggle(Board_GPIO_LED1);
+            if (testFlag == 0) {
+                timer++;
+                testFlag = 1;
+                GPIO_toggle(Board_GPIO_LED1);
+            }
         } else if (packetDataPointer[0] == 0x00) { // OFF signal
-            timer++;
-            testFlag = 0;
-            GPIO_toggle(Board_GPIO_LED1);
+            if (testFlag == 1) {
+                timer++;
+                testFlag = 0;
+                GPIO_toggle(Board_GPIO_LED1);
+            }
         }
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], timer);
 
         RFQueue_nextEntry();
     }
