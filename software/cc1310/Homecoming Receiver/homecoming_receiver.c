@@ -127,6 +127,7 @@ static rfc_dataEntryGeneral_t* currentDataEntry;
 static uint8_t packetLength;
 static uint8_t* packetDataPointer;
 
+
 /* Threading */
 #define THREADSTACKSIZE (1024)
 
@@ -470,8 +471,13 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         //memcpy(packet, packetDataPointer, (packetLength + 1));
 
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
-        if (packetDataPointer[0] == 0xFF) {
-            testFlag++;
+        if (packetDataPointer[0] == 0xFF) { // ON signal
+            timer++;
+            testFlag = 1;
+            GPIO_toggle(Board_GPIO_LED1);
+        } else if (packetDataPointer[0] == 0x00) { // OFF signal
+            timer++;
+            testFlag = 0;
             GPIO_toggle(Board_GPIO_LED1);
         }
 

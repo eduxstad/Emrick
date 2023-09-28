@@ -34,8 +34,6 @@ uint8_t setArr[NB_PIXELS * 3] = {0};
 uint16_t loc_u16_pixelIndex;
 uint16_t arrIdx = 0;
 
-bool TEST_FLAG = false;
-
 
 RGB hsvToRgb(float h, float s, float v) {
     RGB rgb;
@@ -431,7 +429,7 @@ void rainbowGradientHSV() {
                 rgb = hsvToRgb((float)j,1.0,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
             }
-            if (testFlag % 2 == 1) {
+            if (testFlag == 1) {
                 WS2812_setPixelColor(test_led, 255, 255, 255);
             }
 
