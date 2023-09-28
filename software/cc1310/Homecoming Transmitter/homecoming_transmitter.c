@@ -477,23 +477,29 @@ void* mainThread(void *arg0)
                         0,
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
+    //smoketestFlash(displayHandle);
 
+//    while (1) {
+//        sendRF(displayHandle);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(1);
+//    }
 
     uint8_t pktON[1];
     pktON[0] = 0xFF;
     uint8_t pktOFF[1];
     pktOFF[0] = 0x00;
 
-    int pk_count = 10;
 
-    int i = 0;
-    for (i = 0; i < pk_count; i++) {
-        sendRF(displayHandle, pktON, 1);
-    }
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
     sleep(5);
-    for (i = 0; i < pk_count; i++) {
-        sendRF(displayHandle, pktOFF, 1);
-    }
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
     GPIO_toggle(Board_GPIO_LED1);
 
 

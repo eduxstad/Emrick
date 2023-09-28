@@ -13,40 +13,40 @@
 // RX Address Mode: No address check 
 // Frequency: 490.00000 MHz
 // Data Format: Serial mode disable 
-// Deviation: 5.000 kHz
+// Deviation: 0.000 kHz
 // Packet Length Config: Variable 
 // Max Packet Length: 255 
 // Packet Length: 20 
 // Packet Data: 255 
-// RX Filter BW: 49.0 kHz
-// Symbol Rate: 19.99969 kBaud
+// RX Filter BW: 39.0 kHz
+// Symbol Rate: 4.80042 kBaud
 // Sync Word Length: 32 Bits 
 // TX Power: 15 dBm (requires define CCFG_FORCE_VDDR_HH = 1 in ccfg.c, see CC13xx/CC26xx Technical Reference Manual)
-// Whitening: CC1101/CC2500 compatible
+// Whitening: No whitening 
 
 #include "smartrf_settings.h"
 
-#include DeviceFamily_constructPath(rf_patches/rf_patch_cpe_sl_longrange.h)
-#include DeviceFamily_constructPath(rf_patches/rf_patch_rfe_sl_longrange.h)
-#include DeviceFamily_constructPath(rf_patches/rf_patch_mce_sl_longrange.h)
+#include DeviceFamily_constructPath(rf_patches/rf_patch_cpe_genook.h)
+#include DeviceFamily_constructPath(rf_patches/rf_patch_rfe_genook.h)
+#include DeviceFamily_constructPath(rf_patches/rf_patch_mce_genook.h)
 
 // TI-RTOS RF Mode Object
 RF_Mode RF_prop =
 {
     .rfMode = RF_MODE_PROPRIETARY_SUB_1,
-    .cpePatchFxn = &rf_patch_cpe_sl_longrange,
-    .mcePatchFxn = &rf_patch_mce_sl_longrange,
-    .rfePatchFxn = &rf_patch_rfe_sl_longrange
+    .cpePatchFxn = &rf_patch_cpe_genook,
+    .mcePatchFxn = &rf_patch_mce_genook,
+    .rfePatchFxn = &rf_patch_rfe_genook
 };
 
 
 // Overrides for CMD_PROP_RADIO_DIV_SETUP
 uint32_t pOverrides[] =
 {
-    // override_use_patch_simplelink_long_range.xml
+    // override_use_patch_prop_genook_nrz.xml
     // PHY: Use MCE RAM patch, RFE RAM patch
     MCE_RFE_OVERRIDE(1,0,0,1,0,0),
-    // override_synth_prop_430_510_div10_lbw60k.xml
+    // override_synth_prop_430_510_div10.xml
     // Synth: Set recommended RTRIM to 7
     HW_REG_OVERRIDE(0x4038,0x0037),
     // Synth: Set Fref to 4 MHz
@@ -59,12 +59,10 @@ uint32_t pOverrides[] =
     (uint32_t)0xB1070503,
     // Synth: Configure fine calibration setting
     (uint32_t)0x05330523,
-    // Synth: Set loop bandwidth after lock to 60 kHz
-    (uint32_t)0x40410583,
-    // Synth: Set loop bandwidth after lock to 60 kHz
-    (uint32_t)0x32CC0603,
-    // Synth: Set loop bandwidth after lock to 60 kHz
-    (uint32_t)0x00010623,
+    // Synth: Set loop bandwidth after lock to 20 kHz
+    (uint32_t)0x0A480583,
+    // Synth: Set loop bandwidth after lock to 20 kHz
+    (uint32_t)0x7AB80603,
     // Synth: Configure VCO LDO (in ADI1, set VCOLDOCFG=0x9F to use voltage input reference)
     ADI_REG_OVERRIDE(1,4,0x9F),
     // Synth: Configure synth LDO (in ADI1, set SLDOCTL0.COMP_CAP=1)
@@ -80,28 +78,25 @@ uint32_t pOverrides[] =
     HW32_ARRAY_OVERRIDE(0x405C,1),
     // Synth: Set divider bias to disabled (specific for loDivider=10)
     (uint32_t)0x18000280,
-    // override_phy_rx_aaf_bw_0xd.xml
-    // Rx: Set anti-aliasing filter bandwidth to 0xD (in ADI0, set IFAMPCTL3[7:4]=0xD)
-    ADI_HALFREG_OVERRIDE(0,61,0xF,0xD),
-    // override_phy_gfsk_rx.xml
+    // override_phy_tc513.xml
+    // Rx: Set anti-aliasing filter bandwidth to 0xF (in ADI0, set IFAMPCTL3[7:4]=0xF)
+    ADI_HALFREG_OVERRIDE(0,61,0xF,0xF),
+    // Rx: Set AGC reference level to 0x1C.
+    HW_REG_OVERRIDE(0x6088,0x001C),
     // Rx: Set LNA bias current trim offset to 3
     (uint32_t)0x00038883,
     // Rx: Freeze RSSI on sync found event
     HW_REG_OVERRIDE(0x6084,0x35F1),
-    // override_phy_gfsk_pa_ramp_agc_reflevel_0x16.xml
-    // Tx: Configure PA ramping setting (0x41). Rx: Set AGC reference level to 0x16.
-    HW_REG_OVERRIDE(0x6088,0x4116),
-    // Tx: Configure PA ramping setting
-    HW_REG_OVERRIDE(0x608C,0x8213),
-    // override_phy_long_range_dsss4.xml
-    // PHY: Configure DSSS SF=4
-    HW_REG_OVERRIDE(0x505C,0x0303),
-    // override_phy_rx_rssi_offset_neg2db.xml
-    // Rx: Set RSSI offset to adjust reported RSSI by -2 dB (default: 0), trimmed for external bias and differential configuration
-    (uint32_t)0x000288A3,
-    // TX power override
-    // Tx: Set PA trim to max (in ADI0, set PACTL0=0xF8)
-    ADI_REG_OVERRIDE(0,12,0xF8),
+    // Rx: Set data filter to IIR, k=1/4. Explanation: 0x0000: k=1 (no filter), 0x0001: k=1/2, 0x0002: k=1/4, 0x0003: k=1/8.
+    HW_REG_OVERRIDE(0x5204,0x0002),
+    // override_phy_ook_tx_power_max.xml
+    // Tx: Ramp symbol shape to maximum PA level (0x7200). Explanation: min PA level=0x6100, ..., max PA level=0x7200. Bits [15:13] sets wait delay per PA ramp level. Bits[12:8] sets number of PA levels to use from ramp LUT (range 1-18). Bits[7:0] reserved.
+    HW_REG_OVERRIDE(0x6098,0x7200),
+    // Tx: Set symbol duty-cycle delay before symbol ramp-down to 0x78 (=120). This means symbol ramp down will begin after reaching (T_symbol/2) plus wait a delay of (120/2)=60 us.
+    HW_REG_OVERRIDE(0x52B8,0x8078),
+    // override_phy_rx_rssi_offset_neg6db.xml
+    // Rx: Set RSSI offset to adjust reported RSSI by -6 dB (default: 0), trimmed for external bias and differential configuration
+    (uint32_t)0x000688A3,
     (uint32_t)0xFFFFFFFF
 };
 
@@ -120,19 +115,19 @@ rfc_CMD_PROP_RADIO_DIV_SETUP_t RF_cmdPropRadioDivSetup =
     .startTrigger.pastTrig = 0x0,
     .condition.rule = 0x1,
     .condition.nSkip = 0x0,
-    .modulation.modType = 0x1,
-    .modulation.deviation = 0x14,
+    .modulation.modType = 0x2,
+    .modulation.deviation = 0x0,
     .symbolRate.preScale = 0xF,
-    .symbolRate.rateWord = 0x3333,
+    .symbolRate.rateWord = 0xC4A,
     .symbolRate.decimMode = 0x0,
-    .rxBw = 0x21,
-    .preamConf.nPreamBytes = 0x2,
+    .rxBw = 0x20,
+    .preamConf.nPreamBytes = 0x4,
     .preamConf.preamMode = 0x0,
     .formatConf.nSwBits = 0x20,
     .formatConf.bBitReversal = 0x0,
-    .formatConf.bMsbFirst = 0x0,
-    .formatConf.fecMode = 0x8,
-    .formatConf.whitenMode = 0x1,
+    .formatConf.bMsbFirst = 0x1,
+    .formatConf.fecMode = 0x0,
+    .formatConf.whitenMode = 0x0,
     .config.frontEndMode = 0x0,
     .config.biasMode = 0x1,
     .config.analogCfgMode = 0x0,
@@ -170,6 +165,29 @@ rfc_CMD_FS_t RF_cmdFs =
 };
 
 
+// CMD_PROP_TX
+// Proprietary Mode Transmit Command
+rfc_CMD_PROP_TX_t RF_cmdPropTx =
+{
+    .commandNo = 0x3801,
+    .status = 0x0000,
+    .pNextOp = 0, // INSERT APPLICABLE POINTER: (uint8_t*)&xxx
+    .startTime = 0x00000000,
+    .startTrigger.triggerType = 0x0,
+    .startTrigger.bEnaCmd = 0x0,
+    .startTrigger.triggerNo = 0x0,
+    .startTrigger.pastTrig = 0x0,
+    .condition.rule = 0x1,
+    .condition.nSkip = 0x0,
+    .pktConf.bFsOff = 0x0,
+    .pktConf.bUseCrc = 0x1,
+    .pktConf.bVarLen = 0x1,
+    .pktLen = 0x14,
+    .syncWord = 0x930B51DE,
+    .pPkt = 0 // INSERT APPLICABLE POINTER: (uint8_t*)&xxx
+};
+
+
 // CMD_PROP_RX
 // Proprietary Mode Receive Command
 rfc_CMD_PROP_RX_t RF_cmdPropRx =
@@ -199,7 +217,7 @@ rfc_CMD_PROP_RX_t RF_cmdPropRx =
     .rxConf.bAppendRssi = 0x0,
     .rxConf.bAppendTimestamp = 0x0,
     .rxConf.bAppendStatus = 0x1,
-    .syncWord = 0x00000000,
+    .syncWord = 0x930B51DE,
     .maxPktLen = 0xFF,
     .address0 = 0xAA,
     .address1 = 0xBB,
@@ -210,28 +228,5 @@ rfc_CMD_PROP_RX_t RF_cmdPropRx =
     .endTime = 0x00000000,
     .pQueue = 0, // INSERT APPLICABLE POINTER: (dataQueue_t*)&xxx
     .pOutput = 0 // INSERT APPLICABLE POINTER: (uint8_t*)&xxx
-};
-
-
-// CMD_PROP_TX
-// Proprietary Mode Transmit Command
-rfc_CMD_PROP_TX_t RF_cmdPropTx =
-{
-    .commandNo = 0x3801,
-    .status = 0x0000,
-    .pNextOp = 0, // INSERT APPLICABLE POINTER: (uint8_t*)&xxx
-    .startTime = 0x00000000,
-    .startTrigger.triggerType = 0x0,
-    .startTrigger.bEnaCmd = 0x0,
-    .startTrigger.triggerNo = 0x0,
-    .startTrigger.pastTrig = 0x0,
-    .condition.rule = 0x1,
-    .condition.nSkip = 0x0,
-    .pktConf.bFsOff = 0x0,
-    .pktConf.bUseCrc = 0x1,
-    .pktConf.bVarLen = 0x1,
-    .pktLen = 0x14,
-    .syncWord = 0x00000000,
-    .pPkt = 0 // INSERT APPLICABLE POINTER: (uint8_t*)&xxx
 };
 
