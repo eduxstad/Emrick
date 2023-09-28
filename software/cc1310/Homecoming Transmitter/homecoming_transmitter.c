@@ -348,7 +348,7 @@ void smoketestFlash(Display_Handle displayHandle) {
 
 }
 
-void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint8_t length)
+void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
 {
     RF_Params_init(&rfParams);
 

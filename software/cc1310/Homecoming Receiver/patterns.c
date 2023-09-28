@@ -444,7 +444,7 @@ void rainbowGradientHSV() {
                 rgb = hsvToRgb((float)300,1.0 - k,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
             }
-            if (testFlag % 2 == 1) {
+            if (testFlag == 1) {
                 WS2812_setPixelColor(test_led, 255, 255, 255);
             }
 
@@ -458,7 +458,7 @@ void rainbowGradientHSV() {
                 rgb = hsvToRgb(0.0,(float)j / 60.0,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
             }
-            if (testFlag % 2 == 1) {
+            if (testFlag == 1) {
                 WS2812_setPixelColor(test_led, 255, 255, 255);
             }
 
