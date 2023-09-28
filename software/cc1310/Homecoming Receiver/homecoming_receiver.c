@@ -471,10 +471,17 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
         if (packetDataPointer[0] == 0xFF) {
-            testFlag++;
-            GPIO_toggle(Board_GPIO_LED1);
-        }
+            if (testFlag == 0) {
+                testFlag = 1;
+                GPIO_toggle(Board_GPIO_LED1);
+            }
+        } else if (packetDataPointer[0] == 0x00) {
+            if (testFlag == 1) {
+                testFlag = 0;
+                GPIO_toggle(Board_GPIO_LED1);
 
+            }
+        }
         RFQueue_nextEntry();
     }
 

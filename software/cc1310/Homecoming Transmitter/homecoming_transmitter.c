@@ -348,7 +348,7 @@ void smoketestFlash(Display_Handle displayHandle) {
 
 }
 
-void sendRF(Display_Handle displayHandle)
+void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
 {
     RF_Params_init(&rfParams);
 
@@ -367,8 +367,8 @@ void sendRF(Display_Handle displayHandle)
     uint8_t pk[1];
     pk[0] = 0xFF;
 
-    RF_cmdPropTx.pktLen = 1;
-    RF_cmdPropTx.pPkt = pk;
+    RF_cmdPropTx.pktLen = length;
+    RF_cmdPropTx.pPkt = pkt;
     RF_cmdPropTx.startTrigger.triggerType = TRIG_NOW;
 
     /* Send packet */
@@ -488,9 +488,22 @@ void* mainThread(void *arg0)
 //        sleep(1);
 //    }
 
-    sendRF(displayHandle);
+
+    uint8_t pktON[1];
+    pktON[0] = 0xFF;
+    uint8_t pktOFF[1];
+    pktOFF[0] = 0x00;
+
+
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
     sleep(5);
-    sendRF(displayHandle);
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
     GPIO_toggle(Board_GPIO_LED1);
 
 
