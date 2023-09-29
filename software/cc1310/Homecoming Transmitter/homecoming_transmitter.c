@@ -495,7 +495,7 @@ void* mainThread(void *arg0)
     sendRF(displayHandle, pktON, 1);
     sendRF(displayHandle, pktON, 1);
     sendRF(displayHandle, pktON, 1);
-    sleep(5);
+    sleep(20);
     sendRF(displayHandle, pktOFF, 1);
     sendRF(displayHandle, pktOFF, 1);
     sendRF(displayHandle, pktOFF, 1);
