@@ -30,6 +30,13 @@ uint8_t setArr[NB_PIXELS * 3] = {0};
 uint16_t loc_u16_pixelIndex;
 uint16_t arrIdx = 0;
 
+
+// Define pattern functions
+void (*pattern_v[NUM_PATTERNS])(void) = 
+{ResetLights, allWhite, allRed, allBlue, allGreen, chirstLights, rainbow, animationBasic, rainbowAnimation, bounce};
+
+
+
 void trueHSV(int angle, int * red, int * green, int * blue)
 {
   //uint8_t red, green, blue;
