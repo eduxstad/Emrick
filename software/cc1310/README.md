@@ -5,7 +5,9 @@
 Most of the projects have UART debug statements, so you can open up a serial monitor for printf debugging/updates. 
 Install the [drivers](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=downloads) if you have 
 issues seeing the COM ports after connecting the board via USB. 
- 
+
+- Receiver: Main project for the Emrick boards that will combine all previously designed features.
+- Transmitter: Main project for the control board that contains logic to emit rf signals to the Emrick boards 
 - Smoketest: Exercises all peripherals on the board and prints any output to the serial monitor. 
 - SPIWS: Main demo project that contains the minimum amount of code necessary to display a static color or single animation on the light strip. No Radio code. 
 - WirelessBatteryMonitor and WirelessBatteryReceiver: Diagnostics tools that sends current battery/supply voltages to WirelessBatteryReceiver. 
