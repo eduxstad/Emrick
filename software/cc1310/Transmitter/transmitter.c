@@ -348,7 +348,7 @@ void smoketestFlash(Display_Handle displayHandle) {
 
 }
 
-void sendRF(Display_Handle displayHandle)
+void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
 {
     RF_Params_init(&rfParams);
 
@@ -364,8 +364,8 @@ void sendRF(Display_Handle displayHandle)
     /* Set the frequency */
     RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
 
-    RF_cmdPropTx.pktLen = PAYLOAD_LENGTH;
-    RF_cmdPropTx.pPkt = packet;
+    RF_cmdPropTx.pktLen = length;
+    RF_cmdPropTx.pPkt = pkt;
     RF_cmdPropTx.startTrigger.triggerType = TRIG_NOW;
 
     /* Send packet */
@@ -428,122 +428,11 @@ void sendRF(Display_Handle displayHandle)
 
 }
 
-void smoketestLED(Display_Handle displayHandle) {
-
-    // TODO: Check if the is being charged before turning on the LED
-
-    // Turn on power by enabling the 5v supply
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning on 5v power.");
-    GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
-    sleep(1);
-    SPI_init();
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing all white output for 5 seconds (maximum current).");
-    WS2812_beginSPI();
-//    allWhite();
-//    sleep(5);
-//    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing RGB for 1 second each.");
-//    allRed();
-//    sleep(1);
-//    allGreen();
-//    sleep(1);
-//    allBlue();
-//    sleep(1);
-//    rainbowAnimation();
-    rainbowGradient();
-
-    // Turn off power
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning off 5v power.");
-    GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-
-}
-
-void* receivePacket(void *arg0)
-{
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "[RF Thread] Preparing to listen for RF packets...");
-    if (RFQueue_defineQueue(&dataQueue, rxDataEntryBuffer,
-                            sizeof(rxDataEntryBuffer), NUM_DATA_ENTRIES,
-                            MAX_LENGTH + NUM_APPENDED_BYTES))
-    {
-        /* Failed to allocate space for all data entries */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "[RF Thread] Unable to allocate space for entry buffer.");
-        while (1)
-            ;
-    }
-
-    /* Modify CMD_PROP_RX command for application needs */
-    /* Set the Data Entity queue for received data */
-    RF_cmdPropRx.pQueue = &dataQueue;
-    /* Discard ignored packets from Rx queue */
-    RF_cmdPropRx.rxConf.bAutoFlushIgnored = 1;
-    /* Discard packets with CRC error from Rx queue */
-    RF_cmdPropRx.rxConf.bAutoFlushCrcErr = 1;
-    /* Implement packet length filtering to avoid PROP_ERROR_RXBUF */
-    RF_cmdPropRx.maxPktLen = MAX_LENGTH;
-    RF_cmdPropRx.pktConf.bRepeatOk = 1;
-    RF_cmdPropRx.pktConf.bRepeatNok = 1;
-
-    /* Request access to the radio */
-#if defined(DeviceFamily_CC26X0R2)
-       rfHandle = RF_open(&rfObject, &RF_prop, (RF_RadioSetup*)&RF_cmdPropRadioSetup, &rfParams);
-   #else
-    rfHandle = RF_open(&rfObject, &RF_prop,
-                       (RF_RadioSetup*) &RF_cmdPropRadioDivSetup, &rfParams);
-#endif// DeviceFamily_CC26X0R2
-
-    /* Set the frequency */
-    RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "[RF Thread] Listening for RF packets.");
-
-    /* Enter RX mode and stay forever in RX */
-    RF_EventMask terminationReason = RF_runCmd(rfHandle, (RF_Op*) &RF_cmdPropRx,
-                                               RF_PriorityNormal, &callback,
-                                               RF_EventRxEntryDone);
-
-}
-
-void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
-{
-
-    if (e & RF_EventRxEntryDone)
-    {
-//        /* Toggle pin to indicate RX */
-//        PIN_setOutputValue(ledPinHandle, Board_PIN_LED1,
-//                           !PIN_getOutputValue(Board_PIN_LED1));
-
-        /* Get current unhandled data entry */
-        currentDataEntry = RFQueue_getDataEntry();
-
-        /* Handle the packet data, located at &currentDataEntry->data:
-         * - Length is the first byte with the current configuration
-         * - Data starts from the second byte */
-        packetLength      = *(uint8_t*)(&currentDataEntry->data);
-        packetDataPointer = (uint8_t*)(&currentDataEntry->data + 1);
-
-        /* Copy the payload + the status byte to the packet variable */
-        //memcpy(packet, packetDataPointer, (packetLength + 1));
-
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet!");
-
-        RFQueue_nextEntry();
-    }
-
-}
-
 /*
  *  ======== mainThread ========
  */
 void* mainThread(void *arg0)
 {
-    pthread_t           thread0;
-    pthread_attr_t      attrs;
-    struct sched_param  priParam;
-    int                 retc;
-    int                 detachState;
 
     /* Call driver init functions */
     GPIO_init();
@@ -588,61 +477,52 @@ void* mainThread(void *arg0)
                         0,
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
-    smoketestFlash(displayHandle);
-    //smoketestLED(displayHandle);
-    sendRF(displayHandle);
+    //smoketestFlash(displayHandle);
 
-    /* Create application thread(s) */
-    pthread_attr_init(&attrs);
+//    while (1) {
+//        sendRF(displayHandle);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(1);
+//    }
 
-    detachState = PTHREAD_CREATE_DETACHED;
-    /* Set priority and stack size attributes */
-    retc = pthread_attr_setdetachstate(&attrs, detachState);
-    if (retc != 0) {
-        /* pthread_attr_setdetachstate() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread stack size.");
-        while (1);
-    }
-
-    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
-    if (retc != 0) {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread stack size.");
-        /* pthread_attr_setstacksize() failed */
-        while (1);
-    }
-
-    /* Create RX Listener thread */
-    priParam.sched_priority = 1;
-    pthread_attr_setschedparam(&attrs, &priParam);
-
-    retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread.");
-        while (1);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "Created listening thread.");
+    uint8_t pktON[1];
+    pktON[0] = 0xFF;
+    uint8_t pktOFF[1];
+    pktOFF[0] = 0x00;
 
 
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "Smoketest start up complete!");
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
+    sendRF(displayHandle, pktON, 1);
+    sleep(15);
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 1);
+    GPIO_toggle(Board_GPIO_LED1);
 
-    int clock_seconds = 0;
-    int delay = 1;
-    while (delay)
-    {
-        sleep(1);
-        supply_volt = supplyVoltage(displayHandle);
-        bat_microVolt = batteryMicroVoltage(displayHandle);
-        Display_printf(displayHandle, 0, 0,
-                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+
+    while (1) {
+        sleep(3);
         GPIO_toggle(Board_GPIO_LED1);
-        clock_seconds += delay;
+        sleep(1);
+        GPIO_toggle(Board_GPIO_LED1);
     }
+
+
+
+//    int clock_seconds = 0;
+//    int delay = 1;
+//    while (delay)
+//    {
+//        sleep(1);
+//        supply_volt = supplyVoltage(displayHandle);
+//        bat_microVolt = batteryMicroVoltage(displayHandle);
+//        Display_printf(displayHandle, 0, 0,
+//                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        clock_seconds += delay;
+//    }
 }
 

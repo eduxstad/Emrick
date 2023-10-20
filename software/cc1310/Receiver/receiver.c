@@ -127,6 +127,7 @@ static rfc_dataEntryGeneral_t* currentDataEntry;
 static uint8_t packetLength;
 static uint8_t* packetDataPointer;
 
+
 /* Threading */
 #define THREADSTACKSIZE (1024)
 
@@ -221,7 +222,7 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 }
 
 
-void smoketestFlash(Display_Handle displayHandle) {
+void spiffs_init() {
 
     spiffs_file    fd;
     spiffs_config  fsConfig;
@@ -284,64 +285,6 @@ void smoketestFlash(Display_Handle displayHandle) {
             while (1);
         }
     }
-
-    /* Open a file */
-    fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR, 0);
-    if (fd < 0) {
-        /* File not found; create a new file & write message to it */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Creating spiffsFile...");
-
-        fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_CREAT | SPIFFS_RDWR, 0);
-        if (fd < 0) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "Error creating spiffsFile.");
-
-            while (1);
-        }
-
-
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Writing to spiffsFile...");
-
-        if (SPIFFS_write(&fs, fd, (void *) fileArrayHeap, MESSAGE_LENGTH) < 0) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error writing spiffsFile.");
-
-            while (1) ;
-        }
-
-        SPIFFS_close(&fs, fd);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Reading spiffsFile...");
-
-    fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR, 0);
-
-    if (SPIFFS_read(&fs, fd, fileArrayRead, MESSAGE_LENGTH) < 0)
-    {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error reading spiffsFile.");
-
-        while (1);
-    }
-
-    int8_t i = 0;
-    while (i < MESSAGE_LENGTH) {
-        if (fileArrayRead[i] != fileArrayHeap[i]) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error: spiffsFile does not match at index %d, expected %d and read %d", i, fileArrayHeap[i], fileArrayRead[i]);
-        }
-        i++;
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Removing spiffsFile...");
-    status = SPIFFS_fremove(&fs, fd);
-    if (status != SPIFFS_OK)
-    {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error removing spiffsFile.");
-
-        while (1);
-    }
-
-    SPIFFS_close(&fs, fd);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Closed file handle.");
-
 
     SPIFFS_unmount(&fs);
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Unmounted filesystem.");
@@ -437,7 +380,7 @@ void smoketestLED(Display_Handle displayHandle) {
     GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
     sleep(1);
     SPI_init();
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing all white output for 5 seconds (maximum current).");
+//    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing all white output for 5 seconds (maximum current).");
     WS2812_beginSPI();
 //    allWhite();
 //    sleep(5);
@@ -449,12 +392,12 @@ void smoketestLED(Display_Handle displayHandle) {
 //    allBlue();
 //    sleep(1);
 //    rainbowAnimation();
-    rainbowGradient();
+    rainbowGradientHSV();
 
     // Turn off power
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning off 5v power.");
     GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-
+    WS2812_close();
 }
 
 void* receivePacket(void *arg0)
@@ -527,8 +470,19 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Copy the payload + the status byte to the packet variable */
         //memcpy(packet, packetDataPointer, (packetLength + 1));
 
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet!");
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
+        if (packetDataPointer[0] == 0xFF) {
+            if (testFlag == 0) {
+                testFlag = 1;
+                GPIO_toggle(Board_GPIO_LED1);
+            }
+        } else if (packetDataPointer[0] == 0x00) {
+            if (testFlag == 1) {
+                testFlag = 0;
+                GPIO_toggle(Board_GPIO_LED1);
 
+            }
+        }
         RFQueue_nextEntry();
     }
 
@@ -588,9 +542,9 @@ void* mainThread(void *arg0)
                         0,
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
-    smoketestFlash(displayHandle);
-    //smoketestLED(displayHandle);
-    sendRF(displayHandle);
+
+    spiffs_init();
+
 
     /* Create application thread(s) */
     pthread_attr_init(&attrs);
@@ -632,17 +586,18 @@ void* mainThread(void *arg0)
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                    "Smoketest start up complete!");
 
-    int clock_seconds = 0;
-    int delay = 1;
-    while (delay)
-    {
-        sleep(1);
-        supply_volt = supplyVoltage(displayHandle);
-        bat_microVolt = batteryMicroVoltage(displayHandle);
-        Display_printf(displayHandle, 0, 0,
-                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
-        GPIO_toggle(Board_GPIO_LED1);
-        clock_seconds += delay;
-    }
+    smoketestLED(displayHandle);
+//    int clock_seconds = 0;
+//    int delay = 1;
+//    while (delay)
+//    {
+//        sleep(1);
+//        supply_volt = supplyVoltage(displayHandle);
+//        bat_microVolt = batteryMicroVoltage(displayHandle);
+//        Display_printf(displayHandle, 0, 0,
+//                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        clock_seconds += delay;
+//    }
 }
 

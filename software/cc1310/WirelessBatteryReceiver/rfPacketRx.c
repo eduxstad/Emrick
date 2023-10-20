@@ -262,6 +262,7 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         adc_bat_voltage = adc_bat_voltage * 2 / 1000000;
 
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[%d] Supply Voltage: %f Battery Voltage: %f", time, bat_voltage, adc_bat_voltage);
+        GPIO_toggle(Board_GPIO_LED1);
 
         RFQueue_nextEntry();
     }
