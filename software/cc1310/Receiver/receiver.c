@@ -188,7 +188,7 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 
     ADC_Params_init(&adcparams);
 
-    adc = ADC_open(Board_ADC0, &adcparams);
+    adc = ADC_open(Board_ADC6, &adcparams);
 
     if (adc != NULL)
     {
@@ -199,7 +199,7 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 
             adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
             ADC_close(adc);
-            return adcValue0MicroVolt;
+            return adcValue0MicroVolt * 2;
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "ADC0 raw result: %d", adcValue0);
 
@@ -378,7 +378,7 @@ void *smoketestLED(void *arg0) {
     // Turn on power by enabling the 5v supply
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning on 5v power.");
     GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
-    sleep(1);
+//    sleep(1);
     SPI_init();
 //    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing all white output for 5 seconds (maximum current).");
     WS2812_beginSPI();
@@ -488,6 +488,10 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
             }
         }
+
+        /************************************************************
+         * End Packet Parsing and Pattern Switching
+         ************************************************************/
         RFQueue_nextEntry();
     }
 
@@ -592,6 +596,7 @@ void* mainThread(void *arg0)
                    "Smoketest start up complete!");
 
     pthread_mutex_init(&LEDMutex, NULL);
+    // create LED thread
     retc = pthread_create(&thread0, &attrs, smoketestLED, NULL);
     if (retc != 0) {
         /* pthread_create() failed */
@@ -600,7 +605,7 @@ void* mainThread(void *arg0)
         while (1);
     }
     int clock_seconds = 0;
-    int delay = 2;
+    int delay = 1;
     while (delay)
     {
         sleep(delay);
