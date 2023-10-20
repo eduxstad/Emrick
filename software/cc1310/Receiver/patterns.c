@@ -20,6 +20,10 @@
 #include <sched.h>
 #include <math.h>
 
+
+#include <ti/drivers/ADC.h>
+
+
 //TODO : ADD limitation on NB_PIXELS
 
 const uint8_t HSVlights[61] =
@@ -417,7 +421,7 @@ void rainbowGradient(void)
 }
 
 
-void rainbowGradientHSV() {
+void rainbowGradientHSV(Display_Handle displayHandle) {
     int i = 0;
     useconds_t time = 20700;
     uint16_t test_led = 3;
@@ -425,6 +429,7 @@ void rainbowGradientHSV() {
         int j = 0;
         for (j = 0; j < 300; j++) {
             RGB rgb;
+            pthread_mutex_lock(&LEDMutex);
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 rgb = hsvToRgb((float)j,1.0,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
@@ -435,11 +440,16 @@ void rainbowGradientHSV() {
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
             WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
             usleep(time);
         }
+//        WS2812_close();
+//        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"Battery Voltage %d", battMicroVoltage());
+//        WS2812_restartSPI();
         float k = 0;
         for (k = 0; k < 1.0; k += 0.011) {
             RGB rgb;
+            pthread_mutex_lock(&LEDMutex);
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 rgb = hsvToRgb((float)300,1.0 - k,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
@@ -450,10 +460,12 @@ void rainbowGradientHSV() {
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
             WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
             usleep(time);
         }
         for (j = 1; j < 60; j++) {
             RGB rgb;
+            pthread_mutex_lock(&LEDMutex);
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 rgb = hsvToRgb(0.0,(float)j / 60.0,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
@@ -464,7 +476,51 @@ void rainbowGradientHSV() {
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
             WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
             usleep(time);
         }
     }
+}
+
+uint32_t battMicroVoltage(Display_Handle displayHandle)
+{
+    ADC_Handle adc;
+    ADC_Params adcparams;
+    uint16_t adcValue0;
+    uint32_t adcValue0MicroVolt;
+    int_fast16_t res;
+
+    ADC_Params_init(&adcparams);
+
+    adc = ADC_open(Board_ADC0, &adcparams);
+
+    if (adc != NULL)
+    {
+        res = ADC_convert(adc, &adcValue0);
+
+        if (res == ADC_STATUS_SUCCESS)
+        {
+
+            adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
+            ADC_close(adc);
+            return adcValue0MicroVolt;
+
+            //Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "ADC0 raw result: %d", adcValue0);
+
+        }
+        else
+        {
+            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                           "ADC0 convert failed\n");
+        }
+
+    }
+    else
+    {
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                       "Error initializing ADC0\n");
+    }
+
+    ADC_close(adc);
+
 }

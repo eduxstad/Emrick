@@ -371,7 +371,7 @@ void sendRF(Display_Handle displayHandle)
 
 }
 
-void smoketestLED(Display_Handle displayHandle) {
+void *smoketestLED(void *arg0) {
 
     // TODO: Check if the is being charged before turning on the LED
 
@@ -392,7 +392,7 @@ void smoketestLED(Display_Handle displayHandle) {
 //    allBlue();
 //    sleep(1);
 //    rainbowAnimation();
-    rainbowGradientHSV();
+    rainbowGradientHSV(displayHandle);
 
     // Turn off power
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning off 5v power.");
@@ -471,6 +471,11 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         //memcpy(packet, packetDataPointer, (packetLength + 1));
 
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
+
+
+        /************************************************************
+         * Packet Parsing and Pattern Switching
+         ************************************************************/
         if (packetDataPointer[0] == 0xFF) {
             if (testFlag == 0) {
                 testFlag = 1;
@@ -586,18 +591,29 @@ void* mainThread(void *arg0)
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                    "Smoketest start up complete!");
 
-    smoketestLED(displayHandle);
-//    int clock_seconds = 0;
-//    int delay = 1;
-//    while (delay)
-//    {
-//        sleep(1);
-//        supply_volt = supplyVoltage(displayHandle);
-//        bat_microVolt = batteryMicroVoltage(displayHandle);
-//        Display_printf(displayHandle, 0, 0,
-//                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
-//        GPIO_toggle(Board_GPIO_LED1);
-//        clock_seconds += delay;
-//    }
+    pthread_mutex_init(&LEDMutex, NULL);
+    retc = pthread_create(&thread0, &attrs, smoketestLED, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                       "Unable to create thread.");
+        while (1);
+    }
+    int clock_seconds = 0;
+    int delay = 2;
+    while (delay)
+    {
+        sleep(delay);
+        supply_volt = supplyVoltage(displayHandle);
+        pthread_mutex_lock(&LEDMutex);
+        WS2812_close();
+        bat_microVolt = batteryMicroVoltage(displayHandle);
+        WS2812_restartSPI();
+        pthread_mutex_unlock(&LEDMutex);
+        Display_printf(displayHandle, 0, 0,
+                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+        GPIO_toggle(Board_GPIO_LED1);
+        clock_seconds += delay;
+    }
 }
 
