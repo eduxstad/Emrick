@@ -291,86 +291,6 @@ void spiffs_init() {
 
 }
 
-void sendRF(Display_Handle displayHandle)
-{
-    RF_Params_init(&rfParams);
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Sending sample packet...");
-    /* Request access to the radio */
-#if defined(DeviceFamily_CC26X0R2)
-       rfHandle = RF_open(&rfObject, &RF_prop, (RF_RadioSetup*)&RF_cmdPropRadioSetup, &rfParams);
-   #else
-    rfHandle = RF_open(&rfObject, &RF_prop,
-                       (RF_RadioSetup*) &RF_cmdPropRadioDivSetup, &rfParams);
-#endif// DeviceFamily_CC26X0R2
-
-    /* Set the frequency */
-    RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
-
-    RF_cmdPropTx.pktLen = PAYLOAD_LENGTH;
-    RF_cmdPropTx.pPkt = packet;
-    RF_cmdPropTx.startTrigger.triggerType = TRIG_NOW;
-
-    /* Send packet */
-    RF_EventMask terminationReason = RF_runCmd(rfHandle, (RF_Op*) &RF_cmdPropTx,
-                                               RF_PriorityNormal, NULL, 0);
-
-    switch (terminationReason)
-    {
-    case RF_EventLastCmdDone:
-        // A stand-alone radio operation command or the last radio
-        // operation command in a chain finished.
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "RF command done.");
-        break;
-    case RF_EventCmdCancelled:
-        // Command cancelled before it was started; it can be caused
-        // by RF_cancelCmd() or RF_flushCmd().
-    case RF_EventCmdAborted:
-        // Abrupt command termination caused by RF_cancelCmd() or
-        // RF_flushCmd().
-    case RF_EventCmdStopped:
-        // Graceful command termination caused by RF_cancelCmd() or
-        // RF_flushCmd().
-    default:
-        // Uncaught error event
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error with RF command.");
-        while (1)
-            ;
-    }
-
-    uint32_t cmdStatus = ((volatile RF_Op*) &RF_cmdPropTx)->status;
-    switch (cmdStatus)
-    {
-    case PROP_DONE_OK:
-        // Packet transmitted successfully
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Packet transmitted successfully.");
-        break;
-    case PROP_DONE_STOPPED:
-        // received CMD_STOP while transmitting packet and finished
-        // transmitting packet
-    case PROP_DONE_ABORT:
-        // Received CMD_ABORT while transmitting packet
-    case PROP_ERROR_PAR:
-        // Observed illegal parameter
-    case PROP_ERROR_NO_SETUP:
-        // Command sent without setting up the radio in a supported
-        // mode using CMD_PROP_RADIO_SETUP or CMD_RADIO_SETUP
-    case PROP_ERROR_NO_FS:
-        // Command sent without the synthesizer being programmed
-    case PROP_ERROR_TXUNF:
-        // TX underflow observed during operation
-    default:
-        // Uncaught error event - these could come from the
-        // pool of states defined in rf_mailbox.h
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error transmitting packet.");
-        while (1)
-            ;
-    }
-
-    RF_close(rfHandle);
-
-}
-
 void *smoketestLED(void *arg0) {
 
     // TODO: Check if the is being charged before turning on the LED
@@ -497,6 +417,87 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
 }
 
+void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
+{
+    RF_Params_init(&rfParams);
+
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Sending sample packet...");
+    /* Request access to the radio */
+#if defined(DeviceFamily_CC26X0R2)
+       rfHandle = RF_open(&rfObject, &RF_prop, (RF_RadioSetup*)&RF_cmdPropRadioSetup, &rfParams);
+   #else
+    rfHandle = RF_open(&rfObject, &RF_prop,
+                       (RF_RadioSetup*) &RF_cmdPropRadioDivSetup, &rfParams);
+#endif// DeviceFamily_CC26X0R2
+
+    /* Set the frequency */
+    RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
+
+    RF_cmdPropTx.pktLen = length;
+    RF_cmdPropTx.pPkt = pkt;
+    RF_cmdPropTx.startTrigger.triggerType = TRIG_NOW;
+
+    /* Send packet */
+    RF_EventMask terminationReason = RF_runCmd(rfHandle, (RF_Op*) &RF_cmdPropTx,
+                                               RF_PriorityNormal, NULL, 0);
+
+    switch (terminationReason)
+    {
+    case RF_EventLastCmdDone:
+        // A stand-alone radio operation command or the last radio
+        // operation command in a chain finished.
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "RF command done.");
+        break;
+    case RF_EventCmdCancelled:
+        // Command cancelled before it was started; it can be caused
+        // by RF_cancelCmd() or RF_flushCmd().
+    case RF_EventCmdAborted:
+        // Abrupt command termination caused by RF_cancelCmd() or
+        // RF_flushCmd().
+    case RF_EventCmdStopped:
+        // Graceful command termination caused by RF_cancelCmd() or
+        // RF_flushCmd().
+    default:
+        // Uncaught error event
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error with RF command.");
+        while (1)
+            ;
+    }
+
+    uint32_t cmdStatus = ((volatile RF_Op*) &RF_cmdPropTx)->status;
+    switch (cmdStatus)
+    {
+    case PROP_DONE_OK:
+        // Packet transmitted successfully
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Packet transmitted successfully.");
+        break;
+    case PROP_DONE_STOPPED:
+        // received CMD_STOP while transmitting packet and finished
+        // transmitting packet
+    case PROP_DONE_ABORT:
+        // Received CMD_ABORT while transmitting packet
+    case PROP_ERROR_PAR:
+        // Observed illegal parameter
+    case PROP_ERROR_NO_SETUP:
+        // Command sent without setting up the radio in a supported
+        // mode using CMD_PROP_RADIO_SETUP or CMD_RADIO_SETUP
+    case PROP_ERROR_NO_FS:
+        // Command sent without the synthesizer being programmed
+    case PROP_ERROR_TXUNF:
+        // TX underflow observed during operation
+    default:
+        // Uncaught error event - these could come from the
+        // pool of states defined in rf_mailbox.h
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error transmitting packet.");
+        while (1)
+            ;
+    }
+
+    RF_close(rfHandle);
+
+}
+
+
 /*
  *  ======== mainThread ========
  */
@@ -580,20 +581,20 @@ void* mainThread(void *arg0)
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
 
-    retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread.");
-        while (1);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "Created listening thread.");
-
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "Smoketest start up complete!");
+//    retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
+//    if (retc != 0) {
+//        /* pthread_create() failed */
+//        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+//                       "Unable to create thread.");
+//        while (1);
+//    }
+//
+//    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+//                   "Created listening thread.");
+//
+//
+//    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+//                   "Smoketest start up complete!");
 
     pthread_mutex_init(&LEDMutex, NULL);
     // create LED thread
@@ -605,18 +606,21 @@ void* mainThread(void *arg0)
         while (1);
     }
     int clock_seconds = 0;
-    int delay = 300;
+    int delay = 30;
+    sleep(1);
     while (delay)
     {
-        sleep(delay);
         supply_volt = supplyVoltage(displayHandle);
         pthread_mutex_lock(&LEDMutex);
         WS2812_close();
         bat_microVolt = batteryMicroVoltage(displayHandle);
         WS2812_restartSPI();
         pthread_mutex_unlock(&LEDMutex);
+        uint8_t * pkt = (uint8_t *) &bat_microVolt;
+        sendRF(displayHandle,pkt,4);
         Display_printf(displayHandle, 0, 0,
                        "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+        sleep(delay);
         GPIO_toggle(Board_GPIO_LED1);
         clock_seconds += delay;
     }
