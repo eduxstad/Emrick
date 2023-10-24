@@ -605,7 +605,7 @@ void* mainThread(void *arg0)
         while (1);
     }
     int clock_seconds = 0;
-    int delay = 1;
+    int delay = 300;
     while (delay)
     {
         sleep(delay);
