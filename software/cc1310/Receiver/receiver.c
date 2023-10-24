@@ -606,7 +606,7 @@ void* mainThread(void *arg0)
         while (1);
     }
     int clock_seconds = 0;
-    int delay = 10;
+    int delay = 1;
     sleep(1);
     while (delay)
     {
@@ -616,7 +616,11 @@ void* mainThread(void *arg0)
         bat_microVolt = batteryMicroVoltage(displayHandle);
         WS2812_restartSPI();
         pthread_mutex_unlock(&LEDMutex);
-        uint8_t pkt[4] = (uint8_t *) &bat_microVolt;
+        uint8_t pkt[4] = (uint8_t *) malloc(4);
+        pkt[0] = bat_microVolt >> 24 & 0xFF;
+        pkt[1] = bat_microVolt >> 16 & 0xFF;
+        pkt[2] = bat_microVolt >> 8 & 0xFF;
+        pkt[3] = bat_microVolt & 0xFF;
         sendRF(displayHandle,pkt,4);
         Display_printf(displayHandle, 0, 0,
                        "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
