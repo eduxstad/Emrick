@@ -470,9 +470,13 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Copy the payload + the status byte to the packet variable */
         //memcpy(packet, packetDataPointer, (packetLength + 1));
 
-        uint32_t * voltage = (uint32_t *) packetDataPointer;
 
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! Voltage: %f", (float) voltage[0] / 1000000);
+        uint32_t reassemble = (uint32_t) packetDataPointer[0] << 24;
+        reassemble += (uint32_t) packetDataPointer[1] << 16;
+        reassemble += (uint32_t) packetDataPointer[2] << 8;
+        reassemble += (uint32_t) packetDataPointer[3];
+
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! Voltage: %f", (float) reassemble / 1000000);
 
 
         /************************************************************
