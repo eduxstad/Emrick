@@ -16,6 +16,18 @@
 #include <semaphore.h>
 #include <unistd.h>
 
+#define NUM_PATTERNS 10
+#define RESET_LIGHTS 0
+#define ALL_WHITE 1
+#define ALL_RED 2
+#define ALL_BLUE 3
+#define ALL_GREEN 4
+#define CHIRST_LIGHTS 5
+#define RAINBOW 6
+#define ANIMATION_BASIC 7
+#define RAINBOW_ANIMATION 8
+#define BOUNCE 9
+
 //TODO : ADD limitation on NB_PIXELS
 
 const uint8_t HSVlights[61] =
@@ -31,10 +43,9 @@ uint16_t loc_u16_pixelIndex;
 uint16_t arrIdx = 0;
 
 
-// Define pattern functions
-void (*pattern_v[NUM_PATTERNS])(void) = 
-{ResetLights, allWhite, allRed, allBlue, allGreen, chirstLights, rainbow, animationBasic, rainbowAnimation, bounce};
-
+// Define a vector containing the available patterns to display
+int pattern_func[NUM_PATTERNS] =
+{RESET_LIGHTS, ALL_WHITE, ALL_RED, ALL_BLUE, ALL_GREEN, CHIRST_LIGHTS, RAINBOW, ANIMATION_BASIC, RAINBOW_ANIMATION, BOUNCE};
 
 
 void trueHSV(int angle, int * red, int * green, int * blue)
