@@ -139,7 +139,7 @@ void addLog(Display_Handle displayHandle, char *log) {
 }
 
 
-char * readLogs(Display_Handle displayHandle) {
+char * readLogs(Display_Handle displayHandle, char * str) {
 
     spiffs_file    fd;
     spiffs_config  fsConfig;
@@ -209,7 +209,6 @@ char * readLogs(Display_Handle displayHandle) {
         return 0;
     }
     char * buf = (char * ) malloc(32);
-    char * str;
     uint16_t len = 0;
     while (SPIFFS_read(&fs, fd, buf, 32) > 0) {
         len += 32;
@@ -228,13 +227,16 @@ char * readLogs(Display_Handle displayHandle) {
 }
 
 uint16_t getLastLog(Display_Handle displayHandle) {
-    char * log = readLogs(displayHandle);
+    char * log;
+    readLogs(displayHandle, log);
     if (log != 0) {
         uint16_t index = strlen(log) - 1;
         while (log[index-1] != ' ') {
             index--;
         }
-        return atoi(log+index);
+        uint16_t num = atoi(log+index);
+        free(log);
+        return num;
     } else {
         return 0;
     }

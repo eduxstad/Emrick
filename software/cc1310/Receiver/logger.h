@@ -14,5 +14,5 @@
 
 
 void addLog(Display_Handle displayHandle, char *log);
-char * readLogs(Display_Handle displayHandle);
+char * readLogs(Display_Handle displayHandle, char * str);
 uint16_t getLastLog(Display_Handle displayHandle);
