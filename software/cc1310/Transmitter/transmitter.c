@@ -217,6 +217,12 @@ void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
     /* Set the frequency */
     RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
 
+    uint16_t logNum = getLastLog(displayHandle);
+    char buf[5];
+    sprintf(buf, "%d", logNum);
+    pkt[1] = (uint8_t) (logNum >> 8 & 0xFF);
+    pkt[2] = (uint8_t) (logNum & 0xFF);
+
     RF_cmdPropTx.pktLen = length;
     RF_cmdPropTx.pPkt = pkt;
     RF_cmdPropTx.startTrigger.triggerType = TRIG_NOW;
@@ -278,9 +284,6 @@ void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
     }
 
     RF_close(rfHandle);
-    uint16_t logNum = getLastLog(displayHandle);
-    char buf[5];
-    sprintf(buf, "%d", logNum);
     addLog(displayHandle, buf);
 }
 
@@ -341,9 +344,9 @@ void* mainThread(void *arg0)
 //        sleep(1);
 //    }
 
-    uint8_t pktON[1];
+    uint8_t pktON[3];
     pktON[0] = 0xFF;
-    uint8_t pktOFF[1];
+    uint8_t pktOFF[3];
     pktOFF[0] = 0x00;
 
 

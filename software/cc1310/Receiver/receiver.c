@@ -399,8 +399,12 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
             }
         }
         char * log = malloc(32);
+        uint16_t num = 0;
+        num += ((uint16_t) packetDataPointer[1]) << 8;
+        num += packetDataPointer[2];
         sprintf(log, "Received: %d\n", packetDataPointer[1]);
         addLog(displayHandle, log);
+        free(log);
 
         /************************************************************
          * End Packet Parsing and Pattern Switching
