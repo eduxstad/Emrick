@@ -268,7 +268,7 @@
 
   (footprint "footprints.pretty:SW-SMD_CHA_C603B-101ML-1SF" (layer "F.Cu")
     (tstamp 0c4d593e-246e-4ec6-9db2-20c0c306131f)
-    (at 72.136 45.72)
+    (at 72.326 46.4)
     (property "Sheetfile" "Emrick.kicad_sch")
     (property "Sheetname" "")
     (property "ki_description" "Push button switch with LED, generic")
