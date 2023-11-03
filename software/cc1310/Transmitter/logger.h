@@ -12,7 +12,8 @@
 
 #endif /* LOGGER_H_ */
 
-
-void addLog(Display_Handle displayHandle, char *log);
-char * readLogs(Display_Handle displayHandle, char * str);
+void spiffsInit(Display_Handle displayHandle);
+void removeLogs(void);
+void addLog(Display_Handle displayHandle, char *log, uint16_t length);
+char * readLogs(Display_Handle displayHandle);
 uint16_t getLastLog(Display_Handle displayHandle);

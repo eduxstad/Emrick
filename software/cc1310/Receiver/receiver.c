@@ -380,7 +380,15 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /* Copy the payload + the status byte to the packet variable */
         //memcpy(packet, packetDataPointer, (packetLength + 1));
 
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
+        char * log = (char *) malloc(32);
+        uint16_t num = 0;
+        num += ((uint16_t) packetDataPointer[1]) << 8;
+        num += packetDataPointer[2];
+        sprintf(log, "%d\0", num);
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %s", log);
+        addLog(displayHandle, log, strlen(log)+1);
+//        free(log);
+
 
 
         /************************************************************
@@ -398,13 +406,6 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
             }
         }
-        char * log = malloc(32);
-        uint16_t num = 0;
-        num += ((uint16_t) packetDataPointer[1]) << 8;
-        num += packetDataPointer[2];
-        sprintf(log, "Received: %d\n", packetDataPointer[1]);
-        addLog(displayHandle, log);
-        free(log);
 
         /************************************************************
          * End Packet Parsing and Pattern Switching
@@ -469,8 +470,8 @@ void* mainThread(void *arg0)
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
 
-
-
+    spiffsInit(displayHandle);
+//    removeLogs();
     /* Create application thread(s) */
     pthread_attr_init(&attrs);
 
@@ -520,6 +521,7 @@ void* mainThread(void *arg0)
                        "Unable to create thread.");
         while (1);
     }
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Read: %s", readLogs(displayHandle));
     int clock_seconds = 0;
     int delay = 1;
     while (delay)
@@ -531,8 +533,8 @@ void* mainThread(void *arg0)
         bat_microVolt = batteryMicroVoltage(displayHandle);
         WS2812_restartSPI();
         pthread_mutex_unlock(&LEDMutex);
-        Display_printf(displayHandle, 0, 0,
-                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+//        Display_printf(displayHandle, 0, 0,
+//                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
         GPIO_toggle(Board_GPIO_LED1);
         clock_seconds += delay;
     }

@@ -38,9 +38,7 @@ static uint8_t spiffsReadWriteCache[SPIFFS_LOGICAL_PAGE_SIZE * 2];
 spiffs fs;
 SPIFFSNVS_Data spiffsnvsData;
 
-
-
-void addLog(Display_Handle displayHandle, char *log) {
+void spiffsInit(Display_Handle displayHandle) {
 
     spiffs_file    fd;
     spiffs_config  fsConfig;
@@ -52,6 +50,7 @@ void addLog(Display_Handle displayHandle, char *log) {
 #endif
 
     /* Initialize spiffs, spiffs_config & spiffsnvsdata structures */
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Mounting flash file system via SPI");
     status = SPIFFSNVS_config(&spiffsnvsData, Board_NVSEXTERNAL, &fs, &fsConfig,
         SPIFFS_LOGICAL_BLOCK_SIZE, SPIFFS_LOGICAL_PAGE_SIZE);
     if (status != SPIFFSNVS_STATUS_SUCCESS) {
@@ -61,7 +60,9 @@ void addLog(Display_Handle displayHandle, char *log) {
         while (1);
     }
 
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Mounting flash file system via SPI");
+
+
+
 
     status = SPIFFS_mount(&fs, &fsConfig, spiffsWorkBuffer,
         spiffsFileDescriptorCache, sizeof(spiffsFileDescriptorCache),
@@ -103,132 +104,130 @@ void addLog(Display_Handle displayHandle, char *log) {
             while (1);
         }
     }
+}
+
+void removeLogs() {
+    spiffs_file fd;
+    fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR | SPIFFS_APPEND, 0);
+    if (fd > 0) {
+        SPIFFS_fremove(&fs,fd);
+    }
+    SPIFFS_close(&fs,fd);
+}
+
+void addLog(Display_Handle displayHandle, char *log, uint16_t length) {
+
+    spiffs_file    fd;
+    spiffs_config  fsConfig;
+    int32_t        status;
+
+
+//    /* Open a file */
+//    fd = SPIFFS_open(&fs, "logFile", SPIFFS_RDWR, 0);
+//    SPIFFS_fremove(&fs,fd);
+//    SPIFFS_close(&fs,fd);
+//    fd = 0;
+//    if (fd < 0) {
+//        /* File not found; create a new file & write message to it */
+//        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Creating logFile...");
+//
+//        fd = SPIFFS_open(&fs, "logFile", SPIFFS_CREAT | SPIFFS_RDWR | SPIFFS_APPEND, 0);
+//        if (fd < 0) {
+//            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+//                "Error creating logFile.");
+//
+//            while (1);
+//        }
+//    }
+//
+//    int32_t s = SPIFFS_write(&fs, (void *) fd, log, strlen(log));
+//    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Writing to logFile... status: %d", s);
+//    if (s < 0) {
+//        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error writing logFile.");
+//        while (1) ;
+//    }
+
 
     /* Open a file */
-    fd = SPIFFS_open(&fs, "logFile", SPIFFS_RDWR, 0);
-    if (fd < 0) {
-        /* File not found; create a new file & write message to it */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Creating logFile...");
-
-        fd = SPIFFS_open(&fs, "logFile", SPIFFS_CREAT | SPIFFS_RDWR | SPIFFS_APPEND, 0);
+        fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR | SPIFFS_APPEND, 0);
         if (fd < 0) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "Error creating logFile.");
+            /* File not found; create a new file & write message to it */
+            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Creating spiffsFile...");
 
-            while (1);
+            fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_CREAT | SPIFFS_RDWR | SPIFFS_APPEND, 0);
+            if (fd < 0) {
+                Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                    "Error creating spiffsFile.");
+
+                while (1);
+            }
+
+
+
         }
 
+            log = align8bytes(log, length, displayHandle);
+            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Writing to spiffsFile...");
+            if (SPIFFS_write(&fs, fd, (void *) log, strlen(log)) < 0) {
+                Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error writing spiffsFile.");
 
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Writing to logFile...");
+                while (1) ;
+            }
 
-        if (SPIFFS_write(&fs, fd, (void *) log, strlen(log)) < 0) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error writing logFile.");
 
-            while (1) ;
-        }
-
-        SPIFFS_close(&fs, fd);
-    }
 
     SPIFFS_close(&fs, fd);
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Closed file handle.");
-
-
-    SPIFFS_unmount(&fs);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Unmounted filesystem.");
 }
 
 
-char * readLogs(Display_Handle displayHandle, char * str) {
+char * readLogs(Display_Handle displayHandle) {
 
     spiffs_file    fd;
     spiffs_config  fsConfig;
     int32_t        status;
 
 
-#ifdef Board_wakeUpExtFlash
-    Board_wakeUpExtFlash();
-#endif
-
-    /* Initialize spiffs, spiffs_config & spiffsnvsdata structures */
-    status = SPIFFSNVS_config(&spiffsnvsData, Board_NVSEXTERNAL, &fs, &fsConfig,
-        SPIFFS_LOGICAL_BLOCK_SIZE, SPIFFS_LOGICAL_PAGE_SIZE);
-    if (status != SPIFFSNVS_STATUS_SUCCESS) {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-            "Error with SPIFFS configuration.");
-
-        while (1);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Mounting flash file system via SPI");
-
-    status = SPIFFS_mount(&fs, &fsConfig, spiffsWorkBuffer,
-        spiffsFileDescriptorCache, sizeof(spiffsFileDescriptorCache),
-        spiffsReadWriteCache, sizeof(spiffsReadWriteCache), NULL);
-    if (status != SPIFFS_OK) {
-        /*
-         * If SPIFFS_ERR_NOT_A_FS is returned; it means there is no existing
-         * file system in memory.  In this case we must unmount, format &
-         * re-mount the new file system.
-         */
-        if (status == SPIFFS_ERR_NOT_A_FS) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "File system will not be found at first. Must unmount.");
-
-            SPIFFS_unmount(&fs);
-            status = SPIFFS_format(&fs);
-            if (status != SPIFFS_OK) {
-                Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                    "Error formatting memory.");
-
-                while (1);
-            }
-
-            status = SPIFFS_mount(&fs, &fsConfig, spiffsWorkBuffer,
-                spiffsFileDescriptorCache, sizeof(spiffsFileDescriptorCache),
-                spiffsReadWriteCache, sizeof(spiffsReadWriteCache), NULL);
-            if (status != SPIFFS_OK) {
-                Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                    "Error mounting file system.");
-
-                while (1);
-            }
-        }
-        else {
-            /* Received an unexpected error when mounting file system  */
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "Error mounting file system: %d.", status);
-
-            while (1);
-        }
-    }
-
     /* Open a file */
-    fd = SPIFFS_open(&fs, "logFile", SPIFFS_RDWR, 0);
+    fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR, 0);
     if (fd < 0) {
         return 0;
     }
-    char * buf = (char * ) malloc(32);
-    uint16_t len = 0;
-    while (SPIFFS_read(&fs, fd, buf, 32) > 0) {
-        len += 32;
-        str = (char *) realloc(str, len);
+    char buf[32];
+    size_t len = 0;
+    char * str;
+    s32_t s = SPIFFS_read(&fs, fd, buf, 8);
+    uint8_t eof = 0;
+    while (s > 0 || eof) {
+        size_t oldLen = len;
+        len += s;
+        char * tmp = str;
+        str = (char *) malloc(len+1);
+        *(str) = '\0';
+        if (len > 8) {
+            strcpy(str,tmp);
+            free(tmp);
+        }
+        *(str+oldLen) = '\0';
         strcat(str,buf);
+        uint8_t i;
+        for (i = 0; i < s; i++) {
+            if (*(str+i) == '\0') {
+                eof = 1;
+            }
+        }
+        *(str+len) = '\0';
+        s = SPIFFS_read(&fs, fd, buf, 8);
     }
 
     SPIFFS_close(&fs, fd);
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Closed file handle.");
-
-
-    SPIFFS_unmount(&fs);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Unmounted filesystem.");
 
     return str;
 }
 
 uint16_t getLastLog(Display_Handle displayHandle) {
-    char * log;
-    readLogs(displayHandle, log);
+    char * log = readLogs(displayHandle);
     if (log != 0) {
         uint16_t index = strlen(log) - 1;
         while (log[index-1] != ' ') {
@@ -240,4 +239,19 @@ uint16_t getLastLog(Display_Handle displayHandle) {
     } else {
         return 0;
     }
+}
+
+char * align8bytes(char * str, uint16_t length) {
+    char * tmp;
+    if (length % 8 != 0) {
+        int offset = 8 - (length % 8);
+        tmp = (char *) malloc(length + offset);
+        int i;
+        for (i = 0; i < offset; i++) {
+            *(tmp+i) = ' ';
+        }
+        *(tmp+offset) = '\0';
+        strcat(tmp, str);
+    }
+    return tmp;
 }

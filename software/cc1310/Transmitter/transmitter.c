@@ -217,12 +217,6 @@ void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
     /* Set the frequency */
     RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
 
-    uint16_t logNum = getLastLog(displayHandle);
-    char buf[5];
-    sprintf(buf, "%d", logNum);
-    pkt[1] = (uint8_t) (logNum >> 8 & 0xFF);
-    pkt[2] = (uint8_t) (logNum & 0xFF);
-
     RF_cmdPropTx.pktLen = length;
     RF_cmdPropTx.pPkt = pkt;
     RF_cmdPropTx.startTrigger.triggerType = TRIG_NOW;
@@ -284,7 +278,6 @@ void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
     }
 
     RF_close(rfHandle);
-    addLog(displayHandle, buf);
 }
 
 /*
@@ -343,22 +336,34 @@ void* mainThread(void *arg0)
 //        GPIO_toggle(Board_GPIO_LED1);
 //        sleep(1);
 //    }
-
+    spiffsInit(displayHandle);
+//    removeLogs();
     uint8_t pktON[3];
     pktON[0] = 0xFF;
     uint8_t pktOFF[3];
     pktOFF[0] = 0x00;
 
+    uint16_t logNum = getLastLog(displayHandle)+1;
+    char buf[5];
+    sprintf(buf, "%d\0", logNum);
 
-    sendRF(displayHandle, pktON, 1);
-    sendRF(displayHandle, pktON, 1);
-    sendRF(displayHandle, pktON, 1);
-    sendRF(displayHandle, pktON, 1);
+    pktON[1] = (uint8_t) (logNum >> 8 & 0xFF);
+    pktON[2] = (uint8_t) (logNum & 0xFF);
+    pktOFF[1] = (uint8_t) (logNum >> 8 & 0xFF);
+    pktOFF[2] = (uint8_t) (logNum & 0xFF);
+    addLog(displayHandle, buf, 5);
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Wrote to File: %s", readLogs(displayHandle));
+
+
+    sendRF(displayHandle, pktON, 3);
+    sendRF(displayHandle, pktON, 3);
+    sendRF(displayHandle, pktON, 3);
+    sendRF(displayHandle, pktON, 3);
     sleep(15);
-    sendRF(displayHandle, pktOFF, 1);
-    sendRF(displayHandle, pktOFF, 1);
-    sendRF(displayHandle, pktOFF, 1);
-    sendRF(displayHandle, pktOFF, 1);
+    sendRF(displayHandle, pktOFF, 3);
+    sendRF(displayHandle, pktOFF, 3);
+    sendRF(displayHandle, pktOFF, 3);
+    sendRF(displayHandle, pktOFF, 3);
     GPIO_toggle(Board_GPIO_LED1);
 
 
