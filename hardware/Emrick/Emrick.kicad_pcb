@@ -20175,7 +20175,7 @@
   (gr_text "*" (at 114.55 52.2 -180) (layer "F.SilkS") (tstamp 97647632-b6aa-4184-8a06-e1adb3dce1e6)
     (effects (font (size 1 1) (thickness 0.15)))
   )
-  (gr_text "Rev 5.1 Board #" (at 80.45 67.35) (layer "F.SilkS") (tstamp dc4531be-2fce-4af4-ad89-2094b20b8b44)
+  (gr_text "Rev 5.2 Board #" (at 80.45 67.35) (layer "F.SilkS") (tstamp dc4531be-2fce-4af4-ad89-2094b20b8b44)
     (effects (font (size 3 3) (thickness 0.3)) (justify left bottom))
   )
   (gr_text "41.5 by 52.0 mm" (at 135.05 52.25) (layer "Dwgs.User") (tstamp 42a8a489-8a21-4050-9748-91480748f0b4)
