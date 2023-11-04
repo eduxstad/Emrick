@@ -7,4 +7,5 @@
   (lib (name "xkbswitch")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_SS-12D10G5/KiCADv6/2023-05-24_03-18-55/footprints.pretty")(options "")(descr ""))
   (lib (name "s4bjstconn")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_S4B-PH-SM4-TB-LF-SN-/KiCADv6/2023-05-24_03-45-30/footprints.pretty")(options "")(descr ""))
   (lib (name "custom_components")(type "KiCad")(uri "${KIPRJMOD}/custom_components.pretty")(options "")(descr ""))
+  (lib (name "switch_original")(type "KiCad")(uri "${KIPRJMOD}/switch_original.pretty")(options "")(descr ""))
 )
