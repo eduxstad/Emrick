@@ -5,4 +5,6 @@
   (lib (name "2022-09-29_03-42-52")(type "Legacy")(uri "//nas01.itap.purdue.edu/puhome/My Documents/Downloads/ul_CP2102N-A02-GQFN28/KiCAD/2022-09-29_03-42-52/2022-09-29_03-42-52.lib")(options "")(descr ""))
   (lib (name "tps61230")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_TPS61230ARNSR/KiCADv6/2023-05-23_19-38-35/2023-05-23_19-38-35.kicad_sym")(options "")(descr ""))
   (lib (name "2023-05-23_19-43-28")(type "KiCad")(uri "C:/Users/eduxs/Downloads/ul_TPS61230ARNSR(1)/KiCADv6/2023-05-23_19-43-28/2023-05-23_19-43-28.kicad_sym")(options "")(descr ""))
+  (lib (name "custom_symbols")(type "KiCad")(uri "${KIPRJMOD}/custom_symbols.kicad_sym")(options "")(descr ""))
+  (lib (name "custom_componentsFull")(type "KiCad")(uri "${KIPRJMOD}/Switch.kicad_sym")(options "")(descr ""))
 )
