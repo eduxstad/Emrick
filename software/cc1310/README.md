@@ -12,6 +12,7 @@ issues seeing the COM ports after connecting the board via USB.
 - SPIWS: Main demo project that contains the minimum amount of code necessary to display a static color or single animation on the light strip. No Radio code. 
 - WirelessBatteryMonitor and WirelessBatteryReceiver: Diagnostics tools that sends current battery/supply voltages to WirelessBatteryReceiver. 
 It also powers the lights strips in a seperate thread to provide a current draw. 
+- AutoLEDShutoff: Simple state machine that will shutoff the LED strip when the battery goes below a cutoff. Supports revision 4. 
 
 ### Legacy/Outdated/For Reference Only
 
