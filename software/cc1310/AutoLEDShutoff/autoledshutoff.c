@@ -579,16 +579,6 @@ void* mainThread(void *arg0)
     // This test designed to be connected to a power supply with a set duty cycle that fully charges the
     // battery and waits long enough for the battery to discharge between cycles.
 
-
-    // Turn on power by enabling the 5v supply
-//    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-//                   "Turning on 5v power.");
-//    GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
-//    sleep(1);
-//    whiteLED(displayHandle);
-
-
-
     while (1)
     {
         //GPIO_setConfig(Board_GPIO_BAT_CHG_IN, GPIO_CFG_IN_PU);
@@ -598,14 +588,15 @@ void* mainThread(void *arg0)
         bat_microVolt = 2 * batteryMicroVoltage(displayHandle);
         if (bat_microVolt < 3.01 * 1000000) {
             if (state == 1) {
+                // Cut power to the LEDs.
                 GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
             }
             state = 0;
         } else if ((bat_microVolt > 4 * 1000000) && !POWER_GOOD_INPUT) {
-            // if we turn power on and then immediately try to program the lights there are inconsistent results
             if (state == 0) {
                 Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning on 5v power.");
                 GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
+                // if we turn power on and then immediately try to program the lights there are inconsistent results
                 sleep(1);
                 whiteLED(displayHandle);
             }
@@ -614,12 +605,7 @@ void* mainThread(void *arg0)
         Display_printf(displayHandle, 0, 0,
                        "\r(%02d:%02d) <BAT: %fV> BAT_CHG: %u POWER_GOOD: %d state: %d", clock_seconds/60, clock_seconds % 60, (float) bat_microVolt / 1000000,
                        BAT_CHG_INPUT, POWER_GOOD_INPUT, state);
-        //GPIO_write(Board_GPIO_LED1, GPIO_read(Board_GPIO_POWER_GOOD_IN));
-        //GPIO_write(Board_GPIO_LED1, ~state & 1);
         GPIO_toggle(Board_GPIO_LED1);
-
-        // Turn on the LEDS if we are in the running state
-
 
         sleep(delay);
         clock_seconds += delay;
