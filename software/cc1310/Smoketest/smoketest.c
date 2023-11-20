@@ -439,17 +439,20 @@ void smoketestLED(Display_Handle displayHandle) {
     SPI_init();
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing all white output for 5 seconds (maximum current).");
     WS2812_beginSPI();
-//    allWhite();
-//    sleep(5);
-//    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing RGB for 1 second each.");
-//    allRed();
-//    sleep(1);
-//    allGreen();
-//    sleep(1);
-//    allBlue();
-//    sleep(1);
-//    rainbowAnimation();
-    rainbowGradient();
+    allWhite();
+    sleep(5);
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing RGB for 1 second each.");
+    allRed();
+    sleep(1);
+    allGreen();
+    sleep(1);
+    allBlue();
+    sleep(1);
+    rainbowAnimation();
+    //rainbowGradient();
+
+    // This ends the SPI connection so this function can be called multiple times.
+    WS2812_close();
 
     // Turn off power
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning off 5v power.");
@@ -589,7 +592,7 @@ void* mainThread(void *arg0)
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
     smoketestFlash(displayHandle);
-    //smoketestLED(displayHandle);
+    smoketestLED(displayHandle);
     sendRF(displayHandle);
 
     /* Create application thread(s) */
