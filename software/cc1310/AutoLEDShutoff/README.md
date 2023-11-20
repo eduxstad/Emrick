@@ -1,13 +1,13 @@
 
-# Smoketest
+# AutoLED shutoff
 
 ---
 
 ## Summary
 
-This smoketest is intented to test and demonstrate that all features of the
-Emrick board are working, ideally without creating any smoke. The program
-attempts to print any errors to the UART/serial console. 
+This project is based off of the smoketest is intented to show how to turn off the LED strip when the Battery voltage is low. 
+An implementation like this should prevent any weird shutoff behaviours or reboots when the battery power is low. It uses
+a simple state machine for testing that should be extended for the full project.
 
 ## Peripherals Exercised
 
@@ -18,15 +18,22 @@ attempts to print any errors to the UART/serial console.
 * Supply Voltage - Internal supply voltage monitor of the CC1310.
 * Battery Voltage - ADC measurement of the battery voltage (floats if no
 	battery is present).
-* External Flash - Writes and reads a file from the external flash chip. 
 * 5V Supply - Turns on the boosted 5V supply
-* LED Strip - Displays maximum brightness (white), RGB, and an animation
-	on the LED strip. Turns off after. 
-* RF TX - Transmits a packet at boot. 
-* RF RX - Creates a thread to listen for packets and prints whenever
-	it receives a packet. You can start another board running the 
-	smoketest to trigger this message. 
+* LED Strip - Displays maximum brightness (white).
 * Power LED - The LED should flash after initialization is complete.
+* PGOOD and BAT_CHG signals - shows how to configure GPIO to read these signals from the battery charger.
+
+## State Machine
+
+0: Shutdown: Wait for battery charge (triggered upon low bat voltage)
+
+1: Running:  Display LEDs in white (triggered upon high bat voltage and PGOOD low)
+
+For a real design we need more states like charging, plugged in, etc
+This assumes we will always charge and discharge the battery, in real life this won't be the case.
+This test designed to be connected to a power supply with a set duty cycle that fully charges the
+battery and waits long enough for the battery to discharge between cycles.
+
 
 
 ## Application Design Details
