@@ -16,7 +16,6 @@
 #include <semaphore.h>
 #include <unistd.h>
 
-#define NUM_PATTERNS 10
 #define RESET_LIGHTS 0
 #define ALL_WHITE 1
 #define ALL_RED 2
