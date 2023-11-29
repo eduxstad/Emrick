@@ -70,6 +70,7 @@ extern "C" {
  * SPI used will be SPI at index arg_u8_spiId in your Board.c
  */
 extern void WS2812_beginSPI(void);
+extern void WS2812_restartSPI(void);
 extern void WS2812_close(void);
 extern bool WS2812_show(void);
 extern void WS2812_setPixelColor(uint16_t arg_u16_ledIndex, uint8_t arg_u8_red, uint8_t arg_u8_green, uint8_t arg_u8_blue);

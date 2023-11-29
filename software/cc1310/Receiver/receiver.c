@@ -39,6 +39,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <stdlib.h>
+#include <stdio.h>
+
 /* Driver Header files */
 
 #include <ti/drivers/GPIO.h>
@@ -54,9 +57,7 @@
 
 #include <ti/drivers/ADC.h>
 
-/* Flash Read/Write */
-#include <third_party/spiffs/spiffs.h>
-#include <third_party/spiffs/SPIFFSNVS.h>
+#include "logger.h"
 
 /* Board Header file */
 #include "Board.h"
@@ -81,7 +82,7 @@
 #define PAYLOAD_LENGTH      20
 static RF_Object rfObject;
 static RF_Handle rfHandle;
-static uint32_t packet[PAYLOAD_LENGTH] = {1, 8, 8, 6, 2, 0, 2, 3};
+static uint32_t packet[PAYLOAD_LENGTH];
 RF_Params rfParams;
 
 /* Packet RX Configuration */
@@ -131,32 +132,16 @@ static uint8_t* packetDataPointer;
 /* Threading */
 #define THREADSTACKSIZE (1024)
 
+pthread_t           thread0;
+pthread_t           thread1;
+pthread_t           thread2;
+
+char logBuffer[64];
+
 /* UART Display */
 Display_Handle displayHandle;
 
-/* SPIFFS configuration parameters */
-#define SPIFFS_LOGICAL_BLOCK_SIZE    (4096)
-#define SPIFFS_LOGICAL_PAGE_SIZE     (256)
-#define SPIFFS_FILE_DESCRIPTOR_SIZE  (44)
 
-#define MESSAGE_LENGTH (8)
-uint8_t fileArrayHeap[8] = {1, 8, 8, 6, 2, 0, 2, 3};
-uint8_t fileArrayRead[8] = {0};
-
-/*
- * SPIFFS needs RAM to perform operations on files.  It requires a work buffer
- * which MUST be (2 * LOGICAL_PAGE_SIZE) bytes.
- */
-static uint8_t spiffsWorkBuffer[SPIFFS_LOGICAL_PAGE_SIZE * 2];
-
-/* The array below will be used by SPIFFS as a file descriptor cache. */
-static uint8_t spiffsFileDescriptorCache[SPIFFS_FILE_DESCRIPTOR_SIZE * 4];
-
-/* The array below will be used by SPIFFS as a read/write cache. */
-static uint8_t spiffsReadWriteCache[SPIFFS_LOGICAL_PAGE_SIZE * 2];
-
-spiffs fs;
-SPIFFSNVS_Data spiffsnvsData;
 
 float sup_voltage;
 
@@ -188,7 +173,7 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 
     ADC_Params_init(&adcparams);
 
-    adc = ADC_open(Board_ADC0, &adcparams);
+    adc = ADC_open(Board_ADC6, &adcparams);
 
     if (adc != NULL)
     {
@@ -199,7 +184,7 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 
             adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
             ADC_close(adc);
-            return adcValue0MicroVolt;
+            return adcValue0MicroVolt * 2;
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "ADC0 raw result: %d", adcValue0);
 
@@ -221,75 +206,6 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 
 }
 
-
-void spiffs_init() {
-
-    spiffs_file    fd;
-    spiffs_config  fsConfig;
-    int32_t        status;
-
-
-#ifdef Board_wakeUpExtFlash
-    Board_wakeUpExtFlash();
-#endif
-
-    /* Initialize spiffs, spiffs_config & spiffsnvsdata structures */
-    status = SPIFFSNVS_config(&spiffsnvsData, Board_NVSEXTERNAL, &fs, &fsConfig,
-        SPIFFS_LOGICAL_BLOCK_SIZE, SPIFFS_LOGICAL_PAGE_SIZE);
-    if (status != SPIFFSNVS_STATUS_SUCCESS) {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-            "Error with SPIFFS configuration.");
-
-        while (1);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Mounting flash file system via SPI");
-
-    status = SPIFFS_mount(&fs, &fsConfig, spiffsWorkBuffer,
-        spiffsFileDescriptorCache, sizeof(spiffsFileDescriptorCache),
-        spiffsReadWriteCache, sizeof(spiffsReadWriteCache), NULL);
-    if (status != SPIFFS_OK) {
-        /*
-         * If SPIFFS_ERR_NOT_A_FS is returned; it means there is no existing
-         * file system in memory.  In this case we must unmount, format &
-         * re-mount the new file system.
-         */
-        if (status == SPIFFS_ERR_NOT_A_FS) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "File system will not be found at first. Must unmount.");
-
-            SPIFFS_unmount(&fs);
-            status = SPIFFS_format(&fs);
-            if (status != SPIFFS_OK) {
-                Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                    "Error formatting memory.");
-
-                while (1);
-            }
-
-            status = SPIFFS_mount(&fs, &fsConfig, spiffsWorkBuffer,
-                spiffsFileDescriptorCache, sizeof(spiffsFileDescriptorCache),
-                spiffsReadWriteCache, sizeof(spiffsReadWriteCache), NULL);
-            if (status != SPIFFS_OK) {
-                Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                    "Error mounting file system.");
-
-                while (1);
-            }
-        }
-        else {
-            /* Received an unexpected error when mounting file system  */
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "Error mounting file system: %d.", status);
-
-            while (1);
-        }
-    }
-
-    SPIFFS_unmount(&fs);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Unmounted filesystem.");
-
-}
 
 void sendRF(Display_Handle displayHandle)
 {
@@ -371,14 +287,14 @@ void sendRF(Display_Handle displayHandle)
 
 }
 
-void smoketestLED(Display_Handle displayHandle) {
+void *smoketestLED(void *arg0) {
 
     // TODO: Check if the is being charged before turning on the LED
 
     // Turn on power by enabling the 5v supply
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning on 5v power.");
     GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
-    sleep(1);
+//    sleep(1);
     SPI_init();
 //    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Testing all white output for 5 seconds (maximum current).");
     WS2812_beginSPI();
@@ -392,7 +308,7 @@ void smoketestLED(Display_Handle displayHandle) {
 //    allBlue();
 //    sleep(1);
 //    rainbowAnimation();
-    rainbowGradientHSV();
+    rainbowGradientHSV(displayHandle);
 
     // Turn off power
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning off 5v power.");
@@ -468,9 +384,25 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         packetDataPointer = (uint8_t*)(&currentDataEntry->data + 1);
 
         /* Copy the payload + the status byte to the packet variable */
-        //memcpy(packet, packetDataPointer, (packetLength + 1));
+        memcpy(packet, packetDataPointer, (packetLength + 1));
+        pthread_mutex_lock(&loggerMutex);
+        char * log = (char *) malloc(32);
+        uint16_t num = 0;
+        num += ((uint16_t) packetDataPointer[1]) << 8;
+        num += packetDataPointer[2];
+        ltoa(num, log, 10);
+        log[strlen(log)] = '\0';
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %s", log);
+        strcpy(logBuffer,log);
+        //addLog(displayHandle, log, strlen(log)+1);
+        pthread_mutex_unlock(&loggerMutex);
+//        free(log);
 
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %d, %d", packetDataPointer[0], testFlag);
+
+
+        /************************************************************
+         * Packet Parsing and Pattern Switching
+         ************************************************************/
         if (packetDataPointer[0] == 0xFF) {
             if (testFlag == 0) {
                 testFlag = 1;
@@ -483,17 +415,63 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
             }
         }
+
+        /************************************************************
+         * End Packet Parsing and Pattern Switching
+         ************************************************************/
         RFQueue_nextEntry();
     }
 
 }
+
+void *log(void *arg0) {
+    pthread_mutex_lock(&loggerMutex);
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"log thread.");
+    if (logBuffer[0] != '\0') {
+        addLog(displayHandle, logBuffer, strlen(logBuffer));
+        memset(logBuffer, 0, 64);
+    }
+    pthread_mutex_unlock(&loggerMutex);
+    while (1) sched_yield();
+}
+
+void createReceiverThread(pthread_attr_t attrs) {
+    int retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                       "Unable to create thread.");
+        while (1);
+    }
+}
+
+void createLEDThread(pthread_attr_t attrs) {
+    int retc = pthread_create(&thread1, &attrs, smoketestLED, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                       "Unable to create thread.");
+        while (1);
+    }
+}
+
+void createLogThread(pthread_attr_t attrs) {
+    pthread_cancel(thread0);
+    int retc = pthread_create(&thread2, &attrs, log, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"Unable to create thread.");
+        while (1);
+    }
+}
+
+
 
 /*
  *  ======== mainThread ========
  */
 void* mainThread(void *arg0)
 {
-    pthread_t           thread0;
     pthread_attr_t      attrs;
     struct sched_param  priParam;
     int                 retc;
@@ -532,6 +510,8 @@ void* mainThread(void *arg0)
             0,
             "========================\r\nBoard Reset\r\n========================\r\nSmoketest starting up...");
 
+    pthread_mutex_init(&loggerMutex, NULL);
+
     float supply_volt = supplyVoltage(displayHandle);
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                            "Supply Voltage: %f V", supply_volt);
@@ -543,9 +523,8 @@ void* mainThread(void *arg0)
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
 
-    spiffs_init();
-
-
+    spiffsInit(displayHandle);
+//    removeLogs();
     /* Create application thread(s) */
     pthread_attr_init(&attrs);
 
@@ -559,7 +538,7 @@ void* mainThread(void *arg0)
         while (1);
     }
 
-    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
+    retc |= pthread_attr_setstacksize(&attrs, 512);
     if (retc != 0) {
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                        "Unable to create thread stack size.");
@@ -571,13 +550,7 @@ void* mainThread(void *arg0)
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
 
-    retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread.");
-        while (1);
-    }
+    createReceiverThread(attrs);
 
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                    "Created listening thread.");
@@ -586,18 +559,40 @@ void* mainThread(void *arg0)
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                    "Smoketest start up complete!");
 
-    smoketestLED(displayHandle);
-//    int clock_seconds = 0;
-//    int delay = 1;
-//    while (delay)
-//    {
-//        sleep(1);
-//        supply_volt = supplyVoltage(displayHandle);
-//        bat_microVolt = batteryMicroVoltage(displayHandle);
-//        Display_printf(displayHandle, 0, 0,
-//                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
-//        GPIO_toggle(Board_GPIO_LED1);
-//        clock_seconds += delay;
-//    }
+    pthread_mutex_init(&LEDMutex, NULL);
+    // create LED thread
+
+    createLEDThread(attrs);
+    memset(logBuffer, 0, 64);
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Read: %s", readLogs(displayHandle));
+    int clock_seconds = 0;
+    int delay = 1;
+    while (delay)
+    {
+        if (logBuffer[0] != '\0') {
+//            createLogThread(attrs);
+//            sched_yield();
+
+            pthread_mutex_lock(&loggerMutex);
+            //pthread_cancel(thread0);
+            addLog(displayHandle, logBuffer, strlen(logBuffer));
+            memset(logBuffer, 0, 64);
+            //createReceiverThread(attrs);
+            pthread_mutex_unlock(&loggerMutex);
+
+
+        }
+        sleep(delay);
+        supply_volt = supplyVoltage(displayHandle);
+        pthread_mutex_lock(&LEDMutex);
+        WS2812_close();
+        bat_microVolt = batteryMicroVoltage(displayHandle);
+        WS2812_restartSPI();
+        pthread_mutex_unlock(&LEDMutex);
+        Display_printf(displayHandle, 0, 0,
+                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+        GPIO_toggle(Board_GPIO_LED1);
+        clock_seconds += delay;
+    }
 }
 

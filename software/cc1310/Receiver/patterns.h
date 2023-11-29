@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <ti/display/Display.h>
+#include <ti/display/DisplayUart.h>
 
 /**************************************************************************
  * Manifest Constants
@@ -48,4 +50,4 @@ void allGreen(void);
 void nextPattern(void);
 void rainbowAnimation(void);
 void rainbowGradient(void);
-void rainbowGradientHSV(void);
+void rainbowGradientHSV(Display_Handle displayHandle);
