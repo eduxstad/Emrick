@@ -136,6 +136,9 @@ pthread_t           thread0;
 pthread_t           thread1;
 pthread_t           thread2;
 
+
+pthread_attr_t      attrs;
+
 char logBuffer[64];
 
 /* UART Display */
@@ -435,7 +438,7 @@ void *log(void *arg0) {
     while (1) sched_yield();
 }
 
-void createReceiverThread(pthread_attr_t attrs) {
+void createReceiverThread() {
     int retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
     if (retc != 0) {
         /* pthread_create() failed */
@@ -445,7 +448,7 @@ void createReceiverThread(pthread_attr_t attrs) {
     }
 }
 
-void createLEDThread(pthread_attr_t attrs) {
+void createLEDThread() {
     int retc = pthread_create(&thread1, &attrs, smoketestLED, NULL);
     if (retc != 0) {
         /* pthread_create() failed */
@@ -455,7 +458,7 @@ void createLEDThread(pthread_attr_t attrs) {
     }
 }
 
-void createLogThread(pthread_attr_t attrs) {
+void createLogThread() {
     pthread_cancel(thread0);
     int retc = pthread_create(&thread2, &attrs, log, NULL);
     if (retc != 0) {
@@ -472,7 +475,6 @@ void createLogThread(pthread_attr_t attrs) {
  */
 void* mainThread(void *arg0)
 {
-    pthread_attr_t      attrs;
     struct sched_param  priParam;
     int                 retc;
     int                 detachState;
