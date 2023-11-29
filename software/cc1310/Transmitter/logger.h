@@ -12,6 +12,10 @@
 
 #endif /* LOGGER_H_ */
 
+#include <pthread.h>
+
+pthread_mutex_t loggerMutex;
+
 void spiffsInit(Display_Handle displayHandle);
 void removeLogs(void);
 void addLog(Display_Handle displayHandle, char *log, uint16_t length);

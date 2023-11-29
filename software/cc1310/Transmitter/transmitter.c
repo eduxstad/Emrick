@@ -356,13 +356,7 @@ void* mainThread(void *arg0)
 
 
     sendRF(displayHandle, pktON, 3);
-    sendRF(displayHandle, pktON, 3);
-    sendRF(displayHandle, pktON, 3);
-    sendRF(displayHandle, pktON, 3);
     sleep(15);
-    sendRF(displayHandle, pktOFF, 3);
-    sendRF(displayHandle, pktOFF, 3);
-    sendRF(displayHandle, pktOFF, 3);
     sendRF(displayHandle, pktOFF, 3);
     GPIO_toggle(Board_GPIO_LED1);
 

@@ -121,33 +121,6 @@ void addLog(Display_Handle displayHandle, char *log, uint16_t length) {
     spiffs_config  fsConfig;
     int32_t        status;
 
-
-//    /* Open a file */
-//    fd = SPIFFS_open(&fs, "logFile", SPIFFS_RDWR, 0);
-//    SPIFFS_fremove(&fs,fd);
-//    SPIFFS_close(&fs,fd);
-//    fd = 0;
-//    if (fd < 0) {
-//        /* File not found; create a new file & write message to it */
-//        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Creating logFile...");
-//
-//        fd = SPIFFS_open(&fs, "logFile", SPIFFS_CREAT | SPIFFS_RDWR | SPIFFS_APPEND, 0);
-//        if (fd < 0) {
-//            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-//                "Error creating logFile.");
-//
-//            while (1);
-//        }
-//    }
-//
-//    int32_t s = SPIFFS_write(&fs, (void *) fd, log, strlen(log));
-//    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Writing to logFile... status: %d", s);
-//    if (s < 0) {
-//        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error writing logFile.");
-//        while (1) ;
-//    }
-
-
     /* Open a file */
         fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR | SPIFFS_APPEND, 0);
         if (fd < 0) {
@@ -161,12 +134,9 @@ void addLog(Display_Handle displayHandle, char *log, uint16_t length) {
 
                 while (1);
             }
-
-
-
         }
 
-            log = align8bytes(log, length, displayHandle);
+            align8bytes(log, length, displayHandle);
             Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Writing to spiffsFile...");
             if (SPIFFS_write(&fs, fd, (void *) log, strlen(log)) < 0) {
                 Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error writing spiffsFile.");
@@ -206,7 +176,6 @@ char * readLogs(Display_Handle displayHandle) {
         *(str) = '\0';
         if (len > 8) {
             strcpy(str,tmp);
-            free(tmp);
         }
         *(str+oldLen) = '\0';
         strcat(str,buf);
@@ -252,6 +221,8 @@ char * align8bytes(char * str, uint16_t length) {
         }
         *(tmp+offset) = '\0';
         strcat(tmp, str);
+        strcpy(str, tmp);
+        free(tmp);
     }
     return tmp;
 }

@@ -82,7 +82,7 @@
 #define PAYLOAD_LENGTH      20
 static RF_Object rfObject;
 static RF_Handle rfHandle;
-static uint32_t packet[PAYLOAD_LENGTH] = {1, 8, 8, 6, 2, 0, 2, 3};
+static uint32_t packet[PAYLOAD_LENGTH];
 RF_Params rfParams;
 
 /* Packet RX Configuration */
@@ -131,6 +131,12 @@ static uint8_t* packetDataPointer;
 
 /* Threading */
 #define THREADSTACKSIZE (1024)
+
+pthread_t           thread0;
+pthread_t           thread1;
+pthread_t           thread2;
+
+char logBuffer[64];
 
 /* UART Display */
 Display_Handle displayHandle;
@@ -378,15 +384,18 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         packetDataPointer = (uint8_t*)(&currentDataEntry->data + 1);
 
         /* Copy the payload + the status byte to the packet variable */
-        //memcpy(packet, packetDataPointer, (packetLength + 1));
-
+        memcpy(packet, packetDataPointer, (packetLength + 1));
+        pthread_mutex_lock(&loggerMutex);
         char * log = (char *) malloc(32);
         uint16_t num = 0;
         num += ((uint16_t) packetDataPointer[1]) << 8;
         num += packetDataPointer[2];
-        sprintf(log, "%d\0", num);
+        ltoa(num, log, 10);
+        log[strlen(log)] = '\0';
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %s", log);
-        addLog(displayHandle, log, strlen(log)+1);
+        strcpy(logBuffer,log);
+        //addLog(displayHandle, log, strlen(log)+1);
+        pthread_mutex_unlock(&loggerMutex);
 //        free(log);
 
 
@@ -415,12 +424,54 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
 }
 
+void *log(void *arg0) {
+    pthread_mutex_lock(&loggerMutex);
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"log thread.");
+    if (logBuffer[0] != '\0') {
+        addLog(displayHandle, logBuffer, strlen(logBuffer));
+        memset(logBuffer, 0, 64);
+    }
+    pthread_mutex_unlock(&loggerMutex);
+    while (1) sched_yield();
+}
+
+void createReceiverThread(pthread_attr_t attrs) {
+    int retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                       "Unable to create thread.");
+        while (1);
+    }
+}
+
+void createLEDThread(pthread_attr_t attrs) {
+    int retc = pthread_create(&thread1, &attrs, smoketestLED, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                       "Unable to create thread.");
+        while (1);
+    }
+}
+
+void createLogThread(pthread_attr_t attrs) {
+    pthread_cancel(thread0);
+    int retc = pthread_create(&thread2, &attrs, log, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"Unable to create thread.");
+        while (1);
+    }
+}
+
+
+
 /*
  *  ======== mainThread ========
  */
 void* mainThread(void *arg0)
 {
-    pthread_t           thread0;
     pthread_attr_t      attrs;
     struct sched_param  priParam;
     int                 retc;
@@ -459,6 +510,8 @@ void* mainThread(void *arg0)
             0,
             "========================\r\nBoard Reset\r\n========================\r\nSmoketest starting up...");
 
+    pthread_mutex_init(&loggerMutex, NULL);
+
     float supply_volt = supplyVoltage(displayHandle);
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                            "Supply Voltage: %f V", supply_volt);
@@ -485,7 +538,7 @@ void* mainThread(void *arg0)
         while (1);
     }
 
-    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
+    retc |= pthread_attr_setstacksize(&attrs, 512);
     if (retc != 0) {
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                        "Unable to create thread stack size.");
@@ -497,13 +550,7 @@ void* mainThread(void *arg0)
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
 
-    retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread.");
-        while (1);
-    }
+    createReceiverThread(attrs);
 
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                    "Created listening thread.");
@@ -514,18 +561,27 @@ void* mainThread(void *arg0)
 
     pthread_mutex_init(&LEDMutex, NULL);
     // create LED thread
-    retc = pthread_create(&thread0, &attrs, smoketestLED, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                       "Unable to create thread.");
-        while (1);
-    }
+
+    createLEDThread(attrs);
+    memset(logBuffer, 0, 64);
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Read: %s", readLogs(displayHandle));
     int clock_seconds = 0;
     int delay = 1;
     while (delay)
     {
+        if (logBuffer[0] != '\0') {
+//            createLogThread(attrs);
+//            sched_yield();
+
+            pthread_mutex_lock(&loggerMutex);
+            //pthread_cancel(thread0);
+            addLog(displayHandle, logBuffer, strlen(logBuffer));
+            memset(logBuffer, 0, 64);
+            //createReceiverThread(attrs);
+            pthread_mutex_unlock(&loggerMutex);
+
+
+        }
         sleep(delay);
         supply_volt = supplyVoltage(displayHandle);
         pthread_mutex_lock(&LEDMutex);
@@ -533,8 +589,8 @@ void* mainThread(void *arg0)
         bat_microVolt = batteryMicroVoltage(displayHandle);
         WS2812_restartSPI();
         pthread_mutex_unlock(&LEDMutex);
-//        Display_printf(displayHandle, 0, 0,
-//                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
+        Display_printf(displayHandle, 0, 0,
+                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
         GPIO_toggle(Board_GPIO_LED1);
         clock_seconds += delay;
     }
