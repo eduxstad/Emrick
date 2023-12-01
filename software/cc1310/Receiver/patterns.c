@@ -565,13 +565,13 @@ void lightFunction(int marcher) {
         case 1: {
             pthread_mutex_lock(&LEDMutex);
             if (change != function_flag) {
-                rotate = marcher;
+                rotate = marcher % 3;
                 change = function_flag;
             }
             //Set xmas pattern
-            if(marcher % 3 == rotate) {
+            if(rotate == 0) {
                 for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-                    WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 255, 255);
                 }
             } else {
                 for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
@@ -603,10 +603,12 @@ void lightFunction(int marcher) {
             if (color) {
                 if (time >= index) {
                     for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-                        WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
                     }
                 } else {
-                    WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                    }
                 }
             } else {
                 if (time >= index) {
@@ -614,7 +616,9 @@ void lightFunction(int marcher) {
                         WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
                     }
                 } else {
-                    WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                    }
                 }
             }
 
@@ -622,7 +626,7 @@ void lightFunction(int marcher) {
             WS2812_show();
             pthread_mutex_unlock(&LEDMutex);
 
-            usleep(300000);
+            usleep(100000);
             time++;
             if (time == 6) {
                 color = !color;

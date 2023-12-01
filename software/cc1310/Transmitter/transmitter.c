@@ -342,19 +342,19 @@ void* mainThread(void *arg0)
     pktXmasShift[0] = 0xBA;
     uint8_t pktSinglePulse[1];
     pktSinglePulse[0] = 0xBB;
-    int delay = 120;
+    int delay = 10;
 
     while (1) {
+        sendRF(displayHandle, pktXmasShift, 1);
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
         sendRF(displayHandle, pktXmasPulse, 1);
         GPIO_toggle(Board_GPIO_LED1);
         sleep(delay);
-        sendRF(displayHandle, pktCandyCane, 1);
-        GPIO_toggle(Board_GPIO_LED1);
-        sleep(delay);
-        sendRF(displayHandle, pktSinglePulse, 1);
-        GPIO_toggle(Board_GPIO_LED1);
-        sleep(delay);
-//        sendRF(displayHandle, pktXmasShift, 1);
+//        sendRF(displayHandle, pktCandyCane, 1);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(delay);
+//        sendRF(displayHandle, pktSinglePulse, 1);
 //        GPIO_toggle(Board_GPIO_LED1);
 //        sleep(delay);
     }
