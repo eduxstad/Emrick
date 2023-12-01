@@ -426,7 +426,7 @@ void *transmit(void* args) {
     pktXmasShift[0] = 0xBA;
     uint8_t pktSinglePulse[1];
     pktSinglePulse[0] = 0xBB;
-    int delay = 5;
+    int delay = 120;
 
     while (1) {
         sendRF(displayHandle, pktXmasPulse, 1);
