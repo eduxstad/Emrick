@@ -204,7 +204,7 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 }
 
 
-void sendRF(Display_Handle displayHandle)
+void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
 {
     RF_Params_init(&rfParams);
 
@@ -220,8 +220,8 @@ void sendRF(Display_Handle displayHandle)
     /* Set the frequency */
     RF_postCmd(rfHandle, (RF_Op*) &RF_cmdFs, RF_PriorityNormal, NULL, 0);
 
-    RF_cmdPropTx.pktLen = PAYLOAD_LENGTH;
-    RF_cmdPropTx.pPkt = packet;
+    RF_cmdPropTx.pktLen = length;
+    RF_cmdPropTx.pPkt = pkt;
     RF_cmdPropTx.startTrigger.triggerType = TRIG_NOW;
 
     /* Send packet */
@@ -281,7 +281,6 @@ void sendRF(Display_Handle displayHandle)
     }
 
     RF_close(rfHandle);
-
 }
 
 void *smoketestLED(void *arg0) {
@@ -418,6 +417,37 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
 }
 
+void *transmit(void* args) {
+    uint8_t pktCandyCane[1];
+    pktCandyCane[0] = 0xAA;
+    uint8_t pktXmasPulse[1];
+    pktXmasPulse[0] = 0xAB;
+    uint8_t pktXmasShift[1];
+    pktXmasShift[0] = 0xBA;
+    uint8_t pktSinglePulse[1];
+    pktSinglePulse[0] = 0xBB;
+    int delay = 5;
+
+    while (1) {
+        sendRF(displayHandle, pktXmasPulse, 1);
+        function_flag = 1;
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+        sendRF(displayHandle, pktCandyCane, 1);
+        function_flag = 0;
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+        sendRF(displayHandle, pktSinglePulse, 1);
+        function_flag = 3;
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+//        sendRF(displayHandle, pktXmasShift, 1);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(delay);
+//        function_flag = 2;
+    }
+}
+
 void createReceiverThread(pthread_attr_t attrs) {
     int retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
     if (retc != 0) {
@@ -523,7 +553,6 @@ void* mainThread(void *arg0)
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
 
-    createReceiverThread(attrs);
 
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                    "Created listening thread.");
@@ -536,6 +565,16 @@ void* mainThread(void *arg0)
     // create LED thread
 
     createLEDThread(attrs);
+
+
+    retc = pthread_create(&thread0, &attrs, transmit, NULL);
+    if (retc != 0) {
+        /* pthread_create() failed */
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                       "Unable to create thread.");
+        while (1);
+    }
+
     int clock_seconds = 0;
     int delay = 1;
     while (delay)
