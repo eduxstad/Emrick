@@ -426,25 +426,25 @@ void *transmit(void* args) {
     pktXmasShift[0] = 0xBA;
     uint8_t pktSinglePulse[1];
     pktSinglePulse[0] = 0xBB;
-    int delay = 120;
+    int delay = 5;
 
     while (1) {
-        sendRF(displayHandle, pktXmasPulse, 1);
-        function_flag = 1;
-        GPIO_toggle(Board_GPIO_LED1);
-        sleep(delay);
         sendRF(displayHandle, pktCandyCane, 1);
         function_flag = 0;
         GPIO_toggle(Board_GPIO_LED1);
         sleep(delay);
+        sendRF(displayHandle, pktXmasPulse, 1);
+        function_flag = 1;
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+        sendRF(displayHandle, pktXmasShift, 1);
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+        function_flag = 2;
         sendRF(displayHandle, pktSinglePulse, 1);
         function_flag = 3;
         GPIO_toggle(Board_GPIO_LED1);
         sleep(delay);
-//        sendRF(displayHandle, pktXmasShift, 1);
-//        GPIO_toggle(Board_GPIO_LED1);
-//        sleep(delay);
-//        function_flag = 2;
     }
 }
 
