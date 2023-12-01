@@ -428,7 +428,7 @@ void createReceiverThread(pthread_attr_t attrs) {
     }
 }
 
-void createLEDThread() {
+void createLEDThread(pthread_attr_t attrs) {
     int retc = pthread_create(&thread1, &attrs, smoketestLED, NULL);
     if (retc != 0) {
         /* pthread_create() failed */
@@ -448,6 +448,7 @@ void* mainThread(void *arg0)
     struct sched_param  priParam;
     int                 retc;
     int                 detachState;
+    pthread_attr_t attrs;
 
     /* Call driver init functions */
     GPIO_init();
