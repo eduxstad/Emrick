@@ -134,12 +134,6 @@ static uint8_t* packetDataPointer;
 
 pthread_t           thread0;
 pthread_t           thread1;
-pthread_t           thread2;
-
-
-pthread_attr_t      attrs;
-
-char logBuffer[64];
 
 /* UART Display */
 Display_Handle displayHandle;
@@ -311,7 +305,7 @@ void *smoketestLED(void *arg0) {
 //    allBlue();
 //    sleep(1);
 //    rainbowAnimation();
-    rainbowGradientHSV(displayHandle);
+    lightFunction(0);
 
     // Turn off power
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning off 5v power.");
@@ -388,37 +382,34 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
         /* Copy the payload + the status byte to the packet variable */
         memcpy(packet, packetDataPointer, (packetLength + 1));
-        pthread_mutex_lock(&loggerMutex);
-        char * log = (char *) malloc(32);
-        uint16_t num = 0;
-        num += ((uint16_t) packetDataPointer[1]) << 8;
-        num += packetDataPointer[2];
-        ltoa(num, log, 10);
-        log[strlen(log)] = '\0';
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet! %s", log);
-        strcpy(logBuffer,log);
-        //addLog(displayHandle, log, strlen(log)+1);
-        pthread_mutex_unlock(&loggerMutex);
-//        free(log);
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "[RF Thread] Received packet!");
 
 
 
         /************************************************************
          * Packet Parsing and Pattern Switching
          ************************************************************/
-        if (packetDataPointer[0] == 0xFF) {
-            if (testFlag == 0) {
-                testFlag = 1;
-                GPIO_toggle(Board_GPIO_LED1);
+        if (packetDataPointer[0] == 0xAA) {
+            //Candy Cane
+            if (function_flag != 0) {
+                function_flag = 0;
             }
-        } else if (packetDataPointer[0] == 0x00) {
-            if (testFlag == 1) {
-                testFlag = 0;
-                GPIO_toggle(Board_GPIO_LED1);
-
+        } else if (packetDataPointer[0] == 0xAB) {
+            //Xmas Pulse
+            if (function_flag != 1) {
+                function_flag = 1;
+            }
+        } else if (packetDataPointer[0] == 0xBA) {
+            //Xmas Shift
+            if (function_flag != 2) {
+                function_flag = 2;
+            }
+        } else if (packetDataPointer[0] == 0xBB) {
+            //Single Pulse
+            if (function_flag != 3) {
+                function_flag = 3;
             }
         }
-
         /************************************************************
          * End Packet Parsing and Pattern Switching
          ************************************************************/
@@ -427,18 +418,7 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 
 }
 
-void *log(void *arg0) {
-    pthread_mutex_lock(&loggerMutex);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"log thread.");
-    if (logBuffer[0] != '\0') {
-        addLog(displayHandle, logBuffer, strlen(logBuffer));
-        memset(logBuffer, 0, 64);
-    }
-    pthread_mutex_unlock(&loggerMutex);
-    while (1) sched_yield();
-}
-
-void createReceiverThread() {
+void createReceiverThread(pthread_attr_t attrs) {
     int retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
     if (retc != 0) {
         /* pthread_create() failed */
@@ -454,16 +434,6 @@ void createLEDThread() {
         /* pthread_create() failed */
         Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                        "Unable to create thread.");
-        while (1);
-    }
-}
-
-void createLogThread() {
-    pthread_cancel(thread0);
-    int retc = pthread_create(&thread2, &attrs, log, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"Unable to create thread.");
         while (1);
     }
 }
@@ -525,8 +495,6 @@ void* mainThread(void *arg0)
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
 
-    spiffsInit(displayHandle);
-//    removeLogs();
     /* Create application thread(s) */
     pthread_attr_init(&attrs);
 
@@ -548,6 +516,8 @@ void* mainThread(void *arg0)
         while (1);
     }
 
+    function_flag = 0;
+
     /* Create RX Listener thread */
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
@@ -565,25 +535,10 @@ void* mainThread(void *arg0)
     // create LED thread
 
     createLEDThread(attrs);
-    memset(logBuffer, 0, 64);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Read: %s", readLogs(displayHandle));
     int clock_seconds = 0;
     int delay = 1;
     while (delay)
     {
-        if (logBuffer[0] != '\0') {
-//            createLogThread(attrs);
-//            sched_yield();
-
-            pthread_mutex_lock(&loggerMutex);
-            //pthread_cancel(thread0);
-            addLog(displayHandle, logBuffer, strlen(logBuffer));
-            memset(logBuffer, 0, 64);
-            //createReceiverThread(attrs);
-            pthread_mutex_unlock(&loggerMutex);
-
-
-        }
         sleep(delay);
         supply_volt = supplyVoltage(displayHandle);
         pthread_mutex_lock(&LEDMutex);
