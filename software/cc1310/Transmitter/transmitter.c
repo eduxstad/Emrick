@@ -329,36 +329,35 @@ void* mainThread(void *arg0)
                         0,
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
-    //smoketestFlash(displayHandle);
 
-//    while (1) {
-//        sendRF(displayHandle);
-//        GPIO_toggle(Board_GPIO_LED1);
-//        sleep(1);
-//    }
-    spiffsInit(displayHandle);
-//    removeLogs();
     uint8_t pktON[3];
-    pktON[0] = 0xFF;
+    pktON[0] = 0x00;
     uint8_t pktOFF[3];
-    pktOFF[0] = 0x00;
+    pktOFF[0] = 0xFF;
+    uint8_t pktCandyCane[1];
+    pktCandyCane[0] = 0xAA;
+    uint8_t pktXmasPulse[1];
+    pktXmasPulse[0] = 0xAB;
+    uint8_t pktXmasShift[1];
+    pktXmasShift[0] = 0xBA;
+    uint8_t pktSinglePulse[1];
+    pktSinglePulse[0] = 0xBB;
+    int delay = 120;
 
-    uint16_t logNum = getLastLog(displayHandle)+1;
-    char buf[5];
-    sprintf(buf, "%d\0", logNum);
-
-    pktON[1] = (uint8_t) (logNum >> 8 & 0xFF);
-    pktON[2] = (uint8_t) (logNum & 0xFF);
-    pktOFF[1] = (uint8_t) (logNum >> 8 & 0xFF);
-    pktOFF[2] = (uint8_t) (logNum & 0xFF);
-    addLog(displayHandle, buf, 5);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Wrote to File: %s", readLogs(displayHandle));
-
-
-    sendRF(displayHandle, pktON, 3);
-    sleep(15);
-    sendRF(displayHandle, pktOFF, 3);
-    GPIO_toggle(Board_GPIO_LED1);
+    while (1) {
+        sendRF(displayHandle, pktXmasPulse, 1);
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+        sendRF(displayHandle, pktCandyCane, 1);
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+        sendRF(displayHandle, pktSinglePulse, 1);
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+//        sendRF(displayHandle, pktXmasShift, 1);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(delay);
+    }
 
 
     while (1) {

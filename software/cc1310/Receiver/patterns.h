@@ -26,6 +26,10 @@ uint16_t testFlag;
 uint16_t timer;
 pthread_mutex_t LEDMutex;
 
+
+/* Function Selector */
+uint8_t function_flag;
+
 /**************************************************************************
  * Macros
  **************************************************************************/
@@ -50,4 +54,9 @@ void allGreen(void);
 void nextPattern(void);
 void rainbowAnimation(void);
 void rainbowGradient(void);
+void CandyCane();
+void XmasShift(int marcher);
+void XmasPulse(int marcher);
+void SinglePulse();
 void rainbowGradientHSV(Display_Handle displayHandle);
+void lightFunction(int marcher);
