@@ -305,7 +305,7 @@ void *smoketestLED(void *arg0) {
 //    allBlue();
 //    sleep(1);
 //    rainbowAnimation();
-    lightFunction(2);
+    lightFunction(0);
 
     // Turn off power
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning off 5v power.");
