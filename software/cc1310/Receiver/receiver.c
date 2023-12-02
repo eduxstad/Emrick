@@ -305,7 +305,7 @@ void *smoketestLED(void *arg0) {
 //    allBlue();
 //    sleep(1);
 //    rainbowAnimation();
-    lightFunction(0);
+    lightFunction(6);
 
     // Turn off power
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Turning off 5v power.");
@@ -408,6 +408,10 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
             //Single Pulse
             if (function_flag != 3) {
                 function_flag = 3;
+            }
+        } else {
+            if (function_flag != 4) {
+                function_flag = 4;
             }
         }
         /************************************************************
