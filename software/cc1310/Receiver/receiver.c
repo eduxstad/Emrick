@@ -408,6 +408,10 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
             if (function_flag != 3) {
                 function_flag = 3;
             }
+        } else {
+            if (function_flag != 4) {
+                function_flag = 4;
+            }
         }
         /************************************************************
          * End Packet Parsing and Pattern Switching
@@ -426,25 +430,31 @@ void *transmit(void* args) {
     pktXmasShift[0] = 0xBA;
     uint8_t pktSinglePulse[1];
     pktSinglePulse[0] = 0xBB;
+    uint8_t pktOFF[1];
+    pktOFF[0] = 0x00;
     int delay = 60;
 
     while (1) {
-        sendRF(displayHandle, pktCandyCane, 1);
-        function_flag = 0;
+        sendRF(displayHandle, pktOFF, 1);
+        function_flag = 4;
         GPIO_toggle(Board_GPIO_LED1);
         sleep(delay);
-        sendRF(displayHandle, pktXmasPulse, 1);
-        function_flag = 1;
-        GPIO_toggle(Board_GPIO_LED1);
-        sleep(delay);
-        sendRF(displayHandle, pktXmasShift, 1);
-        GPIO_toggle(Board_GPIO_LED1);
-        function_flag = 2;
-        sleep(delay);
-        sendRF(displayHandle, pktSinglePulse, 1);
-        function_flag = 3;
-        GPIO_toggle(Board_GPIO_LED1);
-        sleep(delay);
+//        sendRF(displayHandle, pktCandyCane, 1);
+//        function_flag = 0;
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(delay);
+//        sendRF(displayHandle, pktXmasPulse, 1);
+//        function_flag = 1;
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(delay);
+//        sendRF(displayHandle, pktXmasShift, 1);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        function_flag = 2;
+//        sleep(delay);
+//        sendRF(displayHandle, pktSinglePulse, 1);
+//        function_flag = 3;
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(delay);
     }
 }
 

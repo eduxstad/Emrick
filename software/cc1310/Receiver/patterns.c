@@ -672,6 +672,15 @@ void lightFunction(int marcher) {
             }
             break;
         }
+        case 4: {
+            pthread_mutex_lock(&LEDMutex);
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
+            }
+            WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
+            break;
+        }
         }
     }
 }
