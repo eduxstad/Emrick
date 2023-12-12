@@ -13,7 +13,8 @@ serial console (sampled every 5 seconds).
 An implementation like this should prevent any weird shutoff behaviours or reboots when the 
 battery power is low. The simple state machine should be extended for the full project.
 
-The GPIO (PGOOD, BAT_CHG) is configured for Rev 4.
+The GPIO (PGOOD, BAT_CHG) is configured for Rev 4. Double check the other pins are
+correct for your revision.
 
 ## Peripherals Exercised
 
