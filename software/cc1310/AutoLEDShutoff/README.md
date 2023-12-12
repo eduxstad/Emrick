@@ -5,9 +5,15 @@
 
 ## Summary
 
-This project is based off of the smoketest is intented to show how to turn off the LED strip when the Battery voltage is low. 
-An implementation like this should prevent any weird shutoff behaviours or reboots when the battery power is low. It uses
-a simple state machine for testing that should be extended for the full project.
+This project is based off of the smoketest is intented to show a simple state machine that 
+turns off the LED strip when the Battery voltage is low. THE LED is configured to show
+whether the battery is charging, and when the battery stops charging the power is unplugged,
+the LED strip turns on. The last 50 seconds of battery voltage history is also printed to the
+serial console (sampled every 5 seconds).
+An implementation like this should prevent any weird shutoff behaviours or reboots when the 
+battery power is low. The simple state machine should be extended for the full project.
+
+The GPIO (PGOOD, BAT_CHG) is configured for Rev 4.
 
 ## Peripherals Exercised
 

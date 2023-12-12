@@ -567,10 +567,11 @@ void* mainThread(void *arg0)
             "========================\r\nBoard Reset\r\n========================\r\Board starting up...");
 
     int clock_seconds = 0;
-    int delay = 1;
+    int delay = 5;
     uint32_t bat_microVolt;
     uint8_t BAT_CHG_INPUT = 0;
     uint8_t POWER_GOOD_INPUT = 0;
+    float bat_hist[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     int state = 0;
     // 0: Shutdown: Wait for battery charge (triggered upon low bat voltage)
     // 1: Running:  Display LEDs in white (triggered upon high bat voltage and PGOOD low)
@@ -602,10 +603,18 @@ void* mainThread(void *arg0)
             }
             state = 1;
         }
+        uint8_t i = 9;
+        while (i > 0) {
+            bat_hist[i] = bat_hist[i-1];
+            i--;
+        }
+        bat_hist[0] = (float) bat_microVolt / 1000000;
         Display_printf(displayHandle, 0, 0,
                        "\r(%02d:%02d) <BAT: %fV> BAT_CHG: %u POWER_GOOD: %d state: %d", clock_seconds/60, clock_seconds % 60, (float) bat_microVolt / 1000000,
                        BAT_CHG_INPUT, POWER_GOOD_INPUT, state);
-        GPIO_toggle(Board_GPIO_LED1);
+
+        Display_printf(displayHandle, 0, 0, "\rBattery Voltages: {%f, %f, %f, %f, %f, %f, %f, %f, %f, %f}", bat_hist[0], bat_hist[1],bat_hist[2],bat_hist[3],bat_hist[4],bat_hist[5],bat_hist[6],bat_hist[7],bat_hist[8],bat_hist[9]);
+        GPIO_write(Board_GPIO_LED1, ~BAT_CHG_INPUT & 1);
 
         sleep(delay);
         clock_seconds += delay;
