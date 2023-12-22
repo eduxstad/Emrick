@@ -694,6 +694,10 @@
     (stroke (width 0.2) (type default))
     (uuid c2c75e32-885d-49ba-94e7-eb4e74d8d5bd)
   )
+  (polyline (pts (xy 58.42 46.99) (xy 60.96 46.99))
+    (stroke (width 0.2) (type default))
+    (uuid c6499c35-be09-4ea2-928a-01b7bb43df3e)
+  )
 
   (wire (pts (xy 224.79 24.13) (xy 229.87 24.13))
     (stroke (width 0) (type default))
