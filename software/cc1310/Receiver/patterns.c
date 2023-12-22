@@ -20,6 +20,10 @@
 #include <sched.h>
 #include <math.h>
 
+
+#include <ti/drivers/ADC.h>
+
+
 //TODO : ADD limitation on NB_PIXELS
 
 const uint8_t HSVlights[61] =
@@ -417,7 +421,7 @@ void rainbowGradient(void)
 }
 
 
-void rainbowGradientHSV() {
+void rainbowGradientHSV(Display_Handle displayHandle) {
     int i = 0;
     useconds_t time = 20700;
     uint16_t test_led = 3;
@@ -425,6 +429,7 @@ void rainbowGradientHSV() {
         int j = 0;
         for (j = 0; j < 300; j++) {
             RGB rgb;
+            pthread_mutex_lock(&LEDMutex);
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 rgb = hsvToRgb((float)j,1.0,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
@@ -435,11 +440,16 @@ void rainbowGradientHSV() {
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
             WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
             usleep(time);
         }
+//        WS2812_close();
+//        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"Battery Voltage %d", battMicroVoltage());
+//        WS2812_restartSPI();
         float k = 0;
         for (k = 0; k < 1.0; k += 0.011) {
             RGB rgb;
+            pthread_mutex_lock(&LEDMutex);
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 rgb = hsvToRgb((float)300,1.0 - k,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
@@ -450,10 +460,12 @@ void rainbowGradientHSV() {
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
             WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
             usleep(time);
         }
         for (j = 1; j < 60; j++) {
             RGB rgb;
+            pthread_mutex_lock(&LEDMutex);
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 rgb = hsvToRgb(0.0,(float)j / 60.0,1.0);
                 WS2812_setPixelColor(loc_u16_pixelIndex, rgb.r, rgb.g, rgb.b);
@@ -464,7 +476,368 @@ void rainbowGradientHSV() {
 
             //Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d, %d, %d, %d", j, rgb.r, rgb.g, rgb.b);
             WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
             usleep(time);
         }
+    }
+}
+
+uint32_t battMicroVoltage(Display_Handle displayHandle)
+{
+    ADC_Handle adc;
+    ADC_Params adcparams;
+    uint16_t adcValue0;
+    uint32_t adcValue0MicroVolt;
+    int_fast16_t res;
+
+    ADC_Params_init(&adcparams);
+
+    adc = ADC_open(Board_ADC0, &adcparams);
+
+    if (adc != NULL)
+    {
+        res = ADC_convert(adc, &adcValue0);
+
+        if (res == ADC_STATUS_SUCCESS)
+        {
+
+            adcValue0MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue0);
+            ADC_close(adc);
+            return adcValue0MicroVolt;
+
+            //Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "ADC0 raw result: %d", adcValue0);
+
+        }
+        else
+        {
+            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                           "ADC0 convert failed\n");
+        }
+
+    }
+    else
+    {
+        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                       "Error initializing ADC0\n");
+    }
+
+    ADC_close(adc);
+
+}
+
+
+void lightFunction(int marcher) {
+    int change = -1;{
+    int rotate = 0;
+    int time = 0;
+    int index = abs(marcher - 6);
+    bool color = true;
+    while (1)
+        switch(function_flag) {
+        case 0: {
+            pthread_mutex_lock(&LEDMutex);
+            if (change != function_flag) {
+                rotate = 0;
+                change = function_flag;
+            }
+            //Set candy cane pattern
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                if (loc_u16_pixelIndex % 5 == rotate || loc_u16_pixelIndex % 5 == (rotate + 1) % 5) {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                } else {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 255, 255);
+                }
+            }
+
+            //Show the changes
+            WS2812_show();
+
+            usleep(300000);
+
+            //Rotate by 2 lights
+            rotate++;
+            if (rotate == 5) {
+                rotate = 0;
+            }
+            pthread_mutex_unlock(&LEDMutex);
+            break;
+        }
+        case 1: {
+            pthread_mutex_lock(&LEDMutex);
+            if (change != function_flag) {
+                rotate = marcher % 3;
+                change = function_flag;
+            }
+            //Set xmas pattern
+            if(rotate == 0) {
+                for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 255, 255);
+                }
+            } else {
+                for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                }
+            }
+
+           //Show the changes
+            WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
+
+            usleep(800000);
+
+           //Rotate by 1 person
+            rotate++;
+            if (rotate == 3) {
+                rotate = 0;
+            }
+            break;
+        }
+        case 2: {
+            pthread_mutex_lock(&LEDMutex);
+            if (change != function_flag) {
+                time = 0;
+                index = abs(marcher - 6);
+                change = function_flag;
+                color = true;
+            }
+            if (color) {
+                if (time >= index) {
+                    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                    }
+                } else {
+                    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                    }
+                }
+            } else {
+                if (time >= index) {
+                    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                    }
+                } else {
+                    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                    }
+                }
+            }
+
+            //Show the changes
+            WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
+
+            usleep(100000);
+            time++;
+            if (time == 6) {
+                color = !color;
+                time = 0;
+            }
+            break;
+        }
+        case 3: {
+            pthread_mutex_lock(&LEDMutex);
+            if (change != function_flag) {
+                int time = 0;
+                int index = abs(marcher - 6);
+                change = function_flag;
+                color = true;
+            }
+            if (color) {
+                for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                    if (time >= abs(loc_u16_pixelIndex - (NB_PIXELS / 2))) {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                    } else {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                    }
+                }
+            } else {
+                for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                    if (time >= abs(loc_u16_pixelIndex - (NB_PIXELS / 2))) {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                    } else {
+                        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                    }
+                }
+            }
+
+            //Show the changes
+            WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
+
+            usleep(30000);
+            time++;
+            if (time == NB_PIXELS / 2) {
+                color = !color;
+                time = 0;
+            }
+            break;
+        }
+        default: {
+            pthread_mutex_lock(&LEDMutex);
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
+            }
+            WS2812_show();
+            pthread_mutex_unlock(&LEDMutex);
+            break;
+        }
+        }
+    }
+}
+
+
+//Christmas Parade Patterns
+void CandyCane() {
+    //Outer loop goes forever
+    int rotate = 0;
+    while(function_flag == 0) {
+        //Set candy cane pattern
+        for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+            if (loc_u16_pixelIndex % 5 == rotate || loc_u16_pixelIndex % 5 == (rotate + 1) % 5) {
+                WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+            } else {
+                WS2812_setPixelColor(loc_u16_pixelIndex, 255, 255, 255);
+            }
+        }
+        
+        //Show the changes
+        WS2812_show();
+
+        usleep(300000);
+
+        //Rotate by 2 lights
+        rotate++;
+        if (rotate == 5) {
+            rotate = 0;
+        }
+    }
+    switch (function_flag) {
+    case 0: CandyCane(); break;
+    case 1: XmasShift(0); break;
+    case 2: XmasPulse(0); break;
+    case 3: SinglePulse(); break;
+    default: CandyCane();
+    }
+}
+
+
+//Colors shift across a rank (ASSUMES THEY ALL START AT THE SAME TIME)
+void XmasShift(int marcher) {
+    //Outer loop goes forever
+    int rotate = marcher;
+    while(function_flag == 1) {
+        //Set xmas pattern
+        if(marcher % 3 == rotate) {
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+            }
+        } else {
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+            }
+        }
+        
+        //Show the changes
+        WS2812_show();
+
+        usleep(800000);
+
+        //Rotate by 1 person 
+        rotate++;
+        if (rotate == 3) {
+            rotate = 0;
+        }
+    }
+    switch (function_flag) {
+    case 0: CandyCane(); break;
+    case 1: XmasShift(0); break;
+    case 2: XmasPulse(0); break;
+    case 3: SinglePulse(); break;
+    default: CandyCane();
+    }
+}
+
+void XmasPulse(int marcher) {
+    //Outer loop goes forever
+    int time = 0;
+    int index = abs(marcher - 6); //Middle of the ranks are 0, incrementing outside
+    bool color = true;
+    while(function_flag == 2) {
+        if (color) {
+            if (time >= index) {
+                for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                }
+            } else {
+                WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+            }
+        } else {
+            if (time >= index) {
+                for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                }
+            } else {
+                WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+            }
+        }
+        
+        //Show the changes
+        WS2812_show();
+
+        usleep(300000);
+        time++;
+        if (time == 6) {
+            color = !color;
+            time = 0;
+        }
+    }
+    switch (function_flag) {
+    case 0: CandyCane(); break;
+    case 1: XmasShift(0); break;
+    case 2: XmasPulse(0); break;
+    case 3: SinglePulse(); break;
+    default: CandyCane();
+    }
+}
+
+void SinglePulse() {
+    //Outer loop goes forever
+    int time = 0;
+    bool color = true;
+    while(function_flag == 3) {
+        if (color) {
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                if (time >= abs(loc_u16_pixelIndex - (NB_PIXELS / 2))) {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                } else {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                }
+            }
+        } else {
+            for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                if (time >= abs(loc_u16_pixelIndex - (NB_PIXELS / 2))) {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 255, 0, 0);
+                } else {
+                    WS2812_setPixelColor(loc_u16_pixelIndex, 0, 255, 0);
+                }
+            }
+        }
+        
+        //Show the changes
+        WS2812_show();
+
+        usleep(30000);
+        time++;
+        if (time == NB_PIXELS / 2) {
+            color = !color;
+            time = 0;
+        }
+    }
+    switch (function_flag) {
+    case 0: CandyCane(); break;
+    case 1: XmasShift(0); break;
+    case 2: XmasPulse(0); break;
+    case 3: SinglePulse(); break;
+    default: CandyCane();
     }
 }

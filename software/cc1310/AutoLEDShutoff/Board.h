@@ -50,9 +50,8 @@ extern "C" {
 
 /* These #defines allow us to reuse TI-RTOS across other device families */
 
-#define Board_ADC0              CC1310_LAUNCHXL_ADC0
+#define Board_ADC0              CC1310_LAUNCHXL_ADC6
 #define Board_ADC1              CC1310_LAUNCHXL_ADC1
-#define Board_ADC6              CC1310_LAUNCHXL_ADC6
 
 #define Board_ADCBUF0           CC1310_LAUNCHXL_ADCBUF0
 #define Board_ADCBUF0CHANNEL0   CC1310_LAUNCHXL_ADCBUF0CHANNEL0
@@ -88,6 +87,8 @@ extern "C" {
 #define Board_GPIO_LED_OFF      CC1310_LAUNCHXL_GPIO_LED_OFF
 #define Board_GPIO_TMP116_EN    CC1310_LAUNCHXL_GPIO_TMP116_EN
 #define Board_GPIO_BOOST_EN     CC1310_LAUNCHXL_GPIO_BOOST_EN
+#define Board_GPIO_BAT_CHG_IN   CC1310_LAUNCHXL_GPIO_BAT_CHG_IN
+#define Board_GPIO_POWER_GOOD_IN CC1310_LAUNCHXL_GPIO_POWER_GOOD_IN
 
 #define Board_GPTIMER0A         CC1310_LAUNCHXL_GPTIMER0A
 #define Board_GPTIMER0B         CC1310_LAUNCHXL_GPTIMER0B

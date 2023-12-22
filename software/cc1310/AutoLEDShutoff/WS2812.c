@@ -98,26 +98,6 @@ void WS2812_beginSPI(void)
     WS2812_show();
 }
 
-void WS2812_restartSPI(void) {
-    SPI_Params      spiParams;
-    uint16_t loc_u16_pixelIndex;
-
-
-    SPI_Params_init(&spiParams);
-    spiParams.frameFormat = SPI_POL0_PHA1;
-    spiParams.bitRate = 2420000;
-    masterSpi = SPI_open(CC1310_LAUNCHXL_SPI1, &spiParams);
-
-
-    //This is needed
-    /** Put all led to 0 */
-//    for(loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++)
-//    {
-//        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
-//    }
-    WS2812_show();
-}
-
 void WS2812_close(void)
 {
     SPI_close(masterSpi);

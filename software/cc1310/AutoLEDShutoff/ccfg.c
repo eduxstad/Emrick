@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,64 +25,27 @@
  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
  * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
  * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /*
- *  ======== main_tirtos.c ========
+ *  ======== ccfg.c ========
+ *  Customer Configuration for CC26xx and CC13xx devices.  This file is used to
+ *  configure Boot ROM, start-up code, and SW radio behaviour.
+ *
+ *  By default, driverlib startup_files/ccfg.c settings are used.  However, if
+ *  changes are required there are two means to do so:
+ *
+ *    1.  Remove this file and copy driverlib's startup_files/ccfg.c file in
+ *        its place.  Make all changes to the file.  Changes made are local to
+ *        the project and will not affect other projects.
+ *
+ *    2.  Perform changes to driverlib startup_files/ccfg.c file.  Changes
+ *        made to this file will be applied to all projects.  This file must
+ *        remain unmodified.
  */
-#include <stdint.h>
 
-/* POSIX Header files */
-#include <pthread.h>
-
-/* RTOS header files */
-#include <ti/sysbios/BIOS.h>
-
-/* Example/Board Header files */
-#include <ti/drivers/Board.h>
-
-extern void *mainThread(void *arg0);
-
-/* Stack size in bytes */
-#define THREADSTACKSIZE    2048
-
-/*
- *  ======== main ========
- */
-int main(void)
-{
-    pthread_t           thread;
-    pthread_attr_t      attrs;
-    struct sched_param  priParam;
-    int                 retc;
-
-    /* Call driver init functions */
-    Board_init();
-
-    /* Initialize the attributes structure with default values */
-    pthread_attr_init(&attrs);
-
-    /* Set priority, detach state, and stack size attributes */
-    priParam.sched_priority = 1;
-    retc = pthread_attr_setschedparam(&attrs, &priParam);
-    retc |= pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
-    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
-    if (retc != 0) {
-        /* failed to set attributes */
-        while (1) {}
-    }
-
-    retc = pthread_create(&thread, &attrs, mainThread, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        while (1) {}
-    }
-
-    BIOS_start();
-
-    return (0);
-}
+#include <ti/devices/DeviceFamily.h>
+#include DeviceFamily_constructPath(startup_files/ccfg.c)

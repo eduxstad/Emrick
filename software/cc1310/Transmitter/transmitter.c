@@ -39,6 +39,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <stdio.h>
+
 /* Driver Header files */
 
 #include <ti/drivers/GPIO.h>
@@ -57,6 +59,8 @@
 /* Flash Read/Write */
 #include <third_party/spiffs/spiffs.h>
 #include <third_party/spiffs/SPIFFSNVS.h>
+
+#include "logger.h"
 
 /* Board Header file */
 #include "Board.h"
@@ -133,30 +137,6 @@ static uint8_t* packetDataPointer;
 /* UART Display */
 Display_Handle displayHandle;
 
-/* SPIFFS configuration parameters */
-#define SPIFFS_LOGICAL_BLOCK_SIZE    (4096)
-#define SPIFFS_LOGICAL_PAGE_SIZE     (256)
-#define SPIFFS_FILE_DESCRIPTOR_SIZE  (44)
-
-#define MESSAGE_LENGTH (8)
-uint8_t fileArrayHeap[8] = {1, 8, 8, 6, 2, 0, 2, 3};
-uint8_t fileArrayRead[8] = {0};
-
-/*
- * SPIFFS needs RAM to perform operations on files.  It requires a work buffer
- * which MUST be (2 * LOGICAL_PAGE_SIZE) bytes.
- */
-static uint8_t spiffsWorkBuffer[SPIFFS_LOGICAL_PAGE_SIZE * 2];
-
-/* The array below will be used by SPIFFS as a file descriptor cache. */
-static uint8_t spiffsFileDescriptorCache[SPIFFS_FILE_DESCRIPTOR_SIZE * 4];
-
-/* The array below will be used by SPIFFS as a read/write cache. */
-static uint8_t spiffsReadWriteCache[SPIFFS_LOGICAL_PAGE_SIZE * 2];
-
-spiffs fs;
-SPIFFSNVS_Data spiffsnvsData;
-
 float sup_voltage;
 
 float supplyVoltage(Display_Handle displayHandle)
@@ -220,133 +200,6 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 
 }
 
-
-void smoketestFlash(Display_Handle displayHandle) {
-
-    spiffs_file    fd;
-    spiffs_config  fsConfig;
-    int32_t        status;
-
-
-#ifdef Board_wakeUpExtFlash
-    Board_wakeUpExtFlash();
-#endif
-
-    /* Initialize spiffs, spiffs_config & spiffsnvsdata structures */
-    status = SPIFFSNVS_config(&spiffsnvsData, Board_NVSEXTERNAL, &fs, &fsConfig,
-        SPIFFS_LOGICAL_BLOCK_SIZE, SPIFFS_LOGICAL_PAGE_SIZE);
-    if (status != SPIFFSNVS_STATUS_SUCCESS) {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-            "Error with SPIFFS configuration.");
-
-        while (1);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Mounting flash file system via SPI");
-
-    status = SPIFFS_mount(&fs, &fsConfig, spiffsWorkBuffer,
-        spiffsFileDescriptorCache, sizeof(spiffsFileDescriptorCache),
-        spiffsReadWriteCache, sizeof(spiffsReadWriteCache), NULL);
-    if (status != SPIFFS_OK) {
-        /*
-         * If SPIFFS_ERR_NOT_A_FS is returned; it means there is no existing
-         * file system in memory.  In this case we must unmount, format &
-         * re-mount the new file system.
-         */
-        if (status == SPIFFS_ERR_NOT_A_FS) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "File system will not be found at first. Must unmount.");
-
-            SPIFFS_unmount(&fs);
-            status = SPIFFS_format(&fs);
-            if (status != SPIFFS_OK) {
-                Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                    "Error formatting memory.");
-
-                while (1);
-            }
-
-            status = SPIFFS_mount(&fs, &fsConfig, spiffsWorkBuffer,
-                spiffsFileDescriptorCache, sizeof(spiffsFileDescriptorCache),
-                spiffsReadWriteCache, sizeof(spiffsReadWriteCache), NULL);
-            if (status != SPIFFS_OK) {
-                Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                    "Error mounting file system.");
-
-                while (1);
-            }
-        }
-        else {
-            /* Received an unexpected error when mounting file system  */
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "Error mounting file system: %d.", status);
-
-            while (1);
-        }
-    }
-
-    /* Open a file */
-    fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR, 0);
-    if (fd < 0) {
-        /* File not found; create a new file & write message to it */
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Creating spiffsFile...");
-
-        fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_CREAT | SPIFFS_RDWR, 0);
-        if (fd < 0) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                "Error creating spiffsFile.");
-
-            while (1);
-        }
-
-
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Writing to spiffsFile...");
-
-        if (SPIFFS_write(&fs, fd, (void *) fileArrayHeap, MESSAGE_LENGTH) < 0) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error writing spiffsFile.");
-
-            while (1) ;
-        }
-
-        SPIFFS_close(&fs, fd);
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Reading spiffsFile...");
-
-    fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR, 0);
-
-    if (SPIFFS_read(&fs, fd, fileArrayRead, MESSAGE_LENGTH) < 0)
-    {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error reading spiffsFile.");
-
-        while (1);
-    }
-
-    int8_t i = 0;
-    while (i < MESSAGE_LENGTH) {
-        if (fileArrayRead[i] != fileArrayHeap[i]) {
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error: spiffsFile does not match at index %d, expected %d and read %d", i, fileArrayHeap[i], fileArrayRead[i]);
-        }
-        i++;
-    }
-
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Removing spiffsFile...");
-    status = SPIFFS_fremove(&fs, fd);
-    if (status != SPIFFS_OK)
-    {
-        Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Error removing spiffsFile.");
-
-        while (1);
-    }
-
-    SPIFFS_close(&fs, fd);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Closed file handle.");
-
-
-    SPIFFS_unmount(&fs);
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Unmounted filesystem.");
-
-}
 
 void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
 {
@@ -425,7 +278,6 @@ void sendRF(Display_Handle displayHandle, uint8_t * pkt, uint16_t length)
     }
 
     RF_close(rfHandle);
-
 }
 
 /*
@@ -477,30 +329,35 @@ void* mainThread(void *arg0)
                         0,
                         "Battery Voltage: %f V (random/floating value if disconnected)",
                         (float) bat_microVolt / 1000000);
-    //smoketestFlash(displayHandle);
 
-//    while (1) {
-//        sendRF(displayHandle);
+    uint8_t pktON[3];
+    pktON[0] = 0x00;
+    uint8_t pktOFF[3];
+    pktOFF[0] = 0xFF;
+    uint8_t pktCandyCane[1];
+    pktCandyCane[0] = 0xAA;
+    uint8_t pktXmasPulse[1];
+    pktXmasPulse[0] = 0xAB;
+    uint8_t pktXmasShift[1];
+    pktXmasShift[0] = 0xBA;
+    uint8_t pktSinglePulse[1];
+    pktSinglePulse[0] = 0xBB;
+    int delay = 10;
+
+    while (1) {
+        sendRF(displayHandle, pktXmasShift, 1);
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+        sendRF(displayHandle, pktXmasPulse, 1);
+        GPIO_toggle(Board_GPIO_LED1);
+        sleep(delay);
+//        sendRF(displayHandle, pktCandyCane, 1);
 //        GPIO_toggle(Board_GPIO_LED1);
-//        sleep(1);
-//    }
-
-    uint8_t pktON[1];
-    pktON[0] = 0xFF;
-    uint8_t pktOFF[1];
-    pktOFF[0] = 0x00;
-
-
-    sendRF(displayHandle, pktON, 1);
-    sendRF(displayHandle, pktON, 1);
-    sendRF(displayHandle, pktON, 1);
-    sendRF(displayHandle, pktON, 1);
-    sleep(15);
-    sendRF(displayHandle, pktOFF, 1);
-    sendRF(displayHandle, pktOFF, 1);
-    sendRF(displayHandle, pktOFF, 1);
-    sendRF(displayHandle, pktOFF, 1);
-    GPIO_toggle(Board_GPIO_LED1);
+//        sleep(delay);
+//        sendRF(displayHandle, pktSinglePulse, 1);
+//        GPIO_toggle(Board_GPIO_LED1);
+//        sleep(delay);
+    }
 
 
     while (1) {
