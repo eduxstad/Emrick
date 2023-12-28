@@ -38,6 +38,105 @@ uint8_t setArr[NB_PIXELS * 3] = {0};
 uint16_t loc_u16_pixelIndex;
 uint16_t arrIdx = 0;
 
+void runLED() {
+
+    // TODO: Check if the is being charged before turning on the LED
+
+    // Turn on power by enabling the 5v supply
+    GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
+    SPI_init();
+    WS2812_beginSPI();
+
+    // TODO: parse new packets and create new thread for new running pattern
+    while(1) {
+
+    }
+
+    // Turn off power
+    GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
+    WS2812_close();
+}
+
+
+uint8_t diff(uint8_t x, uint8_t y) {
+    if (x > y) {
+        return x - y;
+    } else {
+        return y - x;
+    }
+}
+
+
+uint8_t maxColorDiff(RGB c1, RGB c2) {
+    uint8_t max = 0;
+    uint8_t rdiff = 0;
+    uint8_t gdiff = 0;
+    uint8_t bdiff = 0;
+
+    rdiff = diff(c1.r, c2.r);
+    gdiff = diff(c1.g, c2.g);
+    bdiff = diff(c1.b, c2.b);
+
+
+    max = rdiff;
+    if (gdiff > max) {
+        max = gdiff;
+    }
+    if (bdiff > max) {
+        max = bdiff;
+    }
+    return max;
+}
+
+
+void defaultLEDFunction(control control) {
+    // TODO: run light function then exit thread when execution is complete or perform waiting procedure if necessary
+    uint32_t time_step;
+    uint8_t steps;
+
+    if (control.light_show_flags & FINITE_DURATION && control.light_show_flags & COLOR_SHIFT) {
+        steps = maxColorDiff(control.start_color, control.end_color);
+        time_step = control.duration / steps;
+
+    }
+    if (!(control.light_show_flags & SHIFT_POST_DELAY)) {
+        for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+            WS2812_setPixelColor(loc_u16_pixelIndex, control.start_color.r, control.start_color.g, control.start_color.b);
+        }
+        WS2812_show();
+    }
+    if (control.light_show_flags & DO_DELAY) {
+        usleep(control.delay);
+    }
+    if (control.light_show_flags & COLOR_SHIFT) {
+        uint8_t i;
+        for (i = 0; i < steps; i++) {
+            for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+                uint8_t r;
+                uint8_t g;
+                uint8_t b;
+                if (control.start_color.r > control.end_color.r)
+                    r = control.start_color.r - diff(control.start_color.r, control.end_color.r) * i / steps;
+                else {
+                    r = control.start_color.r + diff(control.start_color.r, control.end_color.r) * i / steps;
+                }
+                if (control.start_color.g > control.end_color.g)
+                    g = control.start_color.g - diff(control.start_color.g, control.end_color.g) * i / steps;
+                else {
+                    g = control.start_color.g + diff(control.start_color.g, control.end_color.g) * i / steps;
+                }
+                if (control.start_color.b > control.end_color.b)
+                    b = control.start_color.b - diff(control.start_color.b, control.end_color.b) * i / steps;
+                else {
+                    b = control.start_color.b + diff(control.start_color.b, control.end_color.b) * i / steps;
+                }
+                WS2812_setPixelColor(loc_u16_pixelIndex, r, g, b);
+            }
+            WS2812_show();
+        }
+    }
+
+}
 
 RGB hsvToRgb(float h, float s, float v) {
     RGB rgb;
@@ -82,8 +181,6 @@ RGB hsvToRgb(float h, float s, float v) {
 
     return rgb;
 }
-
-
 
 
 

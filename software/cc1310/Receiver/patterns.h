@@ -11,6 +11,16 @@
  * Manifest Constants
  **************************************************************************/
 
+#define STALL_PATTERN               0x001
+#define SET_TIMEOUT                 0x002
+#define BLANK_ON_TIMEOUT            0x004
+#define COLOR_SHIFT                 0x008
+#define DO_DELAY                    0x010
+#define FINITE_DURATION             0X020
+#define DEFAULT_FUNCTION            0x040
+#define SHIFT_POST_DELAY            0x080
+#define TOGGLE_PROGRAMMING_MODE     0X100
+
 /**************************************************************************
  * Type Definitions
  **************************************************************************/
@@ -19,6 +29,15 @@ typedef struct RGB {
     uint8_t g;
     uint8_t b;
 } RGB;
+
+typedef struct control {
+    uint16_t        light_show_flags;
+    RGB             start_color;
+    RGB             end_color;
+    uint16_t        delay;
+    uint16_t        duration;
+    uint8_t         timeout;
+} control;
 /**************************************************************************
  * Global variables
  **************************************************************************/
@@ -42,7 +61,7 @@ uint8_t function_flag;
  * SPI used will be SPI at index arg_u8_spiId in your Board.c
  */
 
-
+void runLED(void);
 void trueHSV(int angle, int * red, int * green, int * blue);
 void ResetLights(void);
 void chirstLights(void);
