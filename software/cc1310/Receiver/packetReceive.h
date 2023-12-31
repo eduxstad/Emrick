@@ -32,6 +32,7 @@ static uint8_t packetLength;
 static uint8_t* packetDataPointer;
 
 
+/* used to describe structure of rf packets */
 typedef struct {
     uint8_t             packet_size;
     uint16_t            strip_id;

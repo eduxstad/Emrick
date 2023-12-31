@@ -12,6 +12,7 @@
  **************************************************************************/
 
 #define STRIP_ID                    0
+#define UNIVERSAL_ID                0xffff  //used to match any light strip
 
 #define STALL_PATTERN               0x001
 #define SET_TIMEOUT                 0x002

@@ -79,6 +79,7 @@
 /* Threading */
 #define THREADSTACKSIZE (1024)
 
+/* Thread ID's */
 pthread_t           thread0;
 pthread_t           thread1;
 
@@ -88,6 +89,8 @@ Display_Handle displayHandle;
 
 
 float sup_voltage;
+
+/* Measures 3.3V supply voltage */
 
 float supplyVoltage(Display_Handle displayHandle)
 {
@@ -106,6 +109,8 @@ float supplyVoltage(Display_Handle displayHandle)
 
     return sup_voltage;
 }
+
+/* Measures supply voltage from battery from ADC */
 
 uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 {
@@ -151,6 +156,8 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 }
 
 
+/* Creates and begins execution of receiver thread */
+
 void createReceiverThread(pthread_attr_t attrs) {
     int retc = pthread_create(&thread0, &attrs, receivePacket, NULL);
     if (retc != 0) {
@@ -158,16 +165,6 @@ void createReceiverThread(pthread_attr_t attrs) {
         while (1);
     }
 }
-
-void createLEDThread(pthread_attr_t attrs) {
-    int retc = pthread_create(&thread1, &attrs, runLED, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
-        while (1);
-    }
-}
-
-
 
 /*
  *  ======== mainThread ========
@@ -213,6 +210,7 @@ void* mainThread(void *arg0)
             "========================\r\nBoard Reset\r\n========================\r\nSmoketest starting up...");
 
 
+    // Measure initial battery voltage
     float supply_volt = supplyVoltage(displayHandle);
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                            "Supply Voltage: %f V", supply_volt);
@@ -245,7 +243,7 @@ void* mainThread(void *arg0)
         while (1);
     }
 
-    function_flag = 0;
+    function_flag = 0; // initialization
 
     /* Create RX Listener thread */
     priParam.sched_priority = 1;
@@ -260,28 +258,10 @@ void* mainThread(void *arg0)
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
                    "Smoketest start up complete!");
 
-    pthread_mutex_init(&LEDMutex, NULL);
-    // create LED thread
+    pthread_mutex_init(&LEDMutex, NULL); // Possibly unnecessary, but could still be useful for drivers competing for resources
 
 
-    runLED();
+    runLED(); // Begin LED control
 
-//    createLEDThread(attrs);
-//    int clock_seconds = 0;
-//    int delay = 1;
-//    while (delay)
-//    {
-//        sleep(delay);
-//        supply_volt = supplyVoltage(displayHandle);
-//        pthread_mutex_lock(&LEDMutex);
-//        WS2812_close();
-//        bat_microVolt = batteryMicroVoltage(displayHandle);
-//        WS2812_restartSPI();
-//        pthread_mutex_unlock(&LEDMutex);
-//        Display_printf(displayHandle, 0, 0,
-//                       "\r(%02d:%02d) <SUPPLY: %fV> <BAT: %fV> Smoketest running", clock_seconds/60, clock_seconds % 60, supply_volt, (float) bat_microVolt / 1000000);
-//        GPIO_toggle(Board_GPIO_LED1);
-//        clock_seconds += delay;
-//    }
 }
 
