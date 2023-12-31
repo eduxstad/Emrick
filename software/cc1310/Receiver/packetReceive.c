@@ -97,31 +97,48 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /************************************************************
          * Packet Parsing and Pattern Switching
          ************************************************************/
-        if (packetDataPointer[0] == 0xAA) {
-            //Candy Cane
-            if (function_flag != 0) {
-                function_flag = 0;
-            }
-        } else if (packetDataPointer[0] == 0xAB) {
-            //Xmas Pulse
-            if (function_flag != 1) {
-                function_flag = 1;
-            }
-        } else if (packetDataPointer[0] == 0xBA) {
-            //Xmas Shift
-            if (function_flag != 2) {
-                function_flag = 2;
-            }
-        } else if (packetDataPointer[0] == 0xBB) {
-            //Single Pulse
-            if (function_flag != 3) {
-                function_flag = 3;
-            }
-        } else {
-            if (function_flag != 4) {
-                function_flag = 4;
-            }
+
+        if (((PKT*) currentDataEntry)->strip_id == STRIP_ID) {
+            receive_control.light_show_flags = ((PKT*) currentDataEntry)->light_show_flags;
+            receive_control.delay = ((PKT*) currentDataEntry)->delay;
+            receive_control.duration = ((PKT*) currentDataEntry)->duration;
+            receive_control.start_color = ((PKT*) currentDataEntry)->start_color;
+            receive_control.end_color = ((PKT*) currentDataEntry)->end_color;
+            receive_control.timeout = ((PKT*) currentDataEntry)->timeout;
+            function_flag = 0xff;
         }
+
+
+
+
+
+
+
+//        if (packetDataPointer[0] == 0xAA) {
+//            //Candy Cane
+//            if (function_flag != 0) {
+//                function_flag = 0;
+//            }
+//        } else if (packetDataPointer[0] == 0xAB) {
+//            //Xmas Pulse
+//            if (function_flag != 1) {
+//                function_flag = 1;
+//            }
+//        } else if (packetDataPointer[0] == 0xBA) {
+//            //Xmas Shift
+//            if (function_flag != 2) {
+//                function_flag = 2;
+//            }
+//        } else if (packetDataPointer[0] == 0xBB) {
+//            //Single Pulse
+//            if (function_flag != 3) {
+//                function_flag = 3;
+//            }
+//        } else {
+//            if (function_flag != 4) {
+//                function_flag = 4;
+//            }
+//        }
         /************************************************************
          * End Packet Parsing and Pattern Switching
          ************************************************************/

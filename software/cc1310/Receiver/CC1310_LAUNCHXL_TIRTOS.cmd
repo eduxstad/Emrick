@@ -36,7 +36,7 @@
 
 --stack_size=1024   /* C stack is also used for ISR stack */
 
-HEAPSIZE = 0x2000;  /* Size of heap buffer used by HeapMem */
+HEAPSIZE = 0x1000;  /* Size of heap buffer used by HeapMem */
 
 /* Override default entry point.                                             */
 --entry_point ResetISR
@@ -53,7 +53,7 @@ HEAPSIZE = 0x2000;  /* Size of heap buffer used by HeapMem */
 #define FLASH_BASE              0x0
 #define FLASH_SIZE              0x20000
 #define RAM_BASE                0x20000000
-#define RAM_SIZE                0x5000
+#define RAM_SIZE                0x7000
 
 /* System memory map */
 

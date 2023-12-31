@@ -32,11 +32,11 @@ static uint8_t packetLength;
 static uint8_t* packetDataPointer;
 
 
-typedef struct PKT {
+typedef struct {
     uint8_t             packet_size;
     uint16_t            strip_id;
     uint16_t            set_id;
-    uint16_t             light_show_flags;
+    uint16_t            light_show_flags;
     RGB                 start_color;
     RGB                 end_color;
     uint16_t            delay;

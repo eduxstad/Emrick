@@ -19,6 +19,7 @@
 #include "patterns.h"
 #include <sched.h>
 #include <math.h>
+#include <time.h>
 
 
 #include <ti/drivers/ADC.h>
@@ -38,6 +39,10 @@ uint8_t setArr[NB_PIXELS * 3] = {0};
 uint16_t loc_u16_pixelIndex;
 uint16_t arrIdx = 0;
 
+void * status;
+
+void *defaultLEDFunction(void *args);
+
 void runLED() {
 
     // TODO: Check if the is being charged before turning on the LED
@@ -49,7 +54,32 @@ void runLED() {
 
     // TODO: parse new packets and create new thread for new running pattern
     while(1) {
+        struct sched_param  priParam;
+        int                 retc;
+        int                 detachState;
+        pthread_attr_t attrs;
+        pthread_t           thread;
+        pthread_attr_init(&attrs);
 
+        detachState = PTHREAD_CREATE_JOINABLE;
+        /* Set priority and stack size attributes */
+        retc = pthread_attr_setdetachstate(&attrs, detachState);
+        if (retc != 0) {
+            /* pthread_attr_setdetachstate() failed */
+            while (1);
+        }
+
+        retc |= pthread_attr_setstacksize(&attrs, 512);
+        if (retc != 0) {
+            /* pthread_attr_setstacksize() failed */
+            while (1);
+        }
+
+        /* Create RX Listener thread */
+        priParam.sched_priority = 1;
+        pthread_attr_setschedparam(&attrs, &priParam);
+        pthread_create(&thread, &attrs, defaultLEDFunction, NULL);
+        pthread_join(thread, &status);
     }
 
     // Turn off power
@@ -89,46 +119,56 @@ uint8_t maxColorDiff(RGB c1, RGB c2) {
 }
 
 
-void defaultLEDFunction(control control) {
+void *defaultLEDFunction(void *args) {
     // TODO: run light function then exit thread when execution is complete or perform waiting procedure if necessary
+
     uint32_t time_step;
     uint8_t steps;
 
-    if (control.light_show_flags & FINITE_DURATION && control.light_show_flags & COLOR_SHIFT) {
-        steps = maxColorDiff(control.start_color, control.end_color);
-        time_step = control.duration / steps;
+    if (receive_control.light_show_flags & FINITE_DURATION && receive_control.light_show_flags & COLOR_SHIFT) {
+        steps = maxColorDiff(receive_control.start_color, receive_control.end_color);
+        time_step = receive_control.duration / steps;
 
     }
-    if (!(control.light_show_flags & SHIFT_POST_DELAY)) {
+    if (!(receive_control.light_show_flags & SHIFT_POST_DELAY)) {
         for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-            WS2812_setPixelColor(loc_u16_pixelIndex, control.start_color.r, control.start_color.g, control.start_color.b);
+            WS2812_setPixelColor(loc_u16_pixelIndex, receive_control.start_color.r, receive_control.start_color.g, receive_control.start_color.b);
         }
         WS2812_show();
     }
-    if (control.light_show_flags & DO_DELAY) {
-        usleep(control.delay);
+    if (receive_control.light_show_flags & DO_DELAY) {
+        struct timespec ts_start;
+        clock_gettime(CLOCK_MONOTONIC, &ts_start);
+        struct timespec ts_curr;
+        clock_gettime(CLOCK_MONOTONIC, &ts_curr);
+        while (ts_curr.tv_nsec < ts_start.tv_nsec + receive_control.delay * 1000) {
+            if (function_flag == 0xff) {
+                pthread_exit(status);
+            }
+            clock_gettime(CLOCK_MONOTONIC, &ts_curr);
+        }
     }
-    if (control.light_show_flags & COLOR_SHIFT) {
+    if (receive_control.light_show_flags & COLOR_SHIFT) {
         uint8_t i;
         for (i = 0; i < steps; i++) {
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 uint8_t r;
                 uint8_t g;
                 uint8_t b;
-                if (control.start_color.r > control.end_color.r)
-                    r = control.start_color.r - diff(control.start_color.r, control.end_color.r) * i / steps;
+                if (receive_control.start_color.r > receive_control.end_color.r)
+                    r = receive_control.start_color.r - diff(receive_control.start_color.r, receive_control.end_color.r) * i / steps;
                 else {
-                    r = control.start_color.r + diff(control.start_color.r, control.end_color.r) * i / steps;
+                    r = receive_control.start_color.r + diff(receive_control.start_color.r, receive_control.end_color.r) * i / steps;
                 }
-                if (control.start_color.g > control.end_color.g)
-                    g = control.start_color.g - diff(control.start_color.g, control.end_color.g) * i / steps;
+                if (receive_control.start_color.g > receive_control.end_color.g)
+                    g = receive_control.start_color.g - diff(receive_control.start_color.g, receive_control.end_color.g) * i / steps;
                 else {
-                    g = control.start_color.g + diff(control.start_color.g, control.end_color.g) * i / steps;
+                    g = receive_control.start_color.g + diff(receive_control.start_color.g, receive_control.end_color.g) * i / steps;
                 }
-                if (control.start_color.b > control.end_color.b)
-                    b = control.start_color.b - diff(control.start_color.b, control.end_color.b) * i / steps;
+                if (receive_control.start_color.b > receive_control.end_color.b)
+                    b = receive_control.start_color.b - diff(receive_control.start_color.b, receive_control.end_color.b) * i / steps;
                 else {
-                    b = control.start_color.b + diff(control.start_color.b, control.end_color.b) * i / steps;
+                    b = receive_control.start_color.b + diff(receive_control.start_color.b, receive_control.end_color.b) * i / steps;
                 }
                 WS2812_setPixelColor(loc_u16_pixelIndex, r, g, b);
             }

@@ -11,6 +11,8 @@
  * Manifest Constants
  **************************************************************************/
 
+#define STRIP_ID                    0
+
 #define STALL_PATTERN               0x001
 #define SET_TIMEOUT                 0x002
 #define BLANK_ON_TIMEOUT            0x004
@@ -44,7 +46,7 @@ typedef struct control {
 uint16_t testFlag;
 uint16_t timer;
 pthread_mutex_t LEDMutex;
-
+control receive_control;
 
 /* Function Selector */
 uint8_t function_flag;
