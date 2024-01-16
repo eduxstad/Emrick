@@ -43,14 +43,16 @@ void * status;
 
 void *defaultLEDFunction(void *args);
 
+Display_Handle displayHandle;
+
 // TODO: write RGB to HSV function
 
 /* Contains control logic for running and switching LED patterns */
 
-void runLED() {
+void runLED(Display_Handle dh) {
 
     // TODO: Check if the is being charged before turning on the LED
-
+    displayHandle = dh;
     // Turn on power by enabling the 5v supply
     GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
     SPI_init();
@@ -82,6 +84,31 @@ void runLED() {
     /* Create RX Listener thread */
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
+
+    RGB red;
+    red.r = 255;
+    red.g = 0;
+    red.b = 0;
+
+    RGB blue;
+    blue.r = 0;
+    blue.g = 0;
+    blue.b = 255;
+
+    receive_control.light_show_flags |= STALL_PATTERN;
+    receive_control.light_show_flags |= SET_TIMEOUT;
+    receive_control.light_show_flags |= COLOR_SHIFT;
+    receive_control.light_show_flags |= FINITE_DURATION;
+    receive_control.light_show_flags |= DEFAULT_FUNCTION;
+    receive_control.light_show_flags |= DO_DELAY;
+    receive_control.light_show_flags |= SHIFT_POST_DELAY;
+    receive_control.delay = 1000;
+    receive_control.duration = 5000;
+    receive_control.timeout = 20;
+    receive_control.start_color = red;
+    receive_control.end_color = blue;
+
+
     while(1) {
         pthread_create(&thread, &attrs, defaultLEDFunction, NULL);
         pthread_join(thread, &status);
@@ -133,6 +160,14 @@ uint8_t maxColorDiff(RGB c1, RGB c2) {
 }
 
 /*
+ * returns a time value converted to milliseconds
+ * */
+
+uint32_t mstime(struct timespec t1) {
+    return t1.tv_sec * 1000 + t1.tv_nsec / 1000000;
+}
+
+/*
  * Runs LED pattern specified by receive_control structure
  * */
 
@@ -146,7 +181,7 @@ void *defaultLEDFunction(void *args) {
     // determine timing for color shifting
     if (receive_control.light_show_flags & FINITE_DURATION && receive_control.light_show_flags & COLOR_SHIFT) {
         steps = maxColorDiff(receive_control.start_color, receive_control.end_color);
-        time_step = receive_control.duration / steps;
+        time_step = receive_control.duration * 1000 / steps;
 
     }
 
@@ -164,12 +199,13 @@ void *defaultLEDFunction(void *args) {
         clock_gettime(CLOCK_MONOTONIC, &ts_start);
         struct timespec ts_curr;
         clock_gettime(CLOCK_MONOTONIC, &ts_curr);
-        while (ts_curr.tv_nsec < ts_start.tv_nsec + receive_control.delay * 1000) {
+        while (mstime(ts_curr) < mstime(ts_start) + receive_control.delay) {
             if (function_flag == 0xff) {
                 function_flag == 0x00;
                 pthread_exit(status);
             }
             clock_gettime(CLOCK_MONOTONIC, &ts_curr);
+            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d %d", ts_start.tv_nsec, ts_curr.tv_nsec);
         }
     }
 
@@ -200,8 +236,14 @@ void *defaultLEDFunction(void *args) {
                 WS2812_setPixelColor(loc_u16_pixelIndex, r, g, b);
             }
             WS2812_show();
+            usleep(time_step);
         }
     }
+
+    for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
+    }
+    WS2812_show();
 
 }
 

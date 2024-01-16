@@ -37,7 +37,7 @@ typedef struct control {
     uint16_t        light_show_flags;
     RGB             start_color;
     RGB             end_color;
-    uint16_t        delay;
+    uint32_t        delay;
     uint16_t        duration;
     uint8_t         timeout;
 } control;
@@ -64,7 +64,7 @@ uint8_t function_flag;
  * SPI used will be SPI at index arg_u8_spiId in your Board.c
  */
 
-void runLED(void);
+void runLED(Display_Handle displayHandle);
 void trueHSV(int angle, int * red, int * green, int * blue);
 void ResetLights(void);
 void chirstLights(void);

@@ -261,7 +261,7 @@ void* mainThread(void *arg0)
     pthread_mutex_init(&LEDMutex, NULL); // Possibly unnecessary, but could still be useful for drivers competing for resources
 
 
-    runLED(); // Begin LED control
+    runLED(displayHandle); // Begin LED control
 
 }
 
