@@ -38,6 +38,11 @@ static uint8_t spiffsReadWriteCache[SPIFFS_LOGICAL_PAGE_SIZE * 2];
 spiffs fs;
 SPIFFSNVS_Data spiffsnvsData;
 
+
+/*
+ * Initialize file system
+ * */
+
 void spiffsInit(Display_Handle displayHandle) {
 
     spiffs_file    fd;
@@ -106,6 +111,11 @@ void spiffsInit(Display_Handle displayHandle) {
     }
 }
 
+
+/*
+ * Clear file system
+ * */
+
 void removeLogs() {
     spiffs_file fd;
     fd = SPIFFS_open(&fs, "spiffsFile", SPIFFS_RDWR | SPIFFS_APPEND, 0);
@@ -115,6 +125,11 @@ void removeLogs() {
     SPIFFS_close(&fs,fd);
     SPIFFS_format(&fs);
 }
+
+
+/*
+ * Write to storage
+ * */
 
 void addLog(Display_Handle displayHandle, char *log, uint16_t length) {
 
@@ -151,6 +166,10 @@ void addLog(Display_Handle displayHandle, char *log, uint16_t length) {
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0, "Closed file handle.");
 }
 
+
+/*
+ * Read back the entirety of a file
+ * */
 
 char * readLogs(Display_Handle displayHandle) {
 
@@ -196,6 +215,11 @@ char * readLogs(Display_Handle displayHandle) {
     return str;
 }
 
+
+/*
+ * Get most recent log (likely deprecated)
+ * */
+
 uint16_t getLastLog(Display_Handle displayHandle) {
     char * log = readLogs(displayHandle);
     if (log != 0) {
@@ -210,6 +234,11 @@ uint16_t getLastLog(Display_Handle displayHandle) {
         return 0;
     }
 }
+
+/*
+ * Fills a string to the nearest 8 bytes with null terminators to avoid adding random characters to storage as the
+ * flash storage on the cc1310 requires 8-byte alignment
+ * */
 
 char * align8bytes(char * str, uint16_t length) {
     char * tmp;
