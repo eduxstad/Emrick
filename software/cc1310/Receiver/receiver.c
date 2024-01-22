@@ -183,7 +183,8 @@ void* mainThread(void *arg0)
     /* Supply Voltage Monitor */
     AONBatMonEnable();
     ADC_init();
-
+    // initialize the NVS driver
+    NVS_init();
 
     /* Configure the LED pin */
     GPIO_setConfig(Board_GPIO_LED1, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);

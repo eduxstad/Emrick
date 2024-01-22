@@ -99,12 +99,12 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
          ************************************************************/
 
         if (((PKT*) currentDataEntry)->strip_id == STRIP_ID) {
-            receive_control.light_show_flags = ((PKT*) currentDataEntry)->light_show_flags;
-            receive_control.delay = ((PKT*) currentDataEntry)->delay;
-            receive_control.duration = ((PKT*) currentDataEntry)->duration;
-            receive_control.start_color = ((PKT*) currentDataEntry)->start_color;
-            receive_control.end_color = ((PKT*) currentDataEntry)->end_color;
-            receive_control.timeout = ((PKT*) currentDataEntry)->timeout;
+            rec_pattern.light_show_flags = ((PKT*) currentDataEntry)->light_show_flags;
+            rec_pattern.delay = ((PKT*) currentDataEntry)->delay;
+            rec_pattern.duration = ((PKT*) currentDataEntry)->duration;
+            rec_pattern.start_color = ((PKT*) currentDataEntry)->start_color;
+            rec_pattern.end_color = ((PKT*) currentDataEntry)->end_color;
+            rec_pattern.timeout = ((PKT*) currentDataEntry)->timeout;
             function_flag = 0xff;
         }
 

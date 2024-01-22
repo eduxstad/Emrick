@@ -34,6 +34,7 @@ typedef struct RGB {
 } RGB;
 
 typedef struct control {
+    uint8_t         size;
     uint16_t        light_show_flags;
     RGB             start_color;
     RGB             end_color;
@@ -47,7 +48,8 @@ typedef struct control {
 uint16_t testFlag;
 uint16_t timer;
 pthread_mutex_t LEDMutex;
-control receive_control;
+control pattern;
+control rec_pattern;
 
 /* Function Selector */
 uint8_t function_flag;

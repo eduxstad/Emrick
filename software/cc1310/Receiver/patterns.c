@@ -11,6 +11,7 @@
 #include <ti/drivers/SPI.h>
 #include <ti/display/Display.h>
 #include <ti/display/DisplayUart.h>
+#include <ti/drivers/NVS.h>
 
 /* POSIX Header files */
 #include <pthread.h>
@@ -47,8 +48,55 @@ Display_Handle displayHandle;
 
 // TODO: write RGB to HSV function
 
-/* Contains control logic for running and switching LED patterns */
 
+char *controlToChar(control control, char * ch) {
+    ch[0] = control.size;
+    ch[1] = control.light_show_flags >> 8 & 0xFF;
+    ch[2] = control.light_show_flags & 0xFF;
+    ch[3] = control.start_color.r;
+    ch[4] = control.start_color.g;
+    ch[5] = control.start_color.b;
+    ch[6] = control.end_color.r;
+    ch[7] = control.end_color.g;
+    ch[8] = control.end_color.b;
+    ch[9] = control.delay >> 24 & 0xFF;
+    ch[10] = control.delay >> 16 & 0xFF;
+    ch[11] = control.delay >> 8 & 0xFF;
+    ch[12] = control.delay & 0xFF;
+    ch[13] = control.duration >> 8 & 0xFF;
+    ch[14] = control.duration & 0xFF;
+    ch[15] = control.timeout;
+    return ch;
+}
+
+
+ control charToControl(char * ch) {
+    control control;
+    control.size = ch[0];
+    control.light_show_flags += ch[1];
+    control.light_show_flags = control.light_show_flags << 8;
+    control.light_show_flags += ch[2];
+    control.start_color.r = ch[3];
+    control.start_color.g = ch[4];
+    control.start_color.b = ch[5];
+    control.end_color.r = ch[6];
+    control.end_color.g = ch[7];
+    control.end_color.b = ch[8];
+    control.delay = ch[9];
+    control.delay = control.delay << 8;
+    control.delay += ch[10];
+    control.delay = control.delay << 8;
+    control.delay += ch[11];
+    control.delay = control.delay << 8;
+    control.delay += ch[12];
+    control.duration = ch[13];
+    control.duration = control.duration << 8;
+    control.duration += ch[14];
+    control.timeout = ch[15];
+    return control;
+}
+
+/* Contains control logic for running and switching LED patterns */
 void runLED(Display_Handle dh) {
 
     // TODO: Check if the board is being charged before turning on the LED
@@ -95,18 +143,42 @@ void runLED(Display_Handle dh) {
     blue.g = 0;
     blue.b = 255;
 
-    receive_control.light_show_flags |= STALL_PATTERN;
-    receive_control.light_show_flags |= SET_TIMEOUT;
-    receive_control.light_show_flags |= COLOR_SHIFT;
-    receive_control.light_show_flags |= FINITE_DURATION;
-    receive_control.light_show_flags |= DEFAULT_FUNCTION;
-    receive_control.light_show_flags |= DO_DELAY;
-    receive_control.light_show_flags |= SHIFT_POST_DELAY;
-    receive_control.delay = 1000;
-    receive_control.duration = 5000;
-    receive_control.timeout = 20;
-    receive_control.start_color = red;
-    receive_control.end_color = blue;
+    // Default pattern
+
+    pattern.light_show_flags |= STALL_PATTERN;
+    pattern.light_show_flags |= SET_TIMEOUT;
+    pattern.light_show_flags |= COLOR_SHIFT;
+    pattern.light_show_flags |= FINITE_DURATION;
+    pattern.light_show_flags |= DEFAULT_FUNCTION;
+    pattern.light_show_flags |= DO_DELAY;
+    pattern.light_show_flags |= SHIFT_POST_DELAY;
+    pattern.delay = 1000;
+    pattern.duration = 5000;
+    pattern.timeout = 20;
+    pattern.start_color = red;
+    pattern.end_color = blue;
+    pattern.size = 15;
+
+
+    NVS_Handle nvsRegion;
+    NVS_Attrs regionAttrs;
+
+    uint_fast16_t status;
+    char buf[32];
+    char pbuf[32];
+
+    controlToChar(pattern, pbuf);
+
+
+    nvsRegion = NVS_open(Board_NVSINTERNAL, NULL);
+
+    NVS_getAttrs(nvsRegion, &regionAttrs);
+    NVS_erase(nvsRegion, 0, regionAttrs.sectorSize);
+
+    NVS_write(nvsRegion, 0, pbuf, 16, NVS_WRITE_POST_VERIFY);
+
+    NVS_read(nvsRegion, 0, buf, 16);
+
 
 
     while(1) {
@@ -168,6 +240,25 @@ uint32_t mstime(struct timespec t1) {
 }
 
 /*
+ * Waits for a specified number of milliseconds then returns. While waiting, the function checks to see if a new
+ * packet has arrived which would indicate the thread should exit
+ * */
+
+void busyWait(uint32_t wait_time) {
+    struct timespec ts_start;
+    clock_gettime(CLOCK_MONOTONIC, &ts_start);
+    struct timespec ts_curr;
+    clock_gettime(CLOCK_MONOTONIC, &ts_curr);
+    while (mstime(ts_curr) < mstime(ts_start) + wait_time) {
+        if (function_flag == 0xff) {
+            function_flag == 0x00;
+            pthread_exit(status);
+        }
+        clock_gettime(CLOCK_MONOTONIC, &ts_curr);
+    }
+}
+
+/*
  * Runs LED pattern specified by receive_control structure
  * */
 
@@ -179,64 +270,53 @@ void *defaultLEDFunction(void *args) {
 
 
     // determine timing for color shifting
-    if (receive_control.light_show_flags & FINITE_DURATION && receive_control.light_show_flags & COLOR_SHIFT) {
-        steps = maxColorDiff(receive_control.start_color, receive_control.end_color);
-        time_step = receive_control.duration * 1000 / steps;
+    if (pattern.light_show_flags & FINITE_DURATION && pattern.light_show_flags & COLOR_SHIFT) {
+        steps = maxColorDiff(pattern.start_color, pattern.end_color);
+        time_step = pattern.duration / steps;
 
     }
 
     // change color if specified to change before delay is executed
-    if (!(receive_control.light_show_flags & SHIFT_POST_DELAY)) {
+    if (!(pattern.light_show_flags & SHIFT_POST_DELAY)) {
         for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-            WS2812_setPixelColor(loc_u16_pixelIndex, receive_control.start_color.r, receive_control.start_color.g, receive_control.start_color.b);
+            WS2812_setPixelColor(loc_u16_pixelIndex, pattern.start_color.r, pattern.start_color.g, pattern.start_color.b);
         }
         WS2812_show();
     }
 
     // busy wait to execute delay
-    if (receive_control.light_show_flags & DO_DELAY) {
-        struct timespec ts_start;
-        clock_gettime(CLOCK_MONOTONIC, &ts_start);
-        struct timespec ts_curr;
-        clock_gettime(CLOCK_MONOTONIC, &ts_curr);
-        while (mstime(ts_curr) < mstime(ts_start) + receive_control.delay) {
-            if (function_flag == 0xff) {
-                function_flag == 0x00;
-                pthread_exit(status);
-            }
-            clock_gettime(CLOCK_MONOTONIC, &ts_curr);
-            Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"%d %d", ts_start.tv_nsec, ts_curr.tv_nsec);
-        }
+    if (pattern.light_show_flags & DO_DELAY) {
+        busyWait(pattern.delay);
     }
 
     // execute color shift
     // TODO: convert to use HSV instead of RGB
-    if (receive_control.light_show_flags & COLOR_SHIFT) {
+    if (pattern.light_show_flags & COLOR_SHIFT) {
         uint8_t i;
         for (i = 0; i < steps; i++) {
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 uint8_t r;
                 uint8_t g;
                 uint8_t b;
-                if (receive_control.start_color.r > receive_control.end_color.r)
-                    r = receive_control.start_color.r - diff(receive_control.start_color.r, receive_control.end_color.r) * i / steps;
+                if (pattern.start_color.r > pattern.end_color.r)
+                    r = pattern.start_color.r - diff(pattern.start_color.r, pattern.end_color.r) * i / steps;
                 else {
-                    r = receive_control.start_color.r + diff(receive_control.start_color.r, receive_control.end_color.r) * i / steps;
+                    r = pattern.start_color.r + diff(pattern.start_color.r, pattern.end_color.r) * i / steps;
                 }
-                if (receive_control.start_color.g > receive_control.end_color.g)
-                    g = receive_control.start_color.g - diff(receive_control.start_color.g, receive_control.end_color.g) * i / steps;
+                if (pattern.start_color.g > pattern.end_color.g)
+                    g = pattern.start_color.g - diff(pattern.start_color.g, pattern.end_color.g) * i / steps;
                 else {
-                    g = receive_control.start_color.g + diff(receive_control.start_color.g, receive_control.end_color.g) * i / steps;
+                    g = pattern.start_color.g + diff(pattern.start_color.g, pattern.end_color.g) * i / steps;
                 }
-                if (receive_control.start_color.b > receive_control.end_color.b)
-                    b = receive_control.start_color.b - diff(receive_control.start_color.b, receive_control.end_color.b) * i / steps;
+                if (pattern.start_color.b > pattern.end_color.b)
+                    b = pattern.start_color.b - diff(pattern.start_color.b, pattern.end_color.b) * i / steps;
                 else {
-                    b = receive_control.start_color.b + diff(receive_control.start_color.b, receive_control.end_color.b) * i / steps;
+                    b = pattern.start_color.b + diff(pattern.start_color.b, pattern.end_color.b) * i / steps;
                 }
                 WS2812_setPixelColor(loc_u16_pixelIndex, r, g, b);
             }
             WS2812_show();
-            usleep(time_step);
+            busyWait(time_step);
         }
     }
 
