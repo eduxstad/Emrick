@@ -651,9 +651,9 @@ const uint_least8_t I2S_count = CC1310_LAUNCHXL_I2SCOUNT;
 #include <ti/drivers/nvs/NVSSPI25X.h>
 #include <ti/drivers/nvs/NVSCC26XX.h>
 
-#define NVS_REGIONS_BASE 0x1A000
+#define NVS_REGIONS_BASE 0xC000
 #define SECTORSIZE       0x1000
-#define REGIONSIZE       (SECTORSIZE * 4)
+#define REGIONSIZE       (SECTORSIZE * 18)
 
 #ifndef Board_EXCLUDE_NVS_INTERNAL_FLASH
 
