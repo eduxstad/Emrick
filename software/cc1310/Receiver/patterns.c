@@ -11,7 +11,6 @@
 #include <ti/drivers/SPI.h>
 #include <ti/display/Display.h>
 #include <ti/display/DisplayUart.h>
-#include <ti/drivers/NVS.h>
 
 /* POSIX Header files */
 #include <pthread.h>
@@ -49,7 +48,7 @@ Display_Handle displayHandle;
 // TODO: write RGB to HSV function
 
 
-char *controlToChar(control control, char * ch) {
+void controlToChar(control control, char * ch) {
     ch[0] = control.size;
     ch[1] = control.light_show_flags >> 8 & 0xFF;
     ch[2] = control.light_show_flags & 0xFF;
@@ -66,7 +65,6 @@ char *controlToChar(control control, char * ch) {
     ch[13] = control.duration >> 8 & 0xFF;
     ch[14] = control.duration & 0xFF;
     ch[15] = control.timeout;
-    return ch;
 }
 
 
@@ -96,6 +94,32 @@ char *controlToChar(control control, char * ch) {
     return control;
 }
 
+void metadataToChar(show_metadata sm, char * ch) {
+    ch[0] = sm.total_size >> 24 & 0xFF;
+    ch[1] = sm.total_size >> 16 & 0xFF;
+    ch[2] = sm.total_size >> 8 & 0xFF;
+    ch[3] = sm.total_size & 0xFF;
+    ch[4] = sm.pattern_count >> 8 & 0xFF;
+    ch[5] = sm.pattern_count & 0xFF;
+    ch[6] = sm.set_count;
+}
+
+show_metadata charToMetadata(char * ch) {
+    show_metadata sm;
+    sm.total_size = ch[0];
+    sm.total_size = sm.total_size << 8;
+    sm.total_size += ch[1];
+    sm.total_size = sm.total_size << 8;
+    sm.total_size += ch[2];
+    sm.total_size = sm.total_size << 8;
+    sm.total_size += ch[3];
+    sm.pattern_count = ch[4];
+    sm.pattern_count = sm.pattern_count << 8;
+    sm.pattern_count += ch[5];
+    sm.set_count = ch[6];
+    return sm;
+}
+
 /* Contains control logic for running and switching LED patterns */
 void runLED(Display_Handle dh) {
 
@@ -105,6 +129,8 @@ void runLED(Display_Handle dh) {
     GPIO_setConfig(Board_GPIO_BOOST_EN, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
     SPI_init();
     WS2812_beginSPI();
+
+    programming_mode = 0;
 
     // TODO: parse new packets and create new thread for new running pattern
 
@@ -145,45 +171,63 @@ void runLED(Display_Handle dh) {
 
     // Default pattern
 
-    pattern.light_show_flags |= STALL_PATTERN;
-    pattern.light_show_flags |= SET_TIMEOUT;
+    //pattern.light_show_flags |= STALL_PATTERN;
+    //pattern.light_show_flags |= SET_TIMEOUT;
     pattern.light_show_flags |= COLOR_SHIFT;
     pattern.light_show_flags |= FINITE_DURATION;
     pattern.light_show_flags |= DEFAULT_FUNCTION;
     pattern.light_show_flags |= DO_DELAY;
-    pattern.light_show_flags |= SHIFT_POST_DELAY;
-    pattern.delay = 1000;
+    //pattern.light_show_flags |= SHIFT_POST_DELAY;
+    pattern.delay = 5000;
     pattern.duration = 5000;
-    pattern.timeout = 20;
+    //pattern.timeout = 20;
     pattern.start_color = red;
     pattern.end_color = blue;
-    pattern.size = 15;
+    pattern.size = 16;
 
 
     NVS_Handle nvsRegion;
     NVS_Attrs regionAttrs;
 
-    uint_fast16_t status;
+    show_metadata show_metadata;
     char buf[32];
-    char pbuf[32];
-
-    controlToChar(pattern, pbuf);
-
-
-    nvsRegion = NVS_open(Board_NVSINTERNAL, NULL);
-
-    NVS_getAttrs(nvsRegion, &regionAttrs);
-    NVS_erase(nvsRegion, 0, regionAttrs.sectorSize);
-
-    NVS_write(nvsRegion, 0, pbuf, 16, NVS_WRITE_POST_VERIFY);
-
-    NVS_read(nvsRegion, 0, buf, 16);
-
-
+    current_set = 0;
+    uint8_t last_set = 0;
 
     while(1) {
-        pthread_create(&thread, &attrs, defaultLEDFunction, NULL);
-        pthread_join(thread, &status);
+        if (programming_mode) {
+            if (function_flag == 0x01) {
+                nvsRegion = NVS_open(Board_NVSINTERNAL, NULL);
+                NVS_getAttrs(nvsRegion, &regionAttrs);
+                NVS_erase(nvsRegion, 0, regionAttrs.sectorSize);
+                function_flag == 0xFF;
+                show_metadata.set_count = 0;
+                show_metadata.pattern_count = 0;
+                show_metadata.total_size = sizeof(show_metadata);
+            }
+            if (rec_pattern.size != NULL) {
+                pthread_mutex_lock(&recMutex);
+                show_metadata.total_size += PACKET_SIZE;
+                size_t offset = regionAttrs.regionSize - (show_metadata.pattern_count) * PACKET_SIZE;
+                if (current_set > last_set) {
+                    show_metadata.set_count++;
+                    buf[0] = offset >> 24 & 0xFF;
+                    buf[1] = offset >> 16 & 0xFF;
+                    buf[2] = offset  >> 8 & 0xFF;
+                    buf[3] = offset & 0xFF;
+                    NVS_write(nvsRegion, sizeof(show_metadata) + (show_metadata.set_count - 1) * 4, buf, 4, NVS_WRITE_POST_VERIFY);
+                }
+                metadataToChar(show_metadata, buf);
+                NVS_write(nvsRegion, 0, buf, sizeof(show_metadata), NVS_WRITE_POST_VERIFY);
+                controlToChar(rec_pattern, buf);
+                NVS_write(nvsRegion, offset, buf, PACKET_SIZE, NVS_WRITE_POST_VERIFY);
+                pthread_mutex_unlock(&recMutex);
+            }
+
+        } else {
+            pthread_create(&thread, &attrs, defaultLEDFunction, NULL);
+            pthread_join(thread, &status);
+        }
     }
 
     // Turn off power
@@ -324,7 +368,6 @@ void *defaultLEDFunction(void *args) {
         WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
     }
     WS2812_show();
-
 }
 
 

@@ -256,10 +256,10 @@ void* mainThread(void *arg0)
                    "Created listening thread.");
 
 
-    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
-                   "Smoketest start up complete!");
 
-    pthread_mutex_init(&LEDMutex, NULL); // Possibly unnecessary, but could still be useful for drivers competing for resources
+    pthread_mutex_init(&recMutex, NULL);
+    Display_printf(displayHandle, DisplayUart_SCROLLING, 0,
+                   "Receiver start up complete!");
 
 
     runLED(displayHandle); // Begin LED control
