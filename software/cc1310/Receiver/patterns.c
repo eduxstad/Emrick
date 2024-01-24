@@ -132,7 +132,6 @@ void runLED(Display_Handle dh) {
 
     programming_mode = 0;
 
-    // TODO: parse new packets and create new thread for new running pattern
 
     struct sched_param  priParam;
     int                 retc;
@@ -171,19 +170,19 @@ void runLED(Display_Handle dh) {
 
     // Default pattern
 
-    //pattern.light_show_flags |= STALL_PATTERN;
-    //pattern.light_show_flags |= SET_TIMEOUT;
-    pattern.light_show_flags |= COLOR_SHIFT;
-    pattern.light_show_flags |= FINITE_DURATION;
-    pattern.light_show_flags |= DEFAULT_FUNCTION;
-    pattern.light_show_flags |= DO_DELAY;
-    //pattern.light_show_flags |= SHIFT_POST_DELAY;
-    pattern.delay = 5000;
-    pattern.duration = 5000;
-    //pattern.timeout = 20;
-    pattern.start_color = red;
-    pattern.end_color = blue;
-    pattern.size = 16;
+    //default_pattern.light_show_flags |= STALL_PATTERN;
+    //default_pattern.light_show_flags |= SET_TIMEOUT;
+    default_pattern.light_show_flags |= COLOR_SHIFT;
+    default_pattern.light_show_flags |= FINITE_DURATION;
+    default_pattern.light_show_flags |= DEFAULT_FUNCTION;
+    default_pattern.light_show_flags |= DO_DELAY;
+    //default_pattern.light_show_flags |= SHIFT_POST_DELAY;
+    default_pattern.delay = 5000;
+    default_pattern.duration = 5000;
+    //default_pattern.timeout = 20;
+    default_pattern.start_color = red;
+    default_pattern.end_color = blue;
+    default_pattern.size = 16;
 
 
     NVS_Handle nvsRegion;
@@ -193,23 +192,25 @@ void runLED(Display_Handle dh) {
     char buf[32];
     current_set = 0;
     uint8_t last_set = 0;
+    uint16_t pattern_index = 0;
 
     while(1) {
         if (programming_mode) {
-            if (function_flag == 0x01) {
+            if (programming_mode == 0x01) {
                 nvsRegion = NVS_open(Board_NVSINTERNAL, NULL);
                 NVS_getAttrs(nvsRegion, &regionAttrs);
-                NVS_erase(nvsRegion, 0, regionAttrs.sectorSize);
-                function_flag == 0xFF;
+                NVS_erase(nvsRegion, 0, regionAttrs.regionSize);
+                programming_mode = 0xFF;
                 show_metadata.set_count = 0;
                 show_metadata.pattern_count = 0;
                 show_metadata.total_size = sizeof(show_metadata);
             }
-            if (rec_pattern.size != NULL) {
+            if (function_flag == 0xFF) {
                 pthread_mutex_lock(&recMutex);
                 show_metadata.total_size += PACKET_SIZE;
                 size_t offset = regionAttrs.regionSize - (show_metadata.pattern_count) * PACKET_SIZE;
                 if (current_set > last_set) {
+                    last_set = current_set;
                     show_metadata.set_count++;
                     buf[0] = offset >> 24 & 0xFF;
                     buf[1] = offset >> 16 & 0xFF;
@@ -221,12 +222,34 @@ void runLED(Display_Handle dh) {
                 NVS_write(nvsRegion, 0, buf, sizeof(show_metadata), NVS_WRITE_POST_VERIFY);
                 controlToChar(rec_pattern, buf);
                 NVS_write(nvsRegion, offset, buf, PACKET_SIZE, NVS_WRITE_POST_VERIFY);
+                rec_pattern.size = NULL;
                 pthread_mutex_unlock(&recMutex);
             }
 
         } else {
-            pthread_create(&thread, &attrs, defaultLEDFunction, NULL);
-            pthread_join(thread, &status);
+            if (current_set == 0) {
+
+            } else {
+                if (current_set != last_set) {
+                    last_set = current_set;
+                    pattern_index = 0;
+                }
+                size_t offset = sizeof(show_metadata) + (current_set - 1) * 4;
+                NVS_read(nvsRegion, offset, buf, 4);
+                offset = buf[0];
+                offset = offset << 8;
+                offset += buf[1];
+                offset = offset << 8;
+                offset += buf[2];
+                offset = offset << 8;
+                offset += buf[3];
+                offset -= pattern_index * PACKET_SIZE;
+                NVS_read(nvsRegion, offset, buf, PACKET_SIZE);
+                pattern = charToControl(buf);
+                pattern_index++;
+                pthread_create(&thread, &attrs, defaultLEDFunction, NULL);
+                pthread_join(thread, &status);
+            }
         }
     }
 

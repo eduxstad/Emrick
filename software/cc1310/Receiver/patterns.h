@@ -59,6 +59,7 @@ uint16_t timer;
 pthread_mutex_t recMutex;
 control pattern;
 control rec_pattern;
+control default_pattern;
 uint8_t programming_mode;
 uint8_t current_set;
 
