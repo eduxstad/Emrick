@@ -8829,7 +8829,7 @@
     (property "Reference" "Y1" (at 160.02 114.5286 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "24MHz" (at 160.02 117.0686 0)
+    (property "Value" "48MHz" (at 160.02 117.0686 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm" (at 152.4 118.11 0)
