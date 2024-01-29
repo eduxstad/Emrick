@@ -159,6 +159,10 @@ uint32_t batteryMicroVoltage(Display_Handle displayHandle)
 void displayResult() {
     float loss = (1.0 - rec_count / (float)last_rec) * 100;
     Display_printf(displayHandle, DisplayUart_SCROLLING, 0,"Received packet #%d: %.2f%% loss", last_rec, loss);
+    if (last_rec >= 100) {
+        last_rec = 0;
+        rec_count = 0.0;
+    }
 }
 
 

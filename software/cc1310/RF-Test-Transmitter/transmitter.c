@@ -331,10 +331,12 @@ void* mainThread(void *arg0)
                         (float) bat_microVolt / 1000000);
 
 
-
-    uint8_t i;
-    for (i = 0; i < 100; i++) {
-        sendRF(displayHandle, &i, 1);
+    while (1) {
+        uint8_t i;
+        for (i = 1; i <= 100; i++) {
+            sendRF(displayHandle, &i, 1);
+        }
+        sleep(5);
     }
 }
 
