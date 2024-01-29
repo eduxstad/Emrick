@@ -47,5 +47,7 @@
  *        remain unmodified.
  */
 
+#define CCFG_FORCE_VDDR_HH  1
+
 #include <ti/devices/DeviceFamily.h>
 #include DeviceFamily_constructPath(startup_files/ccfg.c)

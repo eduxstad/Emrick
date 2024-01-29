@@ -228,7 +228,7 @@ void runLED(Display_Handle dh) {
 
         } else {
             if (current_set == 0) {
-
+                pattern = default_pattern;
             } else {
                 if (current_set != last_set) {
                     last_set = current_set;
@@ -247,9 +247,9 @@ void runLED(Display_Handle dh) {
                 NVS_read(nvsRegion, offset, buf, PACKET_SIZE);
                 pattern = charToControl(buf);
                 pattern_index++;
-                pthread_create(&thread, &attrs, defaultLEDFunction, NULL);
-                pthread_join(thread, &status);
             }
+            pthread_create(&thread, &attrs, defaultLEDFunction, NULL);
+            pthread_join(thread, &status);
         }
     }
 
