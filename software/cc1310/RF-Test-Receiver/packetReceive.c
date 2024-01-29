@@ -27,10 +27,12 @@ rxDataEntryBuffer[RF_QUEUE_DATA_ENTRY_BUFFER_SIZE(NUM_DATA_ENTRIES,
 #error This compiler is not supported.
 #endif
 
+extern void displayResult();
 
 void* receivePacket(void *arg0)
 {
-    count = 0.0;
+    rec_count = 0.0;
+    last_rec = 0;
 
     if (RFQueue_defineQueue(&dataQueue, rxDataEntryBuffer,
                             sizeof(rxDataEntryBuffer), NUM_DATA_ENTRIES,
@@ -98,7 +100,10 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /************************************************************
          * Packet Parsing and Pattern Switching
          ************************************************************/
+        last_rec = packetDataPointer[0];
+        rec_count += 1.0;
 
+        displayResult();
 
         /************************************************************
          * End Packet Parsing and Pattern Switching

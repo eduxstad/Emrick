@@ -47,5 +47,8 @@
  *        remain unmodified.
  */
 
+
+#define CCFG_FORCE_VDDR_HH  1    // set transmitter power high
+
 #include <ti/devices/DeviceFamily.h>
 #include DeviceFamily_constructPath(startup_files/ccfg.c)

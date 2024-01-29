@@ -52,5 +52,7 @@
 //#define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE            0x00       // Disable ROM boot loader
 #define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE         0xC5
 
+#define CCFG_FORCE_VDDR_HH  1    // set transmitter power high
+
 #include <ti/devices/DeviceFamily.h>
 #include DeviceFamily_constructPath(startup_files/ccfg.c)

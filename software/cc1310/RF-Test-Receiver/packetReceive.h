@@ -30,7 +30,8 @@ static dataQueue_t dataQueue;
 static rfc_dataEntryGeneral_t* currentDataEntry;
 static uint8_t packetLength;
 static uint8_t* packetDataPointer;
-float count;
+float rec_count;
+uint8_t last_rec;
 
 
 /* used to describe structure of rf packets */
