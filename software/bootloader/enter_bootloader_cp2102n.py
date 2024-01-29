@@ -5,7 +5,7 @@
 # Assumptions
 # -----------
 # 1. GPIO 0 of the cp2102n is connected to WMCU_RESET, and the reset is active low.
-# 2. BOOTLOADER_BACKDOOR (SET_CCFG_BL_CONFIG_BL_PIN_NUMBER in ccfg.c) is 0xd (GPIO-13)
+# 2. BOOTLOADER_BACKDOOR (SET_CCFG_BL_CONFIG_BL_PIN_NUMBER in ccfg.c) is 0xd (GPIO-13) and is active low.
 # These can be adjusted by changing the mask (first 8 bits, GPIO 7-0) and value (second 8 bits, GPIO 7-0)
 # of wIndex.
 
