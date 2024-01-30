@@ -100,6 +100,9 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /************************************************************
          * Packet Parsing and Pattern Switching
          ************************************************************/
+        if (packetDataPointer[0] <= last_rec) {
+            rec_count = 0;
+        }
         last_rec = packetDataPointer[0];
         rec_count += 1.0;
 

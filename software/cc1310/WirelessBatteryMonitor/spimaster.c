@@ -362,39 +362,4 @@ void *mainThread(void *arg0)
         /* pthread_create() failed */
         while (1);
     }
-
-    /* Create application thread 1 */
-    pthread_attr_init(&attrs1);
-
-    detachState = PTHREAD_CREATE_DETACHED;
-    /* Set priority and stack size attributes */
-    retc = pthread_attr_setdetachstate(&attrs1, detachState);
-    if (retc != 0)
-    {
-        /* pthread_attr_setdetachstate() failed */
-        while (1)
-            ;
-    }
-
-    retc |= pthread_attr_setstacksize(&attrs1, THREADSTACKSIZE);
-    if (retc != 0)
-    {
-        /* pthread_attr_setstacksize() failed */
-        while (1)
-            ;
-    }
-
-    /* Create master thread */
-    priParam1.sched_priority = 2;
-    pthread_attr_setschedparam(&attrs1, &priParam1);
-
-    retc = pthread_create(&thread1, &attrs1, trackBattery, NULL);
-    if (retc != 0)
-    {
-        /* pthread_create() failed */
-        while (1)
-            ;
-    }
-
-    return (NULL);
 }
