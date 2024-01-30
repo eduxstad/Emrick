@@ -290,27 +290,32 @@ void *defaultLEDFunction(void *args) {
     // TODO: convert to use HSV instead of RGB
     if (pattern.light_show_flags & COLOR_SHIFT) {
         uint8_t i;
+        //Use HSV instead of RGB
+        HSV startHSV = RGBtoHSV(pattern.start_color.r, pattern.start_color.g, pattern.start_color.b);
+        HSV endHSV = RGBtoHSV(pattern.end_color.r, pattern.end_color.g, pattern.end_color.b);
         for (i = 0; i < steps; i++) {
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-                uint8_t r;
-                uint8_t g;
-                uint8_t b;
-                if (pattern.start_color.r > pattern.end_color.r)
-                    r = pattern.start_color.r - diff(pattern.start_color.r, pattern.end_color.r) * i / steps;
+                float h;
+                float s;
+                float v;
+
+                if (startHSV.h > endHSV.h)
+                    h = startHSV.h - (startHSV.h - endHSV.h) * i / steps;
                 else {
-                    r = pattern.start_color.r + diff(pattern.start_color.r, pattern.end_color.r) * i / steps;
+                    h = startHSV.h - (endHSV.h - startHSV.h) * i / steps;
                 }
-                if (pattern.start_color.g > pattern.end_color.g)
-                    g = pattern.start_color.g - diff(pattern.start_color.g, pattern.end_color.g) * i / steps;
+                if (startHSV.s > endHSV.s)
+                    s = startHSV.s - (startHSV.s - endHSV.s) * i / steps;
                 else {
-                    g = pattern.start_color.g + diff(pattern.start_color.g, pattern.end_color.g) * i / steps;
+                    s = startHSV.s- (endHSV.s - startHSV.s) * i / steps;
                 }
-                if (pattern.start_color.b > pattern.end_color.b)
-                    b = pattern.start_color.b - diff(pattern.start_color.b, pattern.end_color.b) * i / steps;
+                if (startHSV.v > endHSV.v)
+                    v = startHSV.v - (startHSV.v - endHSV.v) * i / steps;
                 else {
-                    b = pattern.start_color.b + diff(pattern.start_color.b, pattern.end_color.b) * i / steps;
+                    v = startHSV.v - (endHSV.v - startHSV.v) * i / steps;
                 }
-                WS2812_setPixelColor(loc_u16_pixelIndex, r, g, b);
+                RGB ret = hsvToRgb(h, s, v);
+                WS2812_setPixelColor(loc_u16_pixelIndex, ret.r, ret.g, ret.b);
             }
             WS2812_show();
             busyWait(time_step);
