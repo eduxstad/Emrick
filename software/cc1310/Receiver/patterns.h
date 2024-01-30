@@ -33,6 +33,12 @@ typedef struct RGB {
     uint8_t b;
 } RGB;
 
+typedef struct HSV {
+    float h;
+    float s;
+    float v;
+} HSV;
+
 typedef struct control {
     uint8_t         size;
     uint16_t        light_show_flags;

@@ -46,9 +46,6 @@ void *defaultLEDFunction(void *args);
 
 Display_Handle displayHandle;
 
-// TODO: write RGB to HSV function
-
-
 char *controlToChar(control control, char * ch) {
     ch[0] = control.size;
     ch[1] = control.light_show_flags >> 8 & 0xFF;
@@ -374,5 +371,42 @@ RGB hsvToRgb(float h, float s, float v) {
 
 
     return rgb;
+}
+
+/*
+ * Floating point conversion of rgb to hsv
+ * */
+float max3(float a, float b, float c) {
+   return ((a > b)? (a > c ? a : c) : (b > c ? b : c));
+}
+float min3(float a, float b, float c) {
+   return ((a < b)? (a < c ? a : c) : (b < c ? b : c));
+}
+HSV RGBtoHSV(float r, float g, float b) {
+   HSV hsv;
+   float h, s, v;
+   r /= 255.0;
+   g /= 255.0;
+   b /= 255.0;
+   int cmax = max3(r, g, b); // maximum of r, g, b
+   int cmin = min3(r, g, b); // minimum of r, g, b
+   int diff = cmax-cmin; // diff of cmax and cmin.
+   if (cmax == cmin)
+      hsv.h = 0;
+   else if (cmax == r)
+      hsv.h = fmod((60 * ((g - b) / diff) + 360), 360.0);
+   else if (cmax == g)
+      hsv.h = fmod((60 * ((b - r) / diff) + 120), 360.0);
+   else if (cmax == b)
+      hsv.h = fmod((60 * ((r - g) / diff) + 240), 360.0);
+   // if cmax equal zero
+      if (cmax == 0)
+         hsv.s = 0;
+      else
+         hsv.s = (diff / cmax) * 100;
+   // compute v
+   hsv.v = cmax * 100;
+   
+   return hsv;
 }
 
