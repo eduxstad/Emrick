@@ -320,13 +320,14 @@ void *defaultLEDFunction(void *args) {
             WS2812_show();
             busyWait(time_step);
         }
+    } else {
+        for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+            WS2812_setPixelColor(loc_u16_pixelIndex, pattern.end_color.r, pattern.end_color.g, pattern.end_color.b);
+        }
+        WS2812_show();
     }
 
-    for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-        WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
-    }
-    WS2812_show();
-
+    //TODO: TIMEOUTS, FINITE DURATION, DO TIMEOUT, 
 }
 
 
