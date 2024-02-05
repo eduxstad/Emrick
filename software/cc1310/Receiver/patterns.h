@@ -14,16 +14,23 @@
 #define STRIP_ID                    0
 #define UNIVERSAL_ID                0xffff  //used to match any light strip
 
-//TODO GET RID OF HALF OF THESE
+/*
 #define STALL_PATTERN               0x001
 #define SET_TIMEOUT                 0x002
-#define BLANK_ON_TIMEOUT            0x004
+#define BLANK_ON_TIMEOUT            0x004 //Nope
 #define COLOR_SHIFT                 0x008
 #define DO_DELAY                    0x010
 #define FINITE_DURATION             0X020
 #define DEFAULT_FUNCTION            0x040
 #define SHIFT_POST_DELAY            0x080
 #define TOGGLE_PROGRAMMING_MODE     0X100
+*/
+
+#define DEFAULT_FUNCTION            0x001 //Use default light function
+#define TIME_GRADIENT               0x040 //gradually shift color over set time
+#define SET_TIMEOUT                 0x042 //set a timer to timeout after pattern
+#define DO_DELAY                    0x044 //add a delay before execution
+#define INSTANT_COLOR               0x054 //change color before delay is executed
 
 /**************************************************************************
  * Type Definitions

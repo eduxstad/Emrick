@@ -141,14 +141,12 @@ void runLED(Display_Handle dh) {
     blue.b = 255;
 
     // Default pattern
-
-    pattern.light_show_flags |= STALL_PATTERN;
-    pattern.light_show_flags |= SET_TIMEOUT;
-    pattern.light_show_flags |= COLOR_SHIFT;
-    pattern.light_show_flags |= FINITE_DURATION;
     pattern.light_show_flags |= DEFAULT_FUNCTION;
+    pattern.light_show_flags |= TIME_GRADIENT;
+    pattern.light_show_flags |= SET_TIMEOUT;
     pattern.light_show_flags |= DO_DELAY;
-    pattern.light_show_flags |= SHIFT_POST_DELAY;
+    pattern.light_show_flags |= INSTANT_COLOR;
+
     pattern.delay = 1000;
     pattern.duration = 5000;
     pattern.timeout = 20;
@@ -265,16 +263,19 @@ void *defaultLEDFunction(void *args) {
     uint32_t time_step;
     uint8_t steps;
 
+    struct timespec timeoutStart;
+    struct timespec timeoutEnd;
+    clock_gettime(CLOCK_MONOTONIC, &timeoutStart);
+
 
     // determine timing for color shifting
-    if (pattern.light_show_flags & FINITE_DURATION && pattern.light_show_flags & COLOR_SHIFT) {
+    if (pattern.light_show_flags & TIME_GRADIENT) {
         steps = maxColorDiff(pattern.start_color, pattern.end_color);
         time_step = pattern.duration / steps;
-
     }
 
     // change color if specified to change before delay is executed
-    if (!(pattern.light_show_flags & SHIFT_POST_DELAY)) {
+    if (!(pattern.light_show_flags & INSTANT_COLOR)) {
         for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
             WS2812_setPixelColor(loc_u16_pixelIndex, pattern.start_color.r, pattern.start_color.g, pattern.start_color.b);
         }
@@ -288,7 +289,7 @@ void *defaultLEDFunction(void *args) {
 
     // execute color shift
     // TODO: convert to use HSV instead of RGB
-    if (pattern.light_show_flags & COLOR_SHIFT) {
+    if (pattern.light_show_flags & TIME_GRADIENT) {
         uint8_t i;
         //Use HSV instead of RGB
         HSV startHSV = RGBtoHSV(pattern.start_color.r, pattern.start_color.g, pattern.start_color.b);
@@ -327,7 +328,20 @@ void *defaultLEDFunction(void *args) {
         WS2812_show();
     }
 
-    //TODO: TIMEOUTS, FINITE DURATION, DO TIMEOUT, 
+    //Timeout
+    clock_gettime(CLOCK_MONOTONIC, &timeoutEnd);
+    if (pattern.light_show_flags & SET_TIMEOUT && (mstime(timeoutEnd) < mstime(timeoutStart) + pattern.timeout)) {
+        //Busy wait for time left
+        busyWait(pattern.timeout - (mstime(timeoutEnd) - mstime(timeoutStart)));  
+
+        //Turn off lights
+        for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
+            WS2812_setPixelColor(loc_u16_pixelIndex, 0, 0, 0);
+        }
+        WS2812_show();
+    }
+
+
 }
 
 
