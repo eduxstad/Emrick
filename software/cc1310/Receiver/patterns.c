@@ -263,10 +263,6 @@ void *defaultLEDFunction(void *args) {
     uint32_t time_step;
     uint8_t steps;
 
-    struct timespec timeoutStart;
-    struct timespec timeoutEnd;
-    clock_gettime(CLOCK_MONOTONIC, &timeoutStart);
-
 
     // determine timing for color shifting
     if (pattern.light_show_flags & TIME_GRADIENT) {
@@ -330,9 +326,9 @@ void *defaultLEDFunction(void *args) {
 
     //Timeout
     clock_gettime(CLOCK_MONOTONIC, &timeoutEnd);
-    if (pattern.light_show_flags & SET_TIMEOUT && (mstime(timeoutEnd) < mstime(timeoutStart) + pattern.timeout)) {
+    if (pattern.light_show_flags & SET_TIMEOUT) {
         //Busy wait for time left
-        busyWait(pattern.timeout - (mstime(timeoutEnd) - mstime(timeoutStart)));  
+        busyWait(pattern.timeout);  
 
         //Turn off lights
         for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
@@ -340,8 +336,6 @@ void *defaultLEDFunction(void *args) {
         }
         WS2812_show();
     }
-
-
 }
 
 

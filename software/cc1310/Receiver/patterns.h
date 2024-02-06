@@ -31,6 +31,7 @@
 #define SET_TIMEOUT                 0x042 //set a timer to timeout after pattern
 #define DO_DELAY                    0x044 //add a delay before execution
 #define INSTANT_COLOR               0x054 //change color before delay is executed
+#define TOGGLE_PROGAMMING_MODE      0x074 //ya know
 
 /**************************************************************************
  * Type Definitions
