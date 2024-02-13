@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <ti/display/Display.h>
 #include <ti/display/DisplayUart.h>
+#include <ti/drivers/NVS.h>
 
 /**************************************************************************
  * Manifest Constants
@@ -33,6 +34,8 @@
 #define INSTANT_COLOR               0x054 //change color before delay is executed
 #define TOGGLE_PROGAMMING_MODE      0x074 //ya know
 
+#define PACKET_SIZE                 16
+
 /**************************************************************************
  * Type Definitions
  **************************************************************************/
@@ -57,14 +60,23 @@ typedef struct control {
     uint16_t        duration;
     uint8_t         timeout;
 } control;
+
+typedef struct show_metadata {
+    uint32_t        total_size;
+    uint16_t        pattern_count;
+    uint8_t         set_count;
+} show_metadata;
 /**************************************************************************
  * Global variables
  **************************************************************************/
 uint16_t testFlag;
 uint16_t timer;
-pthread_mutex_t LEDMutex;
+pthread_mutex_t recMutex;
 control pattern;
 control rec_pattern;
+control default_pattern;
+uint8_t programming_mode;
+uint8_t current_set;
 
 /* Function Selector */
 uint8_t function_flag;

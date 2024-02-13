@@ -97,15 +97,28 @@ void callback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
         /************************************************************
          * Packet Parsing and Pattern Switching
          ************************************************************/
-
-        if (((PKT*) currentDataEntry)->strip_id == STRIP_ID) {
-            rec_pattern.light_show_flags = ((PKT*) currentDataEntry)->light_show_flags;
-            rec_pattern.delay = ((PKT*) currentDataEntry)->delay;
-            rec_pattern.duration = ((PKT*) currentDataEntry)->duration;
-            rec_pattern.start_color = ((PKT*) currentDataEntry)->start_color;
-            rec_pattern.end_color = ((PKT*) currentDataEntry)->end_color;
-            rec_pattern.timeout = ((PKT*) currentDataEntry)->timeout;
-            function_flag = 0xff;
+        if (((PKT*) currentDataEntry)->light_show_flags & TOGGLE_PROGRAMMING_MODE) {
+            if (!programming_mode) {
+                programming_mode = 0x01;
+            }
+            if (((PKT*) currentDataEntry)->strip_id == STRIP_ID) {
+                pthread_mutex_lock(&recMutex);
+                rec_pattern.light_show_flags = ((PKT*) currentDataEntry)->light_show_flags;
+                rec_pattern.delay = ((PKT*) currentDataEntry)->delay;
+                rec_pattern.duration = ((PKT*) currentDataEntry)->duration;
+                rec_pattern.start_color = ((PKT*) currentDataEntry)->start_color;
+                rec_pattern.end_color = ((PKT*) currentDataEntry)->end_color;
+                rec_pattern.timeout = ((PKT*) currentDataEntry)->timeout;
+                function_flag = 0xFF;
+                pthread_mutex_unlock(&recMutex);
+            }
+        } else {
+            if (programming_mode) {
+                programming_mode = 0x0;
+                current_set = 0;
+            }
+            current_set = packetDataPointer;
+            function_flag = 0xFF;
         }
 
 
