@@ -332,31 +332,31 @@ void *defaultLEDFunction(void *args) {
 
 
     // determine timing for color shifting
-    if (pattern.light_show_flags & TIME_GRADIENT) {
-        steps = maxColorDiff(pattern.start_color, pattern.end_color);
-        time_step = pattern.duration / steps;
+    if (default_pattern.light_show_flags & TIME_GRADIENT) {
+        steps = maxColorDiff(default_pattern.start_color, default_pattern.end_color);
+        time_step = default_pattern.duration / steps;
     }
 
     // change color if specified to change before delay is executed
-    if (!(pattern.light_show_flags & INSTANT_COLOR)) {
+    if (!(default_pattern.light_show_flags & INSTANT_COLOR)) {
         for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-            WS2812_setPixelColor(loc_u16_pixelIndex, pattern.start_color.r, pattern.start_color.g, pattern.start_color.b);
+            WS2812_setPixelColor(loc_u16_pixelIndex, default_pattern.start_color.r, default_pattern.start_color.g, default_pattern.start_color.b);
         }
         WS2812_show();
     }
 
     // busy wait to execute delay
-    if (pattern.light_show_flags & DO_DELAY) {
-        busyWait(pattern.delay);
+    if (default_pattern.light_show_flags & DO_DELAY) {
+        busyWait(default_pattern.delay);
     }
 
     // execute color shift
     // TODO: convert to use HSV instead of RGB
-    if (pattern.light_show_flags & TIME_GRADIENT) {
+    if (default_pattern.light_show_flags & TIME_GRADIENT) {
         uint8_t i;
         //Use HSV instead of RGB
-        HSV startHSV = RGBtoHSV(pattern.start_color.r, pattern.start_color.g, pattern.start_color.b);
-        HSV endHSV = RGBtoHSV(pattern.end_color.r, pattern.end_color.g, pattern.end_color.b);
+        HSV startHSV = RGBtoHSV(default_pattern.start_color.r, default_pattern.start_color.g, default_pattern.start_color.b);
+        HSV endHSV = RGBtoHSV(default_pattern.end_color.r, default_pattern.end_color.g, default_pattern.end_color.b);
         for (i = 0; i < steps; i++) {
             for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
                 float h;
@@ -386,16 +386,16 @@ void *defaultLEDFunction(void *args) {
         }
     } else {
         for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
-            WS2812_setPixelColor(loc_u16_pixelIndex, pattern.end_color.r, pattern.end_color.g, pattern.end_color.b);
+            WS2812_setPixelColor(loc_u16_pixelIndex, default_pattern.end_color.r, default_pattern.end_color.g, default_pattern.end_color.b);
         }
         WS2812_show();
     }
 
     //Timeout
     clock_gettime(CLOCK_MONOTONIC, &timeoutEnd);
-    if (pattern.light_show_flags & SET_TIMEOUT) {
+    if (default_pattern.light_show_flags & SET_TIMEOUT) {
         //Busy wait for time left
-        busyWait(pattern.timeout);  
+        busyWait(default_pattern.timeout);  
 
         //Turn off lights
         for (loc_u16_pixelIndex = 0; loc_u16_pixelIndex < NB_PIXELS; loc_u16_pixelIndex++) {
